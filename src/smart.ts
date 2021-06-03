@@ -7,20 +7,20 @@ import {
     getAndCache,
     fetchConformanceStatement,
     getAccessTokenExpiration,
-    getTargetWindow
+    getTargetWindow,
+    isBrowser,
+    btoa
 } from "./lib";
 import Client from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
+import NamespacedStorage from "./storage/NamespacedStorage";
 
 
 const debug = _debug.extend("oauth2");
 
 export { SMART_KEY as KEY };
 
-function isBrowser() {
-    return typeof window === "object";
-}
 
 /**
  * Fetches the well-known json file from the given base URL.
@@ -304,14 +304,14 @@ export async function authorize(
 
     // create initial state
     const stateKey = randomString(16);
-    const state: fhirclient.ClientState = {
+    const state: fhirclient.SMARTState = {
         clientId,
         scope,
         redirectUri,
         serverUrl,
         clientSecret,
         tokenResponse: {},
-        key: stateKey,
+        // key: stateKey,
         completeInTarget
     };
 
@@ -471,9 +471,9 @@ export function onMessage(e: MessageEvent) {
  */
 export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
 {
-    const url = env.getUrl();
+    const url     = env.getUrl();
     const Storage = env.getStorage();
-    const params = url.searchParams;
+    const params  = url.searchParams;
 
     let key                    = params.get("state");
     const code                 = params.get("code");
@@ -508,7 +508,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     }
 
     // Check if we have a previous state
-    let state = (await Storage.get(key)) as fhirclient.ClientState;
+    let state = (await Storage.get(key)) as fhirclient.SMARTState;
 
     const fullSessionStorageSupport = isBrowser() ?
         getPath(env, "options.fullSessionStorageSupport") :
@@ -596,7 +596,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         }
 
         debug("Preparing to exchange the code for access token...");
-        const requestOptions = buildTokenRequest(env, code, state);
+        const requestOptions = buildTokenRequest(code, state);
         debug("Token request options: %O", requestOptions);
 
         // The EHR authorization server SHALL return a JSON structure that
@@ -609,7 +609,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         }
 
         // Now we need to determine when is this authorization going to expire
-        state.expiresAt = getAccessTokenExpiration(tokenResponse, env);
+        state.expiresAt = getAccessTokenExpiration(tokenResponse);
 
         // save the tokenResponse so that we don't have to re-authorize on
         // every page reload
@@ -628,7 +628,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         await Storage.set(SMART_KEY, key);
     }
 
-    const client = new Client(env, state);
+    const client = new Client({ ...state, storage: new NamespacedStorage(Storage, key) });
     debug("Created client instance: %O", client);
     return client;
 }
@@ -637,7 +637,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): RequestInit
+export function buildTokenRequest(code: string, state: fhirclient.SMARTState): RequestInit
 {
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
@@ -668,7 +668,7 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
     // Basic authentication is required, where the username is the app’s
     // client_id and the password is the app’s client_secret (see example).
     if (clientSecret) {
-        requestOptions.headers.Authorization = "Basic " + env.btoa(
+        requestOptions.headers.Authorization = "Basic " + btoa(
             clientId + ":" + clientSecret
         );
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
@@ -745,7 +745,7 @@ export async function init(env: fhirclient.Adapter, options: fhirclient.Authoriz
     const key     = state || await storage.get(SMART_KEY);
     const cached  = await storage.get(key);
     if (cached) {
-        return new Client(env, cached);
+        return new Client({ ...cached, storage: new NamespacedStorage(storage, key) });
     }
 
     // Otherwise try to launch

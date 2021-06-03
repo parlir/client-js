@@ -2,6 +2,8 @@ import { ready, authorize, init } from "../smart";
 import Client from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
 import { fhirclient } from "../types";
+import { SMART_KEY } from "../settings"
+import NamespacedStorage from "../storage/NamespacedStorage";
 
 /**
  * Browser Adapter
@@ -125,22 +127,6 @@ export default class BrowserAdapter implements fhirclient.Adapter
     }
 
     /**
-     * ASCII string to Base64
-     */
-    atob(str: string): string
-    {
-        return window.atob(str);
-    }
-
-    /**
-     * Base64 to ASCII string
-     */
-    btoa(str: string): string
-    {
-        return window.btoa(str);
-    }
-
-    /**
      * Creates and returns adapter-aware SMART api. Not that while the shape of
      * the returned object is well known, the arguments to this function are not.
      * Those who override this method are free to require any environment-specific
@@ -153,7 +139,20 @@ export default class BrowserAdapter implements fhirclient.Adapter
             ready    : (...args: any[]) => ready(this, ...args),
             authorize: options => authorize(this, options),
             init     : options => init(this, options),
-            client   : (state: string | fhirclient.ClientState) => new Client(this, state),
+            client   : (state: string | fhirclient.ClientOptions) => {
+                if (typeof state === "string") {
+                    state = {
+                        serverUrl: state,
+                        refreshWithCredentials: this.options.refreshTokenWithCredentials
+                    }
+                } else {
+                    state = {
+                        refreshWithCredentials: this.options.refreshTokenWithCredentials,
+                        ...state
+                    }
+                }
+                return new Client(state)
+            },
             options  : this.options
         };
     }

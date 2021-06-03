@@ -29,7 +29,7 @@ before(() => {
             const addr = mockDataServer.address();
             mockUrl = `http://127.0.0.1:${addr.port}`;
             // console.log(`Mock Data Server listening at ${mockUrl}`);
-            resolve();
+            resolve(void 0);
         });
     });
 });
@@ -43,7 +43,7 @@ after(() => {
                     console.log("Error shutting down the mock-data server: ", error);
                 }
                 // console.log("Mock Data Server CLOSED!");
-                resolve();
+                resolve(void 0);
             });
         });
     }
@@ -193,7 +193,7 @@ describe("Complete authorization [SERVER]", () => {
         expect(res.headers.location).to.exist();
         const url = new URL(res.headers.location);
         const state = url.searchParams.get("state");
-        const stored = await storage.get(state);
+        const stored = await storage.get(state + "");
         expect(stored.scope).to.equal("x launch");
     });
 
@@ -218,7 +218,7 @@ describe("ServerStorage", () => {
         const storage = new ServerStorage({ session } as any);
         const result = await storage.unset("a");
         expect(result).to.equal(true);
-        expect(session.a).to.equal(undefined);
+        expect(session.a).to.be.undefined();
         const result2 = await storage.unset("a");
         expect(result2).to.equal(false);
     });

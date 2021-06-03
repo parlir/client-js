@@ -1,3 +1,5 @@
+import { fhirclient } from "../types";
+
 export default class Storage
 {
     /**
@@ -10,7 +12,7 @@ export default class Storage
         if (value) {
             return JSON.parse(value);
         }
-        return null;
+        return undefined;
     }
 
     /**
@@ -37,4 +39,16 @@ export default class Storage
         return false;
     }
 
+    async clear(): Promise<void>
+    {
+        return sessionStorage.clear()
+    }
+
+    async save(data: fhirclient.JsonObject)
+    {
+        for(const key of Object.keys(data)) {
+            await this.set(key, data[key])
+        }
+        return data
+    }
 }

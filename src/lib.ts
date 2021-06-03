@@ -280,16 +280,51 @@ export function randomString(
     return result.join("");
 }
 
+export function isBrowser()
+{
+    return typeof window === "object";
+}
+
+/**
+ * Base64 to ASCII
+ */
+export function atob(str: string): string
+{
+     return isBrowser() ?
+
+        // Browsers have global atob method
+        window.atob(str) :
+        
+        // "global." helps Webpack understand that it doesn't have to
+        // include the Buffer code in the bundle
+        global.Buffer.from(str, "base64").toString("ascii");
+}
+
+/**
+ * ASCII to Base64
+ */
+export function btoa(str: string): string
+{
+    return isBrowser() ?
+
+        // Browsers have global btoa method
+        window.btoa(str) :
+        
+        // "global." helps Webpack understand that it doesn't have to
+        // include the Buffer code in the bundle
+        global.Buffer.from(str).toString("base64");
+}
+
 /**
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
  * @category Utility
  */
-export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.JsonObject | null
+export function jwtDecode(token: string): fhirclient.JsonObject | null
 {
     const payload = token.split(".")[1];
-    return payload ? JSON.parse(env.atob(payload)) : null;
+    return payload ? JSON.parse(atob(payload)) : null;
 }
 
 /**
@@ -299,7 +334,7 @@ export function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.Js
  * @param tokenResponse 
  * @param env 
  */
-export function getAccessTokenExpiration(tokenResponse: fhirclient.TokenResponse, env: fhirclient.Adapter): number
+export function getAccessTokenExpiration(tokenResponse: fhirclient.TokenResponse): number
 {
     const now = Math.floor(Date.now() / 1000);
 
@@ -310,7 +345,7 @@ export function getAccessTokenExpiration(tokenResponse: fhirclient.TokenResponse
 
     // Option 2 - using the exp property of JWT tokens (must not assume JWT!)
     if (tokenResponse.access_token) {
-        let tokenBody = jwtDecode(tokenResponse.access_token, env);
+        let tokenBody = jwtDecode(tokenResponse.access_token);
         if (tokenBody && tokenBody.exp) {
             return tokenBody.exp;
         }

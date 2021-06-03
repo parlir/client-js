@@ -1005,18 +1005,18 @@ describe("Browser tests", () => {
 
             it ("rejects with missing state.redirectUri", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {}))
+                expect(() => smart.buildTokenRequest("whatever", {}))
                     .to.throw(Error, "Missing state.redirectUri");
             });
             it ("rejects with missing state.tokenUri", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
+                expect(() => smart.buildTokenRequest("whatever", {
                     redirectUri: "whatever"
                 })).to.throw(Error, "Missing state.tokenUri");
             });
             it ("rejects with missing state.clientId", () => {
                 // @ts-ignore
-                expect(() => smart.buildTokenRequest(new BrowserEnv(), "whatever", {
+                expect(() => smart.buildTokenRequest("whatever", {
                     redirectUri: "whatever",
                     tokenUri: "whatever"
                 })).to.throw(Error, "Missing state.clientId");
@@ -1209,7 +1209,7 @@ describe("Browser tests", () => {
                     }
 
                     smart.completeAuth(new BrowserEnv());
-                    resolve();
+                    resolve(void 0);
                 });
             });
             // const locationChangeListener2 = new Promise(resolve => {
@@ -1527,7 +1527,7 @@ describe("Browser tests", () => {
 
         describe("onMessage", () => {
             it ("ignores postMessage if the event type is not 'completeAuth'", () => {
-                let error = null;
+                let error: Error | undefined = undefined;
                 window.location.once("change", () => {
                     error = new Error("The event should be ignored");
                 });
@@ -1536,11 +1536,11 @@ describe("Browser tests", () => {
                     type: "not completeAuth",
                     url: window.location.href
                 }, window.location.origin);
-                expect(error).to.equal(null);
+                expect(error).to.be.undefined();
             });
 
             it ("ignores postMessage if the origin is wrong", () => {
-                let error = null;
+                let error: Error | undefined = undefined;
                 window.location.once("change", () => {
                     error = new Error("The event should be ignored");
                 });
@@ -1549,7 +1549,7 @@ describe("Browser tests", () => {
                     type: "completeAuth",
                     url: window.location.href
                 }, "whatever");
-                expect(error).to.equal(null);
+                expect(error).to.be.undefined();
             });
 
             it ("accepts postMessage if the event type is 'completeAuth' and removes itself", () => {

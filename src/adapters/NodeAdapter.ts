@@ -106,26 +106,6 @@ export default class NodeAdapter implements fhirclient.Adapter
     }
 
     /**
-     * Base64 to ASCII string
-     */
-    btoa(str: string): string
-    {
-        // The "global." makes Webpack understand that it doesn't have to
-        // include the Buffer code in the bundle
-        return global.Buffer.from(str).toString("base64");
-    }
-
-    /**
-     * ASCII string to Base64
-     */
-    atob(str: string): string
-    {
-        // The "global." makes Webpack understand that it doesn't have to
-        // include the Buffer code in the bundle
-        return global.Buffer.from(str, "base64").toString("ascii");
-    }
-
-    /**
      * Returns a reference to the AbortController constructor. In browsers,
      * AbortController will always be available as global (native or polyfilled)
      */
@@ -147,7 +127,12 @@ export default class NodeAdapter implements fhirclient.Adapter
             ready    : (...args: any[]) => ready(this, ...args),
             authorize: options => authorize(this, options),
             init     : options => init(this, options),
-            client   : (state: string | fhirclient.ClientState) => new Client(this, state),
+            client   : (state: string | fhirclient.ClientOptions) => {
+                if (typeof state === "string") {
+                    state = { serverUrl: state }
+                }
+                return new Client(state)
+            },
             options  : this.options
         };
     }

@@ -21,7 +21,7 @@ app.clear = () => mocks.splice(0, mocks.length);
 
 app.all("*", (req, res, next) => {
     if (!mocks.length) {
-        return next(new Error("No mocks defined for this request"));
+        return next(new Error(`No mocks defined for this request ("${req.path}")`));
     }
     const settings = mocks.shift();
 
@@ -36,14 +36,19 @@ app.all("*", (req, res, next) => {
 
         if (settings.status) {
             res.status(settings.status);
+        } else {
+            res.status(200);
         }
 
-        if (settings.body) {
-            res.send(
-                settings.body && typeof settings.body == "object" ?
-                    JSON.stringify(settings.body) :
-                    settings.body
-            );
+        if ("body" in settings) {
+            if (settings.body && typeof settings.body == "object") {
+                if (!settings.headers) {
+                    res.set({ "content-type": "application/json" });
+                }
+                res.send(JSON.stringify(settings.body))
+            } else {
+                res.send(settings.body);
+            }
         }
 
         if (settings.file) {

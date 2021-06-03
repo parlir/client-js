@@ -4397,23 +4397,6 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/same-value.js":
-/*!******************************************************!*\
-  !*** ./node_modules/core-js/internals/same-value.js ***!
-  \******************************************************/
-/*! all exports used */
-/***/ (function(module, exports) {
-
-// `SameValue` abstract operation
-// https://tc39.github.io/ecma262/#sec-samevalue
-module.exports = Object.is || function is(x, y) {
-  // eslint-disable-next-line no-self-compare
-  return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/set-global.js":
 /*!******************************************************!*\
   !*** ./node_modules/core-js/internals/set-global.js ***!
@@ -6724,52 +6707,6 @@ fixRegExpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, ma
       return capture === undefined ? '' : capture;
     });
   }
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.string.search.js":
-/*!**********************************************************!*\
-  !*** ./node_modules/core-js/modules/es.string.search.js ***!
-  \**********************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var fixRegExpWellKnownSymbolLogic = __webpack_require__(/*! ../internals/fix-regexp-well-known-symbol-logic */ "./node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js");
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-var requireObjectCoercible = __webpack_require__(/*! ../internals/require-object-coercible */ "./node_modules/core-js/internals/require-object-coercible.js");
-var sameValue = __webpack_require__(/*! ../internals/same-value */ "./node_modules/core-js/internals/same-value.js");
-var regExpExec = __webpack_require__(/*! ../internals/regexp-exec-abstract */ "./node_modules/core-js/internals/regexp-exec-abstract.js");
-
-// @@search logic
-fixRegExpWellKnownSymbolLogic('search', 1, function (SEARCH, nativeSearch, maybeCallNative) {
-  return [
-    // `String.prototype.search` method
-    // https://tc39.github.io/ecma262/#sec-string.prototype.search
-    function search(regexp) {
-      var O = requireObjectCoercible(this);
-      var searcher = regexp == undefined ? undefined : regexp[SEARCH];
-      return searcher !== undefined ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](String(O));
-    },
-    // `RegExp.prototype[@@search]` method
-    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@search
-    function (regexp) {
-      var res = maybeCallNative(nativeSearch, regexp, this);
-      if (res.done) return res.value;
-
-      var rx = anObject(regexp);
-      var S = String(this);
-
-      var previousLastIndex = rx.lastIndex;
-      if (!sameValue(previousLastIndex, 0)) rx.lastIndex = 0;
-      var result = regExpExec(rx, S);
-      if (!sameValue(rx.lastIndex, previousLastIndex)) rx.lastIndex = previousLastIndex;
-      return result === null ? -1 : result.index;
-    }
-  ];
 });
 
 
@@ -10696,8 +10633,6 @@ __webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-
 
 __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
 
-__webpack_require__(/*! core-js/modules/es.string.search */ "./node_modules/core-js/modules/es.string.search.js");
-
 __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-js/modules/es.string.split.js");
 
 __webpack_require__(/*! core-js/modules/es.string.trim */ "./node_modules/core-js/modules/es.string.trim.js");
@@ -10714,6 +10649,8 @@ var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime
 
 __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
 
+var _objectWithoutPropertiesLoose2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/objectWithoutPropertiesLoose */ "./node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js"));
+
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 
 Object.defineProperty(exports, "__esModule", {
@@ -10721,8 +10658,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
-
-var strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
 var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
@@ -10756,24 +10691,24 @@ function contextualize(_x, _x2) {
 
 
 function _contextualize() {
-  _contextualize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8(requestOptions, client) {
+  _contextualize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9(requestOptions, client) {
     var base, contextualURL, _contextualURL;
 
-    return _regenerator.default.wrap(function _callee8$(_context8) {
+    return _regenerator.default.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             _contextualURL = function _contextualURL3() {
-              _contextualURL = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7(_url) {
+              _contextualURL = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8(_url) {
                 var resourceType, conformance, searchParam;
-                return _regenerator.default.wrap(function _callee7$(_context7) {
+                return _regenerator.default.wrap(function _callee8$(_context8) {
                   while (1) {
-                    switch (_context7.prev = _context7.next) {
+                    switch (_context8.prev = _context8.next) {
                       case 0:
                         resourceType = _url.pathname.split("/").pop();
 
                         if (resourceType) {
-                          _context7.next = 3;
+                          _context8.next = 3;
                           break;
                         }
 
@@ -10781,30 +10716,30 @@ function _contextualize() {
 
                       case 3:
                         if (!(settings_1.patientCompartment.indexOf(resourceType) == -1)) {
-                          _context7.next = 5;
+                          _context8.next = 5;
                           break;
                         }
 
                         throw new Error("Cannot filter \"" + resourceType + "\" resources by patient");
 
                       case 5:
-                        _context7.next = 7;
+                        _context8.next = 7;
                         return lib_1.fetchConformanceStatement(client.state.serverUrl);
 
                       case 7:
-                        conformance = _context7.sent;
+                        conformance = _context8.sent;
                         searchParam = lib_1.getPatientParam(conformance, resourceType);
 
                         _url.searchParams.set(searchParam, client.patient.id);
 
-                        return _context7.abrupt("return", _url.href);
+                        return _context8.abrupt("return", _url.href);
 
                       case 11:
                       case "end":
-                        return _context7.stop();
+                        return _context8.stop();
                     }
                   }
-                }, _callee7);
+                }, _callee8);
               }));
               return _contextualURL.apply(this, arguments);
             };
@@ -10816,33 +10751,33 @@ function _contextualize() {
             base = lib_1.absolute("/", client.state.serverUrl);
 
             if (!(typeof requestOptions == "string" || requestOptions instanceof URL)) {
-              _context8.next = 8;
+              _context9.next = 8;
               break;
             }
 
-            _context8.next = 6;
+            _context9.next = 6;
             return contextualURL(new URL(requestOptions + "", base));
 
           case 6:
-            _context8.t0 = _context8.sent;
-            return _context8.abrupt("return", {
-              url: _context8.t0
+            _context9.t0 = _context9.sent;
+            return _context9.abrupt("return", {
+              url: _context9.t0
             });
 
           case 8:
-            _context8.next = 10;
+            _context9.next = 10;
             return contextualURL(new URL(requestOptions.url + "", base));
 
           case 10:
-            requestOptions.url = _context8.sent;
-            return _context8.abrupt("return", requestOptions);
+            requestOptions.url = _context9.sent;
+            return _context9.abrupt("return", requestOptions);
 
           case 12:
           case "end":
-            return _context8.stop();
+            return _context9.stop();
         }
       }
-    }, _callee8);
+    }, _callee9);
   }));
   return _contextualize.apply(this, arguments);
 }
@@ -10980,26 +10915,45 @@ var Client = /*#__PURE__*/function () {
    * Validates the parameters, creates an instance and tries to connect it to
    * FhirJS, if one is available globally.
    */
-  function Client(environment, state) {
+  function Client(options) {
     var _this = this;
 
+    this.options = {
+      refreshWithCredentials: "same-origin"
+    };
+    /**
+     * Refers to the refresh task while it is being performed.
+     * @see [[refresh]]
+     */
+
+    this._refreshTask = null;
     /**
      * @category Utility
      */
+
     this.units = lib_1.units;
 
-    var _state = typeof state == "string" ? {
-      serverUrl: state
-    } : state; // Valid serverUrl is required!
+    if (typeof options == "string") {
+      options = {
+        serverUrl: options
+      };
+    }
 
+    var _options = options,
+        storage = _options.storage,
+        refreshWithCredentials = _options.refreshWithCredentials,
+        state = (0, _objectWithoutPropertiesLoose2.default)(_options, ["storage", "refreshWithCredentials"]); // Valid serverUrl is required!
 
-    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
+    if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
       throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
     }
 
-    this.state = _state;
-    this.environment = environment;
-    this._refreshTask = null;
+    if (storage) {
+      this.storage = storage;
+    }
+
+    this.options.refreshWithCredentials = refreshWithCredentials || "same-origin";
+    this.state = state;
     var client = this; // patient api ---------------------------------------------------------
 
     this.patient = {
@@ -11080,7 +11034,10 @@ var Client = /*#__PURE__*/function () {
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
 
-    this.connect(environment.fhir);
+    if (lib_1.isBrowser()) {
+      // @ts-ignore
+      this.connect(window.fhir);
+    }
   }
   /**
    * This method is used to make the "link" between the `fhirclient` and the
@@ -11129,6 +11086,18 @@ var Client = /*#__PURE__*/function () {
     }
 
     return this;
+  };
+
+  _proto.hasGrantedScope = function hasGrantedScope(scope) {
+    var _a;
+
+    var scopes = String(((_a = this.state.tokenResponse) === null || _a === void 0 ? void 0 : _a.scope) || "").trim().split(/\s+/);
+    return scopes.indexOf(scope) > -1;
+  };
+
+  _proto.hasRequestedScope = function hasRequestedScope(scope) {
+    var scopes = String(this.state.scope || "").trim().split(/\s+/);
+    return scopes.indexOf(scope) > -1;
   }
   /**
    * Returns the ID of the selected patient or null. You should have requested
@@ -11143,11 +11112,23 @@ var Client = /*#__PURE__*/function () {
       // We have been authorized against this server but we don't know
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
-        if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug(strings_1.default.noScopeForId, "patient", "patient");
+        if (!this.hasGrantedScope("launch") && !this.hasGrantedScope("launch/patient")) {
+          debug("Unable to get the ID of the selected patient. Insufficient scopes granted.");
+
+          if (this.hasRequestedScope("launch")) {
+            debug("The authorization server did not grant the 'launch' scope you requested");
+          } else {
+            debug("To get the selected patient, try adding 'launch' to the scopes you are requesting");
+          }
+
+          if (this.hasRequestedScope("launch/patient")) {
+            debug("The authorization server did not grant the 'launch/patient' scope you requested");
+          } else {
+            debug("To get the selected patient, try adding 'launch/patient' to the scopes you are requesting");
+          }
         } else {
           // The server should have returned the patient!
-          debug("The ID of the selected patient is not available. Please check if your server supports that.");
+          debug("The ID of the selected patient is not available. Please check if the server supports that.");
         }
 
         return null;
@@ -11157,9 +11138,9 @@ var Client = /*#__PURE__*/function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(strings_1.default.noIfNoAuth, "the ID of the selected patient");
+      debug("You are trying to get the ID of the selected patient but the app is not authorized yet.");
     } else {
-      debug(strings_1.default.noFreeContext, "selected patient");
+      debug("Please don't use open fhir servers if you need to access launch context items like the selected patient.");
     }
 
     return null;
@@ -11179,11 +11160,31 @@ var Client = /*#__PURE__*/function () {
       // We have been authorized against this server but we don't know
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
-        if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug(strings_1.default.noScopeForId, "encounter", "encounter");
-        } else {
-          // The server should have returned the encounter!
+        var requested = {
+          launch: this.hasRequestedScope("launch"),
+          launchEncounter: this.hasRequestedScope("launch/encounter")
+        };
+        var granted = {
+          launch: this.hasGrantedScope("launch"),
+          launchEncounter: this.hasGrantedScope("launch/encounter")
+        };
+
+        if (granted.launch || granted.launchEncounter) {
           debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
+        } else {
+          debug("Unable to get the ID of the selected encounter. Insufficient scopes granted.");
+
+          if (requested.launch) {
+            debug("The authorization server did not grant the 'launch' scope you requested");
+          } else {
+            debug("To get the selected encounter, try adding 'launch' to the scopes you are requesting");
+          }
+
+          if (requested.launchEncounter) {
+            debug("The authorization server did not grant the 'launch/encounter' scope you requested");
+          } else {
+            debug("To get the selected encounter, try adding 'launch/encounter' to the scopes you are requesting");
+          }
         }
 
         return null;
@@ -11193,9 +11194,9 @@ var Client = /*#__PURE__*/function () {
     }
 
     if (this.state.authorizeUri) {
-      debug(strings_1.default.noIfNoAuth, "the ID of the selected encounter");
+      debug("You are trying to get the ID of the selected encounter but the app is not authorized yet.");
     } else {
-      debug(strings_1.default.noFreeContext, "selected encounter");
+      debug("Please don't use open fhir servers if you need to access launch context items like the selected encounter.");
     }
 
     return null;
@@ -11211,32 +11212,52 @@ var Client = /*#__PURE__*/function () {
     var tokenResponse = this.state.tokenResponse;
 
     if (tokenResponse) {
-      var idToken = tokenResponse.id_token;
-      var scope = this.state.scope || ""; // We have been authorized against this server but we don't have
+      var idToken = tokenResponse.id_token; // We have been authorized against this server but we don't have
       // the id_token. This should be a scope issue.
 
       if (!idToken) {
-        var hasOpenid = scope.match(/\bopenid\b/);
-        var hasProfile = scope.match(/\bprofile\b/);
-        var hasFhirUser = scope.match(/\bfhirUser\b/);
+        var hasOpenid = this.hasGrantedScope("openid");
+        var hasProfile = this.hasGrantedScope("profile");
+        var hasFhirUser = this.hasGrantedScope("fhirUser");
 
-        if (!hasOpenid || !(hasFhirUser || hasProfile)) {
-          debug("You are trying to get the id_token but you are not " + "using the right scopes. Please add 'openid' and " + "'fhirUser' or 'profile' to the scopes you are " + "requesting.");
-        } else {
-          // The server should have returned the id_token!
+        if (hasOpenid && (hasFhirUser || hasProfile)) {
           debug("The id_token is not available. Please check if your server supports that.");
+        } else {
+          if (!hasOpenid) {
+            if (this.hasRequestedScope("openid")) {
+              debug("The authorization server did not grant the 'openid' scope you requested");
+            } else {
+              debug("To get the current user, please add 'openid' to the scopes you are requesting");
+            }
+          }
+
+          if (!hasFhirUser) {
+            if (this.hasRequestedScope("fhirUser")) {
+              debug("The authorization server did not grant the 'fhirUser' scope you requested");
+            } else {
+              debug("To get the current user, please add 'fhirUser' to the scopes you are requesting");
+            }
+          }
+
+          if (!hasProfile) {
+            if (this.hasRequestedScope("profile")) {
+              debug("The authorization server did not grant the 'profile' scope you requested");
+            } else {
+              debug("To get the current user, please add 'profile' to the scopes you are requesting");
+            }
+          }
         }
 
         return null;
       }
 
-      return lib_1.jwtDecode(idToken, this.environment);
+      return lib_1.jwtDecode(idToken);
     }
 
     if (this.state.authorizeUri) {
-      debug(strings_1.default.noIfNoAuth, "the id_token");
+      debug("You are trying to get the id_token but the app is not authorized yet.");
     } else {
-      debug(strings_1.default.noFreeContext, "id_token");
+      debug("Please don't use open fhir servers if you need to access launch context items like the id_token.");
     }
 
     return null;
@@ -11304,7 +11325,7 @@ var Client = /*#__PURE__*/function () {
         password = _this$state2.password;
 
     if (username && password) {
-      return "Basic " + this.environment.btoa(username + ":" + password);
+      return "Basic " + lib_1.btoa(username + ":" + password);
     }
 
     return null;
@@ -11315,38 +11336,20 @@ var Client = /*#__PURE__*/function () {
    */
   ;
 
-  _proto._clearState =
+  _proto.clearAuthorization =
   /*#__PURE__*/
   function () {
-    var _clearState2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-      var storage, key;
+    var _clearAuthorization = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+      var _a;
+
       return _regenerator.default.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
-              storage = this.environment.getStorage();
-              _context2.next = 3;
-              return storage.get(settings_1.SMART_KEY);
-
-            case 3:
-              key = _context2.sent;
-
-              if (!key) {
-                _context2.next = 7;
-                break;
-              }
-
-              _context2.next = 7;
-              return storage.unset(key);
-
-            case 7:
-              _context2.next = 9;
-              return storage.unset(settings_1.SMART_KEY);
-
-            case 9:
               this.state.tokenResponse = {};
+              return _context2.abrupt("return", (_a = this.storage) === null || _a === void 0 ? void 0 : _a.clear());
 
-            case 10:
+            case 2:
             case "end":
               return _context2.stop();
           }
@@ -11354,11 +11357,36 @@ var Client = /*#__PURE__*/function () {
       }, _callee2, this);
     }));
 
-    function _clearState() {
-      return _clearState2.apply(this, arguments);
+    function clearAuthorization() {
+      return _clearAuthorization.apply(this, arguments);
     }
 
-    return _clearState;
+    return clearAuthorization;
+  }();
+
+  _proto._saveState = /*#__PURE__*/function () {
+    var _saveState2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+      var _a;
+
+      return _regenerator.default.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              return _context3.abrupt("return", (_a = this.storage) === null || _a === void 0 ? void 0 : _a.save(this.state));
+
+            case 1:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3, this);
+    }));
+
+    function _saveState() {
+      return _saveState2.apply(this, arguments);
+    }
+
+    return _saveState;
   }()
   /**
    * Creates a new resource in a server-assigned location
@@ -11436,14 +11464,14 @@ var Client = /*#__PURE__*/function () {
   _proto.request =
   /*#__PURE__*/
   function () {
-    var _request = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(requestOptions, fhirOptions, _resolvedRefs) {
+    var _request = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7(requestOptions, fhirOptions, _resolvedRefs) {
       var _this2 = this;
 
       var _a, debugRequest, url, options, signal, job, response;
 
-      return _regenerator.default.wrap(function _callee6$(_context6) {
+      return _regenerator.default.wrap(function _callee7$(_context7) {
         while (1) {
-          switch (_context6.prev = _context6.next) {
+          switch (_context7.prev = _context7.next) {
             case 0:
               if (fhirOptions === void 0) {
                 fhirOptions = {};
@@ -11456,7 +11484,7 @@ var Client = /*#__PURE__*/function () {
               debugRequest = lib_1.debug.extend("client:request");
 
               if (requestOptions) {
-                _context6.next = 5;
+                _context7.next = 5;
                 break;
               }
 
@@ -11486,7 +11514,7 @@ var Client = /*#__PURE__*/function () {
               }).then(function () {
                 return requestOptions;
               }) : Promise.resolve(requestOptions);
-              return _context6.abrupt("return", job // Add the Authorization header now, after the access token might
+              return _context7.abrupt("return", job // Add the Authorization header now, after the access token might
               // have been updated
               .then(function (requestOptions) {
                 var authHeader = _this2.getAuthorizationHeader();
@@ -11511,18 +11539,18 @@ var Client = /*#__PURE__*/function () {
                 });
               }) // Handle 401 ------------------------------------------------------
               .catch( /*#__PURE__*/function () {
-                var _ref3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(error) {
-                  return _regenerator.default.wrap(function _callee3$(_context3) {
+                var _ref3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(error) {
+                  return _regenerator.default.wrap(function _callee4$(_context4) {
                     while (1) {
-                      switch (_context3.prev = _context3.next) {
+                      switch (_context4.prev = _context4.next) {
                         case 0:
                           if (!(error.status == 401)) {
-                            _context3.next = 15;
+                            _context4.next = 15;
                             break;
                           }
 
                           if (_this2.getState("tokenResponse.access_token")) {
-                            _context3.next = 4;
+                            _context4.next = 4;
                             break;
                           }
 
@@ -11531,16 +11559,16 @@ var Client = /*#__PURE__*/function () {
 
                         case 4:
                           if (options.useRefreshToken) {
-                            _context3.next = 10;
+                            _context4.next = 10;
                             break;
                           }
 
                           debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-                          _context3.next = 8;
-                          return _this2._clearState();
+                          _context4.next = 8;
+                          return _this2.clearAuthorization();
 
                         case 8:
-                          error.message += "\n" + strings_1.default.expired;
+                          error.message += "\nSession expired! Please re-launch the app.";
                           throw error;
 
                         case 10:
@@ -11550,11 +11578,11 @@ var Client = /*#__PURE__*/function () {
                           // otherwise -> auto-refresh failed. Session expired.
                           // Need to re-launch. Clear state to start over!
                           debugRequest("Auto-refresh failed! Please re-launch the app.");
-                          _context3.next = 13;
-                          return _this2._clearState();
+                          _context4.next = 13;
+                          return _this2.clearAuthorization();
 
                         case 13:
-                          error.message += "\n" + strings_1.default.expired;
+                          error.message += "\nSession expired! Please re-launch the app.";
                           throw error;
 
                         case 15:
@@ -11562,10 +11590,10 @@ var Client = /*#__PURE__*/function () {
 
                         case 16:
                         case "end":
-                          return _context3.stop();
+                          return _context4.stop();
                       }
                     }
-                  }, _callee3);
+                  }, _callee4);
                 }));
 
                 return function (_x6) {
@@ -11586,38 +11614,38 @@ var Client = /*#__PURE__*/function () {
                 if (typeof data == "string" || data instanceof Response) return data; // Resolve References ------------------------------------------
 
                 return function () {
-                  var _ref4 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(_data) {
-                    return _regenerator.default.wrap(function _callee4$(_context4) {
+                  var _ref4 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(_data) {
+                    return _regenerator.default.wrap(function _callee5$(_context5) {
                       while (1) {
-                        switch (_context4.prev = _context4.next) {
+                        switch (_context5.prev = _context5.next) {
                           case 0:
                             if (!(_data.resourceType == "Bundle")) {
-                              _context4.next = 5;
+                              _context5.next = 5;
                               break;
                             }
 
-                            _context4.next = 3;
+                            _context5.next = 3;
                             return Promise.all((_data.entry || []).map(function (item) {
                               return resolveRefs(item.resource, options, _resolvedRefs, _this2, signal);
                             }));
 
                           case 3:
-                            _context4.next = 7;
+                            _context5.next = 7;
                             break;
 
                           case 5:
-                            _context4.next = 7;
+                            _context5.next = 7;
                             return resolveRefs(_data, options, _resolvedRefs, _this2, signal);
 
                           case 7:
-                            return _context4.abrupt("return", _data);
+                            return _context5.abrupt("return", _data);
 
                           case 8:
                           case "end":
-                            return _context4.stop();
+                            return _context5.stop();
                         }
                       }
-                    }, _callee4);
+                    }, _callee5);
                   }));
 
                   return function (_x7) {
@@ -11625,14 +11653,14 @@ var Client = /*#__PURE__*/function () {
                   };
                 }()(data) // Pagination ----------------------------------------------
                 .then( /*#__PURE__*/function () {
-                  var _ref5 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(_data) {
+                  var _ref5 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(_data) {
                     var links, next, nextPage;
-                    return _regenerator.default.wrap(function _callee5$(_context5) {
+                    return _regenerator.default.wrap(function _callee6$(_context6) {
                       while (1) {
-                        switch (_context5.prev = _context5.next) {
+                        switch (_context6.prev = _context6.next) {
                           case 0:
                             if (!(_data && _data.resourceType == "Bundle")) {
-                              _context5.next = 19;
+                              _context6.next = 19;
                               break;
                             }
 
@@ -11645,16 +11673,16 @@ var Client = /*#__PURE__*/function () {
                             }
 
                             if (!options.onPage) {
-                              _context5.next = 6;
+                              _context6.next = 6;
                               break;
                             }
 
-                            _context5.next = 6;
+                            _context6.next = 6;
                             return options.onPage(_data, Object.assign({}, _resolvedRefs));
 
                           case 6:
                             if (! --options.pageLimit) {
-                              _context5.next = 19;
+                              _context6.next = 19;
                               break;
                             }
 
@@ -11664,11 +11692,11 @@ var Client = /*#__PURE__*/function () {
                             _data = lib_1.makeArray(_data);
 
                             if (!(next && next.url)) {
-                              _context5.next = 19;
+                              _context6.next = 19;
                               break;
                             }
 
-                            _context5.next = 12;
+                            _context6.next = 12;
                             return _this2.request({
                               url: next.url,
                               // Aborting the main request (even after it is complete)
@@ -11679,36 +11707,36 @@ var Client = /*#__PURE__*/function () {
                             }, options, _resolvedRefs);
 
                           case 12:
-                            nextPage = _context5.sent;
+                            nextPage = _context6.sent;
 
                             if (!options.onPage) {
-                              _context5.next = 15;
+                              _context6.next = 15;
                               break;
                             }
 
-                            return _context5.abrupt("return", null);
+                            return _context6.abrupt("return", null);
 
                           case 15:
                             if (!options.resolveReferences.length) {
-                              _context5.next = 18;
+                              _context6.next = 18;
                               break;
                             }
 
                             Object.assign(_resolvedRefs, nextPage.references);
-                            return _context5.abrupt("return", _data.concat(lib_1.makeArray(nextPage.data || nextPage)));
+                            return _context6.abrupt("return", _data.concat(lib_1.makeArray(nextPage.data || nextPage)));
 
                           case 18:
-                            return _context5.abrupt("return", _data.concat(lib_1.makeArray(nextPage)));
+                            return _context6.abrupt("return", _data.concat(lib_1.makeArray(nextPage)));
 
                           case 19:
-                            return _context5.abrupt("return", _data);
+                            return _context6.abrupt("return", _data);
 
                           case 20:
                           case "end":
-                            return _context5.stop();
+                            return _context6.stop();
                         }
                       }
-                    }, _callee5);
+                    }, _callee6);
                   }));
 
                   return function (_x8) {
@@ -11740,10 +11768,10 @@ var Client = /*#__PURE__*/function () {
 
             case 11:
             case "end":
-              return _context6.stop();
+              return _context7.stop();
           }
         }
-      }, _callee6, this);
+      }, _callee7, this);
     }));
 
     function request(_x3, _x4, _x5) {
@@ -11807,21 +11835,42 @@ var Client = /*#__PURE__*/function () {
     var refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
 
     if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found.");
+      return Promise.reject(new Error("Unable to refresh. No refresh_token found."));
     }
 
     var tokenUri = this.state.tokenUri;
 
     if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found.");
+      return Promise.reject(new Error("Unable to refresh. No tokenUri found."));
     }
 
-    var scopes = this.getState("tokenResponse.scope") || "";
-    var hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
-    var hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
+    var hasOfflineAccess = this.hasGrantedScope("offline_access");
+    var hasOnlineAccess = this.hasGrantedScope("online_access");
 
     if (!hasOfflineAccess && !hasOnlineAccess) {
-      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
+      return Promise.reject(new Error("Unable to refresh. No offline_access or online_access scope found."));
+    }
+
+    var refreshRequestOptions = Object.assign({
+      credentials: this.options.refreshWithCredentials
+    }, requestOptions, {
+      method: "POST",
+      mode: "cors",
+      headers: Object.assign({}, requestOptions.headers || {}, {
+        "content-type": "application/x-www-form-urlencoded"
+      }),
+      body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken)
+    }); // custom authorization header can be passed on manual calls
+
+    if (!("authorization" in refreshRequestOptions.headers)) {
+      var _this$state3 = this.state,
+          clientSecret = _this$state3.clientSecret,
+          clientId = _this$state3.clientId;
+
+      if (clientSecret) {
+        // @ts-ignore
+        refreshRequestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+      }
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
@@ -11829,28 +11878,6 @@ var Client = /*#__PURE__*/function () {
 
 
     if (!this._refreshTask) {
-      var refreshRequestOptions = Object.assign({
-        credentials: this.environment.options.refreshTokenWithCredentials || "same-origin"
-      }, requestOptions, {
-        method: "POST",
-        mode: "cors",
-        headers: Object.assign({}, requestOptions.headers || {}, {
-          "content-type": "application/x-www-form-urlencoded"
-        }),
-        body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken)
-      }); // custom authorization header can be passed on manual calls
-
-      if (!("authorization" in refreshRequestOptions.headers)) {
-        var _this$state3 = this.state,
-            clientSecret = _this$state3.clientSecret,
-            clientId = _this$state3.clientId;
-
-        if (clientSecret) {
-          // @ts-ignore
-          refreshRequestOptions.headers.authorization = "Basic " + this.environment.btoa(clientId + ":" + clientSecret);
-        }
-      }
-
       this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(function (data) {
         if (!data.access_token) {
           throw new Error("No access token received");
@@ -11858,7 +11885,7 @@ var Client = /*#__PURE__*/function () {
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(_this3.state.tokenResponse, data);
-        _this3.state.expiresAt = lib_1.getAccessTokenExpiration(data, _this3.environment);
+        _this3.state.expiresAt = lib_1.getAccessTokenExpiration(data);
         return _this3.state;
       }).catch(function (error) {
         var _a, _b;
@@ -11871,13 +11898,11 @@ var Client = /*#__PURE__*/function () {
         throw error;
       }).finally(function () {
         _this3._refreshTask = null;
-        var key = _this3.state.key;
-
-        if (key) {
-          _this3.environment.getStorage().set(key, _this3.state);
-        } else {
-          debugRefresh("No 'key' found in Clint.state. Cannot persist the instance.");
-        }
+        return _this3._saveState().catch(function (e) {
+          return debugRefresh(e.message);
+        }).then(function () {
+          return _this3.state;
+        });
       });
     }
 
@@ -11992,9 +12017,7 @@ var Client = /*#__PURE__*/function () {
 
   _proto.getFhirRelease = function getFhirRelease() {
     return this.getFhirVersion().then(function (v) {
-      var _a;
-
-      return (_a = settings_1.fhirVersions[v]) !== null && _a !== void 0 ? _a : 0;
+      return settings_1.fhirVersions[v] || 0;
     });
   };
 
@@ -12305,22 +12328,6 @@ var BrowserAdapter = /*#__PURE__*/function () {
     return AbortController;
   }
   /**
-   * ASCII string to Base64
-   */
-  ;
-
-  _proto.atob = function atob(str) {
-    return window.atob(str);
-  }
-  /**
-   * Base64 to ASCII string
-   */
-  ;
-
-  _proto.btoa = function btoa(str) {
-    return window.btoa(str);
-  }
-  /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
    * the returned object is well known, the arguments to this function are not.
    * Those who override this method are free to require any environment-specific
@@ -12347,7 +12354,18 @@ var BrowserAdapter = /*#__PURE__*/function () {
         return smart_1.init(_this, options);
       },
       client: function client(state) {
-        return new Client_1.default(_this, state);
+        if (typeof state === "string") {
+          state = {
+            serverUrl: state,
+            refreshWithCredentials: _this.options.refreshTokenWithCredentials
+          };
+        } else {
+          state = Object.assign({
+            refreshWithCredentials: _this.options.refreshTokenWithCredentials
+          }, state);
+        }
+
+        return new Client_1.default(state);
       },
       options: this.options
     };
@@ -12435,7 +12453,7 @@ module.exports = FHIR; // $lab:coverage:on$
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(global) {
 /*
  * This file contains some shared functions. They are used by other modules, but
  * are defined here so that tests can import this library and test them.
@@ -12467,6 +12485,8 @@ __webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/mo
 
 __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
 
+__webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+
 __webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
 
 __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
@@ -12488,7 +12508,7 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 var HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -12673,7 +12693,7 @@ function request(url, requestOptions) {
     // empty body. In this case check if a location header is received and
     // fetch that to use it as the final result.
     if (!body && res.status == 201) {
-      var location = res.headers.get("location") + "";
+      var location = res.headers.get("location");
 
       if (location) {
         return request(location, Object.assign({}, options, {
@@ -12875,6 +12895,36 @@ function randomString(strLength, charSet) {
 }
 
 exports.randomString = randomString;
+
+function isBrowser() {
+  return typeof window === "object";
+}
+
+exports.isBrowser = isBrowser;
+/**
+ * Base64 to ASCII
+ */
+
+function atob(str) {
+  return isBrowser() ? // Browsers have global atob method
+  window.atob(str) : // "global." helps Webpack understand that it doesn't have to
+  // include the Buffer code in the bundle
+  global.Buffer.from(str, "base64").toString("ascii");
+}
+
+exports.atob = atob;
+/**
+ * ASCII to Base64
+ */
+
+function btoa(str) {
+  return isBrowser() ? // Browsers have global btoa method
+  window.btoa(str) : // "global." helps Webpack understand that it doesn't have to
+  // include the Buffer code in the bundle
+  global.Buffer.from(str).toString("base64");
+}
+
+exports.btoa = btoa;
 /**
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
@@ -12882,9 +12932,9 @@ exports.randomString = randomString;
  * @category Utility
  */
 
-function jwtDecode(token, env) {
+function jwtDecode(token) {
   var payload = token.split(".")[1];
-  return payload ? JSON.parse(env.atob(payload)) : null;
+  return payload ? JSON.parse(atob(payload)) : null;
 }
 
 exports.jwtDecode = jwtDecode;
@@ -12896,7 +12946,7 @@ exports.jwtDecode = jwtDecode;
  * @param env
  */
 
-function getAccessTokenExpiration(tokenResponse, env) {
+function getAccessTokenExpiration(tokenResponse) {
   var now = Math.floor(Date.now() / 1000); // Option 1 - using the expires_in property of the token response
 
   if (tokenResponse.expires_in) {
@@ -12905,7 +12955,7 @@ function getAccessTokenExpiration(tokenResponse, env) {
 
 
   if (tokenResponse.access_token) {
-    var tokenBody = jwtDecode(tokenResponse.access_token, env);
+    var tokenBody = jwtDecode(tokenResponse.access_token);
 
     if (tokenBody && tokenBody.exp) {
       return tokenBody.exp;
@@ -13222,6 +13272,7 @@ function _getTargetWindow() {
 }
 
 exports.getTargetWindow = getTargetWindow;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -13353,18 +13404,16 @@ Object.defineProperty(exports, "KEY", {
     return settings_1.SMART_KEY;
   }
 });
-var debug = lib_1.debug.extend("oauth2");
 
-function isBrowser() {
-  return typeof window === "object";
-}
+var NamespacedStorage_1 = __webpack_require__(/*! ./storage/NamespacedStorage */ "./src/storage/NamespacedStorage.ts");
+
+var debug = lib_1.debug.extend("oauth2");
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
  * @param baseUrl The base URL of the FHIR server
  */
-
 
 function fetchWellKnownJson(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
@@ -13642,7 +13691,7 @@ function _authorize() {
               scope += " launch";
             }
 
-            if (isBrowser()) {
+            if (lib_1.isBrowser()) {
               inFrame = isInFrame();
               inPopUp = isInPopUp();
 
@@ -13678,10 +13727,10 @@ function _authorize() {
               serverUrl: serverUrl,
               clientSecret: clientSecret,
               tokenResponse: {},
-              key: stateKey,
+              // key: stateKey,
               completeInTarget: completeInTarget
             };
-            fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
+            fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
             if (!fullSessionStorageSupport) {
               _context.next = 39;
@@ -13785,7 +13834,7 @@ function _authorize() {
             return _context.abrupt("return", redirectUrl);
 
           case 69:
-            if (!(target && isBrowser())) {
+            if (!(target && lib_1.isBrowser())) {
               _context.next = 78;
               break;
             }
@@ -13948,10 +13997,10 @@ function _completeAuth() {
 
           case 18:
             state = _context2.sent;
-            fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+            fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
             // complete, send the location back to our opener and exit.
 
-            if (!(isBrowser() && state && !state.completeInTarget)) {
+            if (!(lib_1.isBrowser() && state && !state.completeInTarget)) {
               _context2.next = 29;
               break;
             }
@@ -13994,7 +14043,7 @@ function _completeAuth() {
 
             hasState = params.has("state");
 
-            if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+            if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
               // `code` is the flag that tell us to request an access token.
               // We have to remove it, otherwise the page will authorize on
               // every load!
@@ -14053,7 +14102,7 @@ function _completeAuth() {
 
           case 38:
             debug("Preparing to exchange the code for access token...");
-            requestOptions = buildTokenRequest(env, code, state);
+            requestOptions = buildTokenRequest(code, state);
             debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
             // includes an access token or a message indicating that the
             // authorization request has been denied.
@@ -14074,7 +14123,7 @@ function _completeAuth() {
 
           case 47:
             // Now we need to determine when is this authorization going to expire
-            state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
+            state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
 
             state = Object.assign({}, state, {
@@ -14101,7 +14150,9 @@ function _completeAuth() {
             return Storage.set(settings_1.SMART_KEY, key);
 
           case 58:
-            client = new Client_1.default(env, state);
+            client = new Client_1.default(Object.assign({}, state, {
+              storage: new NamespacedStorage_1.default(Storage, key)
+            }));
             debug("Created client instance: %O", client);
             return _context2.abrupt("return", client);
 
@@ -14121,7 +14172,7 @@ exports.completeAuth = completeAuth;
  * creates it's configuration and returns it in a Promise.
  */
 
-function buildTokenRequest(env, code, state) {
+function buildTokenRequest(code, state) {
   var redirectUri = state.redirectUri,
       clientSecret = state.clientSecret,
       tokenUri = state.tokenUri,
@@ -14154,7 +14205,7 @@ function buildTokenRequest(env, code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -14289,7 +14340,9 @@ function _init() {
               break;
             }
 
-            return _context4.abrupt("return", new Client_1.default(env, cached));
+            return _context4.abrupt("return", new Client_1.default(Object.assign({}, cached, {
+              storage: new NamespacedStorage_1.default(storage, key)
+            })));
 
           case 17:
             return _context4.abrupt("return", authorize(env, options).then(function () {
@@ -14329,6 +14382,8 @@ exports.init = init;
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
 
+__webpack_require__(/*! core-js/modules/es.object.keys */ "./node_modules/core-js/modules/es.object.keys.js");
+
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
 
 __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
@@ -14367,7 +14422,7 @@ var Storage = /*#__PURE__*/function () {
               return _context.abrupt("return", JSON.parse(value));
 
             case 3:
-              return _context.abrupt("return", null);
+              return _context.abrupt("return", undefined);
 
             case 4:
             case "end":
@@ -14455,6 +14510,72 @@ var Storage = /*#__PURE__*/function () {
     return unset;
   }();
 
+  _proto.clear = /*#__PURE__*/function () {
+    var _clear = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+      return _regenerator.default.wrap(function _callee4$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              return _context4.abrupt("return", sessionStorage.clear());
+
+            case 1:
+            case "end":
+              return _context4.stop();
+          }
+        }
+      }, _callee4);
+    }));
+
+    function clear() {
+      return _clear.apply(this, arguments);
+    }
+
+    return clear;
+  }();
+
+  _proto.save = /*#__PURE__*/function () {
+    var _save = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(data) {
+      var _i, _Object$keys, key;
+
+      return _regenerator.default.wrap(function _callee5$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              _i = 0, _Object$keys = Object.keys(data);
+
+            case 1:
+              if (!(_i < _Object$keys.length)) {
+                _context5.next = 8;
+                break;
+              }
+
+              key = _Object$keys[_i];
+              _context5.next = 5;
+              return this.set(key, data[key]);
+
+            case 5:
+              _i++;
+              _context5.next = 1;
+              break;
+
+            case 8:
+              return _context5.abrupt("return", data);
+
+            case 9:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, _callee5, this);
+    }));
+
+    function save(_x5) {
+      return _save.apply(this, arguments);
+    }
+
+    return save;
+  }();
+
   return Storage;
 }();
 
@@ -14462,26 +14583,202 @@ exports.default = Storage;
 
 /***/ }),
 
-/***/ "./src/strings.ts":
-/*!************************!*\
-  !*** ./src/strings.ts ***!
-  \************************/
+/***/ "./src/storage/NamespacedStorage.ts":
+/*!******************************************!*\
+  !*** ./src/storage/NamespacedStorage.ts ***!
+  \******************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
+
+__webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
+
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
+
 Object.defineProperty(exports, "__esModule", {
   value: true
-}); // This map contains reusable debug messages (only those used in multiple places)
+});
 
-exports.default = {
-  expired: "Session expired! Please re-launch the app",
-  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
-  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
-  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
-};
+var NamespacedStorage = /*#__PURE__*/function () {
+  function NamespacedStorage(storage, ns) {
+    this.storage = storage;
+    this.key = ns;
+  }
+
+  var _proto = NamespacedStorage.prototype;
+
+  _proto.get = /*#__PURE__*/function () {
+    var _get = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(key) {
+      var branch;
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return this.storage.get(this.key);
+
+            case 2:
+              branch = _context.sent;
+
+              if (!(branch && typeof branch == "object")) {
+                _context.next = 5;
+                break;
+              }
+
+              return _context.abrupt("return", branch[key]);
+
+            case 5:
+              return _context.abrupt("return", undefined);
+
+            case 6:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function get(_x) {
+      return _get.apply(this, arguments);
+    }
+
+    return get;
+  }();
+
+  _proto.set = /*#__PURE__*/function () {
+    var _set = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(key, value) {
+      var branch;
+      return _regenerator.default.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return this.storage.get(this.key);
+
+            case 2:
+              branch = _context2.sent;
+              if (branch === undefined) branch = {};
+              branch[key] = value;
+              _context2.next = 7;
+              return this.storage.set(this.key, branch);
+
+            case 7:
+              return _context2.abrupt("return", value);
+
+            case 8:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, this);
+    }));
+
+    function set(_x2, _x3) {
+      return _set.apply(this, arguments);
+    }
+
+    return set;
+  }();
+
+  _proto.unset = /*#__PURE__*/function () {
+    var _unset = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(key) {
+      var branch;
+      return _regenerator.default.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return this.storage.get(this.key);
+
+            case 2:
+              branch = _context3.sent;
+
+              if (!(key in branch)) {
+                _context3.next = 8;
+                break;
+              }
+
+              delete branch[key];
+              _context3.next = 7;
+              return this.storage.set(this.key, branch);
+
+            case 7:
+              return _context3.abrupt("return", true);
+
+            case 8:
+              return _context3.abrupt("return", false);
+
+            case 9:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3, this);
+    }));
+
+    function unset(_x4) {
+      return _unset.apply(this, arguments);
+    }
+
+    return unset;
+  }();
+
+  _proto.save = /*#__PURE__*/function () {
+    var _save = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(data) {
+      return _regenerator.default.wrap(function _callee4$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              return _context4.abrupt("return", this.storage.set(this.key, data));
+
+            case 1:
+            case "end":
+              return _context4.stop();
+          }
+        }
+      }, _callee4, this);
+    }));
+
+    function save(_x5) {
+      return _save.apply(this, arguments);
+    }
+
+    return save;
+  }();
+
+  _proto.clear = /*#__PURE__*/function () {
+    var _clear = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+      return _regenerator.default.wrap(function _callee5$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              this.storage.unset(this.key);
+
+            case 1:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, _callee5, this);
+    }));
+
+    function clear() {
+      return _clear.apply(this, arguments);
+    }
+
+    return clear;
+  }();
+
+  return NamespacedStorage;
+}();
+
+exports.default = NamespacedStorage;
 
 /***/ })
 

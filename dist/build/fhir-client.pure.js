@@ -1008,6 +1008,37 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/webpack/buildin/global.js":
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+/*! all exports used */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || new Function("return this")();
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+
 /***/ "./src/Client.ts":
 /*!***********************!*\
   !*** ./src/Client.ts ***!
@@ -1023,8 +1054,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
-
-const strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
@@ -1214,24 +1243,44 @@ class Client {
    * Validates the parameters, creates an instance and tries to connect it to
    * FhirJS, if one is available globally.
    */
-  constructor(environment, state) {
+  constructor(options) {
+    this.options = {
+      refreshWithCredentials: "same-origin"
+    };
+    /**
+     * Refers to the refresh task while it is being performed.
+     * @see [[refresh]]
+     */
+
+    this._refreshTask = null;
     /**
      * @category Utility
      */
+
     this.units = lib_1.units;
 
-    const _state = typeof state == "string" ? {
-      serverUrl: state
-    } : state; // Valid serverUrl is required!
+    if (typeof options == "string") {
+      options = {
+        serverUrl: options
+      };
+    }
 
+    const {
+      storage,
+      refreshWithCredentials,
+      ...state
+    } = options; // Valid serverUrl is required!
 
-    if (!_state.serverUrl || !_state.serverUrl.match(/https?:\/\/.+/)) {
+    if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
       throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
     }
 
-    this.state = _state;
-    this.environment = environment;
-    this._refreshTask = null;
+    if (storage) {
+      this.storage = storage;
+    }
+
+    this.options.refreshWithCredentials = refreshWithCredentials || "same-origin";
+    this.state = state;
     const client = this; // patient api ---------------------------------------------------------
 
     this.patient = {
@@ -1292,7 +1341,10 @@ class Client {
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
 
-    this.connect(environment.fhir);
+    if (lib_1.isBrowser()) {
+      // @ts-ignore
+      this.connect(window.fhir);
+    }
   }
   /**
    * This method is used to make the "link" between the `fhirclient` and the
@@ -1341,6 +1393,18 @@ class Client {
 
     return this;
   }
+
+  hasGrantedScope(scope) {
+    var _a;
+
+    const scopes = String(((_a = this.state.tokenResponse) === null || _a === void 0 ? void 0 : _a.scope) || "").trim().split(/\s+/);
+    return scopes.indexOf(scope) > -1;
+  }
+
+  hasRequestedScope(scope) {
+    const scopes = String(this.state.scope || "").trim().split(/\s+/);
+    return scopes.indexOf(scope) > -1;
+  }
   /**
    * Returns the ID of the selected patient or null. You should have requested
    * "launch/patient" scope. Otherwise this will return null.
@@ -1354,11 +1418,23 @@ class Client {
       // We have been authorized against this server but we don't know
       // the patient. This should be a scope issue.
       if (!tokenResponse.patient) {
-        if (!(this.state.scope || "").match(/\blaunch(\/patient)?\b/)) {
-          debug(strings_1.default.noScopeForId, "patient", "patient");
+        if (!this.hasGrantedScope("launch") && !this.hasGrantedScope("launch/patient")) {
+          debug("Unable to get the ID of the selected patient. Insufficient scopes granted.");
+
+          if (this.hasRequestedScope("launch")) {
+            debug("The authorization server did not grant the 'launch' scope you requested");
+          } else {
+            debug("To get the selected patient, try adding 'launch' to the scopes you are requesting");
+          }
+
+          if (this.hasRequestedScope("launch/patient")) {
+            debug("The authorization server did not grant the 'launch/patient' scope you requested");
+          } else {
+            debug("To get the selected patient, try adding 'launch/patient' to the scopes you are requesting");
+          }
         } else {
           // The server should have returned the patient!
-          debug("The ID of the selected patient is not available. Please check if your server supports that.");
+          debug("The ID of the selected patient is not available. Please check if the server supports that.");
         }
 
         return null;
@@ -1368,9 +1444,9 @@ class Client {
     }
 
     if (this.state.authorizeUri) {
-      debug(strings_1.default.noIfNoAuth, "the ID of the selected patient");
+      debug("You are trying to get the ID of the selected patient but the app is not authorized yet.");
     } else {
-      debug(strings_1.default.noFreeContext, "selected patient");
+      debug("Please don't use open fhir servers if you need to access launch context items like the selected patient.");
     }
 
     return null;
@@ -1390,11 +1466,31 @@ class Client {
       // We have been authorized against this server but we don't know
       // the encounter. This should be a scope issue.
       if (!tokenResponse.encounter) {
-        if (!(this.state.scope || "").match(/\blaunch(\/encounter)?\b/)) {
-          debug(strings_1.default.noScopeForId, "encounter", "encounter");
-        } else {
-          // The server should have returned the encounter!
+        const requested = {
+          launch: this.hasRequestedScope("launch"),
+          launchEncounter: this.hasRequestedScope("launch/encounter")
+        };
+        const granted = {
+          launch: this.hasGrantedScope("launch"),
+          launchEncounter: this.hasGrantedScope("launch/encounter")
+        };
+
+        if (granted.launch || granted.launchEncounter) {
           debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
+        } else {
+          debug("Unable to get the ID of the selected encounter. Insufficient scopes granted.");
+
+          if (requested.launch) {
+            debug("The authorization server did not grant the 'launch' scope you requested");
+          } else {
+            debug("To get the selected encounter, try adding 'launch' to the scopes you are requesting");
+          }
+
+          if (requested.launchEncounter) {
+            debug("The authorization server did not grant the 'launch/encounter' scope you requested");
+          } else {
+            debug("To get the selected encounter, try adding 'launch/encounter' to the scopes you are requesting");
+          }
         }
 
         return null;
@@ -1404,9 +1500,9 @@ class Client {
     }
 
     if (this.state.authorizeUri) {
-      debug(strings_1.default.noIfNoAuth, "the ID of the selected encounter");
+      debug("You are trying to get the ID of the selected encounter but the app is not authorized yet.");
     } else {
-      debug(strings_1.default.noFreeContext, "selected encounter");
+      debug("Please don't use open fhir servers if you need to access launch context items like the selected encounter.");
     }
 
     return null;
@@ -1422,32 +1518,52 @@ class Client {
     const tokenResponse = this.state.tokenResponse;
 
     if (tokenResponse) {
-      const idToken = tokenResponse.id_token;
-      const scope = this.state.scope || ""; // We have been authorized against this server but we don't have
+      const idToken = tokenResponse.id_token; // We have been authorized against this server but we don't have
       // the id_token. This should be a scope issue.
 
       if (!idToken) {
-        const hasOpenid = scope.match(/\bopenid\b/);
-        const hasProfile = scope.match(/\bprofile\b/);
-        const hasFhirUser = scope.match(/\bfhirUser\b/);
+        const hasOpenid = this.hasGrantedScope("openid");
+        const hasProfile = this.hasGrantedScope("profile");
+        const hasFhirUser = this.hasGrantedScope("fhirUser");
 
-        if (!hasOpenid || !(hasFhirUser || hasProfile)) {
-          debug("You are trying to get the id_token but you are not " + "using the right scopes. Please add 'openid' and " + "'fhirUser' or 'profile' to the scopes you are " + "requesting.");
-        } else {
-          // The server should have returned the id_token!
+        if (hasOpenid && (hasFhirUser || hasProfile)) {
           debug("The id_token is not available. Please check if your server supports that.");
+        } else {
+          if (!hasOpenid) {
+            if (this.hasRequestedScope("openid")) {
+              debug("The authorization server did not grant the 'openid' scope you requested");
+            } else {
+              debug("To get the current user, please add 'openid' to the scopes you are requesting");
+            }
+          }
+
+          if (!hasFhirUser) {
+            if (this.hasRequestedScope("fhirUser")) {
+              debug("The authorization server did not grant the 'fhirUser' scope you requested");
+            } else {
+              debug("To get the current user, please add 'fhirUser' to the scopes you are requesting");
+            }
+          }
+
+          if (!hasProfile) {
+            if (this.hasRequestedScope("profile")) {
+              debug("The authorization server did not grant the 'profile' scope you requested");
+            } else {
+              debug("To get the current user, please add 'profile' to the scopes you are requesting");
+            }
+          }
         }
 
         return null;
       }
 
-      return lib_1.jwtDecode(idToken, this.environment);
+      return lib_1.jwtDecode(idToken);
     }
 
     if (this.state.authorizeUri) {
-      debug(strings_1.default.noIfNoAuth, "the id_token");
+      debug("You are trying to get the id_token but the app is not authorized yet.");
     } else {
-      debug(strings_1.default.noFreeContext, "id_token");
+      debug("Please don't use open fhir servers if you need to access launch context items like the id_token.");
     }
 
     return null;
@@ -1516,7 +1632,7 @@ class Client {
     } = this.state;
 
     if (username && password) {
-      return "Basic " + this.environment.btoa(username + ":" + password);
+      return "Basic " + lib_1.btoa(username + ":" + password);
     }
 
     return null;
@@ -1527,16 +1643,17 @@ class Client {
    */
 
 
-  async _clearState() {
-    const storage = this.environment.getStorage();
-    const key = await storage.get(settings_1.SMART_KEY);
+  async clearAuthorization() {
+    var _a;
 
-    if (key) {
-      await storage.unset(key);
-    }
-
-    await storage.unset(settings_1.SMART_KEY);
     this.state.tokenResponse = {};
+    return (_a = this.storage) === null || _a === void 0 ? void 0 : _a.clear();
+  }
+
+  async _saveState() {
+    var _a;
+
+    return (_a = this.storage) === null || _a === void 0 ? void 0 : _a.save(this.state);
   }
   /**
    * Creates a new resource in a server-assigned location
@@ -1679,8 +1796,8 @@ class Client {
 
         if (!options.useRefreshToken) {
           debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-          await this._clearState();
-          error.message += "\n" + strings_1.default.expired;
+          await this.clearAuthorization();
+          error.message += "\nSession expired! Please re-launch the app.";
           throw error;
         } // In rare cases we may have a valid access token and a refresh
         // token and the request might still fail with 401 just because
@@ -1690,8 +1807,8 @@ class Client {
 
 
         debugRequest("Auto-refresh failed! Please re-launch the app.");
-        await this._clearState();
-        error.message += "\n" + strings_1.default.expired;
+        await this.clearAuthorization();
+        error.message += "\nSession expired! Please re-launch the app.";
         throw error;
       }
 
@@ -1830,21 +1947,43 @@ class Client {
     const refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
 
     if (!refreshToken) {
-      throw new Error("Unable to refresh. No refresh_token found.");
+      return Promise.reject(new Error("Unable to refresh. No refresh_token found."));
     }
 
     const tokenUri = this.state.tokenUri;
 
     if (!tokenUri) {
-      throw new Error("Unable to refresh. No tokenUri found.");
+      return Promise.reject(new Error("Unable to refresh. No tokenUri found."));
     }
 
-    const scopes = this.getState("tokenResponse.scope") || "";
-    const hasOfflineAccess = scopes.search(/\boffline_access\b/) > -1;
-    const hasOnlineAccess = scopes.search(/\bonline_access\b/) > -1;
+    const hasOfflineAccess = this.hasGrantedScope("offline_access");
+    const hasOnlineAccess = this.hasGrantedScope("online_access");
 
     if (!hasOfflineAccess && !hasOnlineAccess) {
-      throw new Error("Unable to refresh. No offline_access or online_access scope found.");
+      return Promise.reject(new Error("Unable to refresh. No offline_access or online_access scope found."));
+    }
+
+    const refreshRequestOptions = {
+      credentials: this.options.refreshWithCredentials,
+      ...requestOptions,
+      method: "POST",
+      mode: "cors",
+      headers: { ...(requestOptions.headers || {}),
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+    }; // custom authorization header can be passed on manual calls
+
+    if (!("authorization" in refreshRequestOptions.headers)) {
+      const {
+        clientSecret,
+        clientId
+      } = this.state;
+
+      if (clientSecret) {
+        // @ts-ignore
+        refreshRequestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+      }
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
     // requests in parallel which may result in multiple refresh calls.
@@ -1852,29 +1991,6 @@ class Client {
 
 
     if (!this._refreshTask) {
-      const refreshRequestOptions = {
-        credentials: this.environment.options.refreshTokenWithCredentials || "same-origin",
-        ...requestOptions,
-        method: "POST",
-        mode: "cors",
-        headers: { ...(requestOptions.headers || {}),
-          "content-type": "application/x-www-form-urlencoded"
-        },
-        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
-      }; // custom authorization header can be passed on manual calls
-
-      if (!("authorization" in refreshRequestOptions.headers)) {
-        const {
-          clientSecret,
-          clientId
-        } = this.state;
-
-        if (clientSecret) {
-          // @ts-ignore
-          refreshRequestOptions.headers.authorization = "Basic " + this.environment.btoa(clientId + ":" + clientSecret);
-        }
-      }
-
       this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(data => {
         if (!data.access_token) {
           throw new Error("No access token received");
@@ -1882,7 +1998,7 @@ class Client {
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
-        this.state.expiresAt = lib_1.getAccessTokenExpiration(data, this.environment);
+        this.state.expiresAt = lib_1.getAccessTokenExpiration(data);
         return this.state;
       }).catch(error => {
         var _a, _b;
@@ -1895,13 +2011,7 @@ class Client {
         throw error;
       }).finally(() => {
         this._refreshTask = null;
-        const key = this.state.key;
-
-        if (key) {
-          this.environment.getStorage().set(key, this.state);
-        } else {
-          debugRefresh("No 'key' found in Clint.state. Cannot persist the instance.");
-        }
+        return this._saveState().catch(e => debugRefresh(e.message)).then(() => this.state);
       });
     }
 
@@ -2006,11 +2116,7 @@ class Client {
 
 
   getFhirRelease() {
-    return this.getFhirVersion().then(v => {
-      var _a;
-
-      return (_a = settings_1.fhirVersions[v]) !== null && _a !== void 0 ? _a : 0;
-    });
+    return this.getFhirVersion().then(v => settings_1.fhirVersions[v] || 0);
   }
 
 }
@@ -2223,22 +2329,6 @@ class BrowserAdapter {
     return AbortController;
   }
   /**
-   * ASCII string to Base64
-   */
-
-
-  atob(str) {
-    return window.atob(str);
-  }
-  /**
-   * Base64 to ASCII string
-   */
-
-
-  btoa(str) {
-    return window.btoa(str);
-  }
-  /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
    * the returned object is well known, the arguments to this function are not.
    * Those who override this method are free to require any environment-specific
@@ -2252,7 +2342,21 @@ class BrowserAdapter {
       ready: (...args) => smart_1.ready(this, ...args),
       authorize: options => smart_1.authorize(this, options),
       init: options => smart_1.init(this, options),
-      client: state => new Client_1.default(this, state),
+      client: state => {
+        if (typeof state === "string") {
+          state = {
+            serverUrl: state,
+            refreshWithCredentials: this.options.refreshTokenWithCredentials
+          };
+        } else {
+          state = {
+            refreshWithCredentials: this.options.refreshTokenWithCredentials,
+            ...state
+          };
+        }
+
+        return new Client_1.default(state);
+      },
       options: this.options
     };
   }
@@ -2315,7 +2419,7 @@ module.exports = FHIR; // $lab:coverage:on$
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(global) {
 /*
  * This file contains some shared functions. They are used by other modules, but
  * are defined here so that tests can import this library and test them.
@@ -2324,7 +2428,7 @@ module.exports = FHIR; // $lab:coverage:on$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
 
@@ -2480,7 +2584,7 @@ function request(url, requestOptions = {}) {
     // empty body. In this case check if a location header is received and
     // fetch that to use it as the final result.
     if (!body && res.status == 201) {
-      const location = res.headers.get("location") + "";
+      const location = res.headers.get("location");
 
       if (location) {
         return request(location, { ...options,
@@ -2656,6 +2760,36 @@ function randomString(strLength = 8, charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 }
 
 exports.randomString = randomString;
+
+function isBrowser() {
+  return typeof window === "object";
+}
+
+exports.isBrowser = isBrowser;
+/**
+ * Base64 to ASCII
+ */
+
+function atob(str) {
+  return isBrowser() ? // Browsers have global atob method
+  window.atob(str) : // "global." helps Webpack understand that it doesn't have to
+  // include the Buffer code in the bundle
+  global.Buffer.from(str, "base64").toString("ascii");
+}
+
+exports.atob = atob;
+/**
+ * ASCII to Base64
+ */
+
+function btoa(str) {
+  return isBrowser() ? // Browsers have global btoa method
+  window.btoa(str) : // "global." helps Webpack understand that it doesn't have to
+  // include the Buffer code in the bundle
+  global.Buffer.from(str).toString("base64");
+}
+
+exports.btoa = btoa;
 /**
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
@@ -2663,9 +2797,9 @@ exports.randomString = randomString;
  * @category Utility
  */
 
-function jwtDecode(token, env) {
+function jwtDecode(token) {
   const payload = token.split(".")[1];
-  return payload ? JSON.parse(env.atob(payload)) : null;
+  return payload ? JSON.parse(atob(payload)) : null;
 }
 
 exports.jwtDecode = jwtDecode;
@@ -2677,7 +2811,7 @@ exports.jwtDecode = jwtDecode;
  * @param env
  */
 
-function getAccessTokenExpiration(tokenResponse, env) {
+function getAccessTokenExpiration(tokenResponse) {
   const now = Math.floor(Date.now() / 1000); // Option 1 - using the expires_in property of the token response
 
   if (tokenResponse.expires_in) {
@@ -2686,7 +2820,7 @@ function getAccessTokenExpiration(tokenResponse, env) {
 
 
   if (tokenResponse.access_token) {
-    let tokenBody = jwtDecode(tokenResponse.access_token, env);
+    let tokenBody = jwtDecode(tokenResponse.access_token);
 
     if (tokenBody && tokenBody.exp) {
       return tokenBody.exp;
@@ -2900,6 +3034,7 @@ async function getTargetWindow(target, width = 800, height = 720) {
 }
 
 exports.getTargetWindow = getTargetWindow;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -2985,18 +3120,16 @@ Object.defineProperty(exports, "KEY", {
     return settings_1.SMART_KEY;
   }
 });
-const debug = lib_1.debug.extend("oauth2");
 
-function isBrowser() {
-  return typeof window === "object";
-}
+const NamespacedStorage_1 = __webpack_require__(/*! ./storage/NamespacedStorage */ "./src/storage/NamespacedStorage.ts");
+
+const debug = lib_1.debug.extend("oauth2");
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
  * @param baseUrl The base URL of the FHIR server
  */
-
 
 function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
@@ -3229,7 +3362,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
     scope += " launch";
   }
 
-  if (isBrowser()) {
+  if (lib_1.isBrowser()) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp();
 
@@ -3258,10 +3391,10 @@ async function authorize(env, params = {}, _noRedirect = false) {
     serverUrl,
     clientSecret,
     tokenResponse: {},
-    key: stateKey,
+    // key: stateKey,
     completeInTarget
   };
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
+  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
   if (fullSessionStorageSupport) {
     await storage.set(settings_1.SMART_KEY, stateKey);
@@ -3325,7 +3458,7 @@ async function authorize(env, params = {}, _noRedirect = false) {
     return redirectUrl;
   }
 
-  if (target && isBrowser()) {
+  if (target && lib_1.isBrowser()) {
     let win;
     win = await lib_1.getTargetWindow(target, width, height);
 
@@ -3449,10 +3582,10 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
   // complete, send the location back to our opener and exit.
 
-  if (isBrowser() && state && !state.completeInTarget) {
+  if (lib_1.isBrowser() && state && !state.completeInTarget) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
     // be called again. In rare cases the opener or parent might also be
@@ -3491,7 +3624,7 @@ async function completeAuth(env) {
 
   const hasState = params.has("state");
 
-  if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -3538,7 +3671,7 @@ async function completeAuth(env) {
     }
 
     debug("Preparing to exchange the code for access token...");
-    const requestOptions = buildTokenRequest(env, code, state);
+    const requestOptions = buildTokenRequest(code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
@@ -3551,7 +3684,7 @@ async function completeAuth(env) {
     } // Now we need to determine when is this authorization going to expire
 
 
-    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
+    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
     // every page reload
 
     state = { ...state,
@@ -3567,7 +3700,9 @@ async function completeAuth(env) {
     await Storage.set(settings_1.SMART_KEY, key);
   }
 
-  const client = new Client_1.default(env, state);
+  const client = new Client_1.default({ ...state,
+    storage: new NamespacedStorage_1.default(Storage, key)
+  });
   debug("Created client instance: %O", client);
   return client;
 }
@@ -3578,7 +3713,7 @@ exports.completeAuth = completeAuth;
  * creates it's configuration and returns it in a Promise.
  */
 
-function buildTokenRequest(env, code, state) {
+function buildTokenRequest(code, state) {
   const {
     redirectUri,
     clientSecret,
@@ -3613,7 +3748,7 @@ function buildTokenRequest(env, code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.Authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -3693,7 +3828,9 @@ async function init(env, options) {
   const cached = await storage.get(key);
 
   if (cached) {
-    return new Client_1.default(env, cached);
+    return new Client_1.default({ ...cached,
+      storage: new NamespacedStorage_1.default(storage, key)
+    });
   } // Otherwise try to launch
 
 
@@ -3739,7 +3876,7 @@ class Storage {
       return JSON.parse(value);
     }
 
-    return null;
+    return undefined;
   }
   /**
    * Sets the `value` on `key` and returns a promise that will be resolved
@@ -3767,16 +3904,28 @@ class Storage {
     return false;
   }
 
+  async clear() {
+    return sessionStorage.clear();
+  }
+
+  async save(data) {
+    for (const key of Object.keys(data)) {
+      await this.set(key, data[key]);
+    }
+
+    return data;
+  }
+
 }
 
 exports.default = Storage;
 
 /***/ }),
 
-/***/ "./src/strings.ts":
-/*!************************!*\
-  !*** ./src/strings.ts ***!
-  \************************/
+/***/ "./src/storage/NamespacedStorage.ts":
+/*!******************************************!*\
+  !*** ./src/storage/NamespacedStorage.ts ***!
+  \******************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3785,14 +3934,55 @@ exports.default = Storage;
 
 Object.defineProperty(exports, "__esModule", {
   value: true
-}); // This map contains reusable debug messages (only those used in multiple places)
+});
 
-exports.default = {
-  expired: "Session expired! Please re-launch the app",
-  noScopeForId: "Trying to get the ID of the selected %s. Please add 'launch' or 'launch/%s' to the requested scopes and try again.",
-  noIfNoAuth: "You are trying to get %s but the app is not authorized yet.",
-  noFreeContext: "Please don't use open fhir servers if you need to access launch context items like the %S."
-};
+class NamespacedStorage {
+  constructor(storage, ns) {
+    this.storage = storage;
+    this.key = ns;
+  }
+
+  async get(key) {
+    const branch = await this.storage.get(this.key);
+
+    if (branch && typeof branch == "object") {
+      return branch[key];
+    }
+
+    return undefined;
+  }
+
+  async set(key, value) {
+    let branch = await this.storage.get(this.key);
+    if (branch === undefined) branch = {};
+    branch[key] = value;
+    await this.storage.set(this.key, branch);
+    return value;
+  }
+
+  async unset(key) {
+    const branch = await this.storage.get(this.key);
+
+    if (key in branch) {
+      delete branch[key];
+      await this.storage.set(this.key, branch);
+      return true;
+    }
+
+    return false;
+  }
+
+  async save(data) {
+    return this.storage.set(this.key, data);
+  }
+
+  async clear() {
+    this.storage.unset(this.key);
+  }
+
+}
+
+exports.default = NamespacedStorage;
 
 /***/ })
 

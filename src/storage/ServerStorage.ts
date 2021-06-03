@@ -46,4 +46,17 @@ export default class ServerStorage
         }
         return false;
     }
+
+    async clear(): Promise<void>
+    {
+        this.request.session = {}
+    }
+
+    async save(data: fhirclient.JsonObject)
+    {
+        for(const key of Object.keys(data)) {
+            await this.set(key, data[key])
+        }
+        return data
+    }
 }

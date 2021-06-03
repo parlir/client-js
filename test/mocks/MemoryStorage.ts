@@ -1,3 +1,4 @@
+import { fhirclient } from "../../src/types";
 
 export default class MemoryStorage
 {
@@ -23,5 +24,18 @@ export default class MemoryStorage
             return true;
         }
         return false;
+    }
+
+    async clear()
+    {
+        this._data = {}
+    }
+
+    async save(data: fhirclient.JsonObject)
+    {
+        for(const key in data) {
+            this._data[key] = data[key];
+        }
+        return this._data
     }
 }
