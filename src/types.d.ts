@@ -766,6 +766,7 @@ declare namespace fhirclient {
 
     interface IDToken {
         profile: string;
+        fhirUser?: string;
         aud: string;
         sub: string;
         iss: string;
