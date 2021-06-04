@@ -18,7 +18,7 @@ var __rest = void 0 && (void 0).__rest || function (s, e) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
 const HttpError_1 = require("./HttpError");
 
@@ -174,7 +174,7 @@ function request(url, requestOptions = {}) {
     // empty body. In this case check if a location header is received and
     // fetch that to use it as the final result.
     if (!body && res.status == 201) {
-      const location = res.headers.get("location") + "";
+      const location = res.headers.get("location");
 
       if (location) {
         return request(location, Object.assign(Object.assign({}, options), {
@@ -350,6 +350,36 @@ function randomString(strLength = 8, charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef
 }
 
 exports.randomString = randomString;
+
+function isBrowser() {
+  return typeof window === "object";
+}
+
+exports.isBrowser = isBrowser;
+/**
+ * Base64 to ASCII
+ */
+
+function atob(str) {
+  return isBrowser() ? // Browsers have global atob method
+  window.atob(str) : // "global." helps Webpack understand that it doesn't have to
+  // include the Buffer code in the bundle
+  global.Buffer.from(str, "base64").toString("ascii");
+}
+
+exports.atob = atob;
+/**
+ * ASCII to Base64
+ */
+
+function btoa(str) {
+  return isBrowser() ? // Browsers have global btoa method
+  window.btoa(str) : // "global." helps Webpack understand that it doesn't have to
+  // include the Buffer code in the bundle
+  global.Buffer.from(str).toString("base64");
+}
+
+exports.btoa = btoa;
 /**
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
@@ -357,9 +387,9 @@ exports.randomString = randomString;
  * @category Utility
  */
 
-function jwtDecode(token, env) {
+function jwtDecode(token) {
   const payload = token.split(".")[1];
-  return payload ? JSON.parse(env.atob(payload)) : null;
+  return payload ? JSON.parse(atob(payload)) : null;
 }
 
 exports.jwtDecode = jwtDecode;
@@ -371,7 +401,7 @@ exports.jwtDecode = jwtDecode;
  * @param env
  */
 
-function getAccessTokenExpiration(tokenResponse, env) {
+function getAccessTokenExpiration(tokenResponse) {
   const now = Math.floor(Date.now() / 1000); // Option 1 - using the expires_in property of the token response
 
   if (tokenResponse.expires_in) {
@@ -380,7 +410,7 @@ function getAccessTokenExpiration(tokenResponse, env) {
 
 
   if (tokenResponse.access_token) {
-    let tokenBody = jwtDecode(tokenResponse.access_token, env);
+    let tokenBody = jwtDecode(tokenResponse.access_token);
 
     if (tokenBody && tokenBody.exp) {
       return tokenBody.exp;

@@ -1,5 +1,8 @@
-"use strict"; // In Browsers we create an adapter, get the SMART api from it and build the
+"use strict";
+
+const util = require("../util"); // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
+
 
 const BrowserAdapter_1 = require("../adapters/BrowserAdapter");
 
@@ -39,6 +42,7 @@ const FHIR = {
     ready,
     authorize,
     init
-  }
+  },
+  util
 };
 module.exports = FHIR; // $lab:coverage:on$

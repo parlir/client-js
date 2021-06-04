@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import Client from "./Client";
+import { Client } from "./Client";
 import { getPath, byCodes, byCode } from "./lib";
 import { IncomingMessage } from "http";
 
@@ -63,7 +63,7 @@ declare namespace fhirclient {
          * Creates and returns a Client instance that can be used to query the
          * FHIR server.
          */
-        client(state: string | fhirclient.ClientOptions): Client;
+        client(state: string | SMARTState): Client;
     }
 
     interface BrowserFHIRSettings extends JsonObject {
@@ -386,7 +386,6 @@ declare namespace fhirclient {
          * An Unix timestamp (JSON numeric value representing the number of
          * seconds since 1970). This updated every time an access token is
          * received from the server.
-         * @deprecated
          */
         expiresAt?: number;
     }
@@ -395,13 +394,9 @@ declare namespace fhirclient {
      * Describes the state that should be passed to the Client constructor.
      * Everything except `serverUrl` is optional
      */
-    interface ClientOptions extends SMARTState {
+    interface ClientOptions {
 
-        /**
-         * If passed in, the client will call `storage.save()` and
-         * `storage.clear()` to persist it's instance
-         */
-        storage?: Storage
+        save?: (state: SMARTState) => any
 
         /**
          * Do we want to send cookies while making a request to the token

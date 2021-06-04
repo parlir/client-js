@@ -1,4 +1,4 @@
-import Client from "./Client";
+import { Client } from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
 export { SMART_KEY as KEY };
@@ -60,7 +60,7 @@ export declare function completeAuth(env: fhirclient.Adapter): Promise<Client>;
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
-export declare function buildTokenRequest(env: fhirclient.Adapter, code: string, state: fhirclient.ClientState): RequestInit;
+export declare function buildTokenRequest(code: string, state: fhirclient.SMARTState): RequestInit;
 /**
  * @param env
  * @param [onSuccess]
@@ -97,4 +97,4 @@ export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Clie
  * @param env The adapter
  * @param options The authorize options
  */
-export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client | never>;
+export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]): Promise<Client | never>;

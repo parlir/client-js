@@ -122,22 +122,6 @@ class BrowserAdapter {
     return AbortController;
   }
   /**
-   * ASCII string to Base64
-   */
-
-
-  atob(str) {
-    return window.atob(str);
-  }
-  /**
-   * Base64 to ASCII string
-   */
-
-
-  btoa(str) {
-    return window.btoa(str);
-  }
-  /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
    * the returned object is well known, the arguments to this function are not.
    * Those who override this method are free to require any environment-specific
@@ -151,7 +135,18 @@ class BrowserAdapter {
       ready: (...args) => smart_1.ready(this, ...args),
       authorize: options => smart_1.authorize(this, options),
       init: options => smart_1.init(this, options),
-      client: state => new Client_1.default(this, state),
+      client: state => {
+        if (typeof state === "string") {
+          state = {
+            serverUrl: state
+          };
+        }
+
+        const client = new Client_1.Client(state, {
+          refreshWithCredentials: this.options.refreshTokenWithCredentials
+        });
+        return client;
+      },
       options: this.options
     };
   }

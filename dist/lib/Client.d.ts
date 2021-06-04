@@ -1,4 +1,30 @@
 import { fhirclient } from "./types";
+export declare const msg: {
+    noPatientBeforeAuth: string;
+    noPatientFromOpenServer: string;
+    noPatientScopes: string;
+    noPatientAvailable: string;
+    noEncounterBeforeAuth: string;
+    noEncounterFromOpenServer: string;
+    noEncounterScopes: string;
+    noEncounterAvailable: string;
+    noUserBeforeAuth: string;
+    noUserFromOpenServer: string;
+    noUserScopes: string;
+    noUserAvailable: string;
+    requestNeedsArgs: string;
+    appRequiresSMART: string;
+    sessionExpiredAndNoRefresh: string;
+    sessionExpired: string;
+    autoRefreshFailed: string;
+    requestGot403: string;
+    cantRefreshNoToken: string;
+    cantRefreshNoTokenUri: string;
+    cantRefreshNoScopes: string;
+    gotNoAccessToken: string;
+    rejectedScopes: string;
+    noExpiresAt: string;
+};
 /**
  * This is a FHIR client that is returned to you from the `ready()` call of the
  * **SMART API**. You can also create it yourself if needed:
@@ -8,24 +34,18 @@ import { fhirclient } from "./types";
  * const client = FHIR.client("https://r4.smarthealthit.org");
  *
  * // SERVER
- * const client = smart(req, res).client("https://r4.smarthealthit.org");
+ * const client = new Client("https://r4.smarthealthit.org");
  * ```
  */
-export default class Client {
+export declare class Client {
     /**
      * The state of the client instance is an object with various properties.
      * It contains some details about how the client has been authorized and
-     * determines the behavior of the client instance. This state is persisted
-     * in `SessionStorage` in browsers or in request session on the servers.
+     * determines the behavior of the client instance. If a `storage` is
+     * passed to the constructor, this state will also be persisted there.
      */
-    readonly state: fhirclient.ClientState;
-    /**
-     * The adapter to use to connect to the current environment. Currently we have:
-     * - BrowserAdapter - for browsers
-     * - NodeAdapter - for Express or vanilla NodeJS servers
-     * - HapiAdapter - for HAPI NodeJS servers
-     */
-    readonly environment: fhirclient.Adapter;
+    readonly state: fhirclient.SMARTState;
+    readonly options: fhirclient.ClientOptions;
     /**
      * A SMART app is typically associated with a patient. This is a namespace
      * for the patient-related functionality of the client.
@@ -63,6 +83,7 @@ export default class Client {
         /**
          * This is the FhirJS Patient API. It will ONLY exist if the `Client`
          * instance is "connected" to FhirJS.
+         * @deprecated FhirJS integration will be removed in the next major release
          */
         api?: fhirclient.JsonObject;
     };
@@ -120,6 +141,7 @@ export default class Client {
      * The [FhirJS](https://github.com/FHIR/fhir.js/blob/master/README.md) API.
      * **NOTE:** This will only be available if `fhir.js` is used. Otherwise it
      * will be `undefined`.
+     * @deprecated FhirJS integration will be removed in the next major release
      */
     api: fhirclient.JsonObject | undefined;
     /**
@@ -128,10 +150,13 @@ export default class Client {
      */
     private _refreshTask;
     /**
-     * Validates the parameters, creates an instance and tries to connect it to
-     * FhirJS, if one is available globally.
+     * - Validates parameters
+     * - Creates an instance
+     * - If in browser, tries to connect it to FhirJS, if one is available globally
+     * - Initializes the `patient`, `user` and `encounter` APIs
+     * - Checks for rejected scopes
      */
-    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string);
+    constructor(state: fhirclient.SMARTState | string, options?: fhirclient.ClientOptions);
     /**
      * This method is used to make the "link" between the `fhirclient` and the
      * `fhir.js`, if one is available.
@@ -141,6 +166,20 @@ export default class Client {
      * is not global.
      */
     connect(fhirJs?: (options: fhirclient.JsonObject) => fhirclient.JsonObject): Client;
+    /**
+     * Checks if the given scope has been granted
+     */
+    hasGrantedScope(scope: string): boolean;
+    /**
+     * Checks if the given scope has been requested
+     */
+    hasRequestedScope(scope: string): boolean;
+    /**
+     * Compares the requested scopes (from `state.scope`) with the granted
+     * scopes (from `state.tokenResponse.scope`). Emits a warning if any of
+     * the requested scopes was not granted.
+     */
+    checkScopes(): void;
     /**
      * Returns the ID of the selected patient or null. You should have requested
      * "launch/patient" scope. Otherwise this will return null.
@@ -180,10 +219,15 @@ export default class Client {
      */
     getAuthorizationHeader(): string | null;
     /**
-     * Used internally to clear the state of the instance and the state in the
-     * associated storage.
+     * Calls the `save` callback option (if one is provided) to persist the instance
+     * - In browsers, clients returned by smart.ready or smart.init will persist in
+     *   sessionStorage
+     * - In servers, clients returned by smart.ready or smart.init will persist in
+     *   the request session (unless configured otherwise)
+     * - Direct Client instances will not persist anywhere, unless a `save` option
+     *   is passed to the constructor
      */
-    private _clearState;
+    saveState(): Promise<void>;
     /**
      * Creates a new resource in a server-assigned location
      * @see http://hl7.org/fhir/http.html#create
@@ -230,7 +274,7 @@ export default class Client {
      * request options or an abort signal.
      * @category Request
      */
-    refreshIfNeeded(requestOptions?: RequestInit): Promise<fhirclient.ClientState>;
+    refreshIfNeeded(requestOptions?: RequestInit): Promise<fhirclient.SMARTState>;
     /**
      * Use the refresh token to obtain new access token. If the refresh token is
      * expired (or this fails for any other reason) it will be deleted from the
@@ -244,7 +288,7 @@ export default class Client {
      * request options or an abort signal.
      * @category Request
      */
-    refresh(requestOptions?: RequestInit): Promise<fhirclient.ClientState>;
+    refresh(requestOptions?: RequestInit): Promise<fhirclient.SMARTState>;
     /**
      * Groups the observations by code. Returns a map that will look like:
      * ```js

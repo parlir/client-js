@@ -1,3 +1,4 @@
+import { fhirclient } from "../types";
 export default class Storage {
     /**
      * Gets the value at `key`. Returns a promise that will be resolved
@@ -15,4 +16,6 @@ export default class Storage {
      * did not exist).
      */
     unset(key: string): Promise<boolean>;
+    clear(): Promise<void>;
+    save(data: fhirclient.JsonObject): Promise<fhirclient.JsonObject>;
 }

@@ -16,7 +16,7 @@ import {
     isBrowser
 } from "./lib";
 
-import { SMART_KEY, patientCompartment, fhirVersions } from "./settings";
+import { patientCompartment, fhirVersions } from "./settings";
 import HttpError from "./HttpError";
 import { fhirclient } from "./types";
 
@@ -202,6 +202,38 @@ function resolveRefs(
     return task;
 }
 
+export const msg = {
+    noPatientBeforeAuth       : "Cannot get the ID of the selected patient before the app is authorized",
+    noPatientFromOpenServer   : "Cannot get the ID of the selected patient from an open FHIR server",
+    noPatientScopes           : "Unable to get the ID of the selected patient. Insufficient scopes. 'launch' or 'launch/patient' scope is needed.",
+    noPatientAvailable        : "The ID of the selected patient is not available. Please check if the server supports that.",
+
+    noEncounterBeforeAuth     : "Cannot get the ID of the selected encounter before the app is authorized",
+    noEncounterFromOpenServer : "Cannot get the ID of the selected encounter from an open FHIR server",
+    noEncounterScopes         : "Unable to get the ID of the selected encounter. Insufficient scopes. 'launch' or 'launch/encounter' scope is needed.",
+    noEncounterAvailable      : "The ID of the selected encounter is not available. Check if this server supports encounter context, and if the selected patient has any recorded encounters.",
+
+    noUserBeforeAuth          : "Cannot get the current user before the app is authorized",
+    noUserFromOpenServer      : "Cannot get the current user from an open FHIR server",
+    noUserScopes              : "Unable to get the current user. Insufficient scopes. 'openid fhirUser' or 'openid profile' scopes are needed.",
+    noUserAvailable           : "The current user is not available. Check if this server supports id tokens.",
+
+    requestNeedsArgs          : "request requires an url or request options as argument",
+    appRequiresSMART          : "This app cannot be accessed directly. Please launch it as SMART app!",
+    sessionExpiredAndNoRefresh: "Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.",
+    sessionExpired            : "Session expired! Please re-launch the app.",
+    autoRefreshFailed         : "Auto-refresh failed! Please re-launch the app.",
+    requestGot403             : "Permission denied! Please make sure that you have requested the proper scopes.",
+    cantRefreshNoToken        : "Unable to refresh. No refresh_token found.",
+    cantRefreshNoTokenUri     : "Unable to refresh. No tokenUri found.",
+    cantRefreshNoScopes       : "Unable to refresh. No offline_access or online_access scope found.",
+    gotNoAccessToken          : "No access token received",
+
+    rejectedScopes            : "The following scopes were requested but not granted by the auth server: \"%s\"",
+    noExpiresAt               : "Auto-refresh might fail! The client got an access token but can't reliably determine when it will expire. The client " +
+                                "does not know when that access token was issued. Please also provide an 'expiresAt' state parameter."
+};
+
 /**
  * This is a FHIR client that is returned to you from the `ready()` call of the
  * **SMART API**. You can also create it yourself if needed:
@@ -211,10 +243,10 @@ function resolveRefs(
  * const client = FHIR.client("https://r4.smarthealthit.org");
  *
  * // SERVER
- * const client = smart(req, res).client("https://r4.smarthealthit.org");
+ * const client = new Client("https://r4.smarthealthit.org");
  * ```
  */
-export default class Client
+export class Client
 {
     /**
      * The state of the client instance is an object with various properties.
@@ -224,15 +256,7 @@ export default class Client
      */
     readonly state: fhirclient.SMARTState;
 
-    /**
-     * If passed in, the client will call `storage.save()` and
-     * `storage.clear()` to persist it's instance state
-     */
-    protected storage?: fhirclient.Storage;
-
-    readonly options: {
-        refreshWithCredentials?: "omit" | "include" | "same-origin"
-    } = {
+    readonly options: fhirclient.ClientOptions = {
         refreshWithCredentials: "same-origin"
     };
 
@@ -362,27 +386,24 @@ export default class Client
     private _refreshTask: Promise<any> | null = null;
 
     /**
-     * Validates the parameters, creates an instance and tries to connect it to
-     * FhirJS, if one is available globally.
+     * - Validates parameters
+     * - Creates an instance
+     * - If in browser, tries to connect it to FhirJS, if one is available globally
+     * - Initializes the `patient`, `user` and `encounter` APIs
+     * - Checks for rejected scopes
      */
-    constructor(options: fhirclient.ClientOptions | string)
+    constructor(state: fhirclient.SMARTState | string, options: fhirclient.ClientOptions = {})
     {
-        if (typeof options == "string") {
-            options = { serverUrl: options } as fhirclient.ClientOptions
+        if (typeof state == "string") {
+            state = { serverUrl: state } as fhirclient.SMARTState
         }
-
-        const { storage, refreshWithCredentials, ...state } = options;
 
         // Valid serverUrl is required!
         if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
             throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
         }
 
-        if (storage) {
-            this.storage = storage;
-        }
-
-        this.options.refreshWithCredentials = refreshWithCredentials || "same-origin";
+        Object.assign(this.options, options);
 
         this.state = state;
 
@@ -439,6 +460,17 @@ export default class Client
             // @ts-ignore
             this.connect(window.fhir);
         }
+
+        this.checkScopes()
+
+        if (!this.state.expiresAt &&
+            this.state.tokenUri &&
+            this.state.tokenResponse?.access_token &&
+            this.state.tokenResponse?.refresh_token &&
+            (this.hasGrantedScope("offline_access") || this.hasGrantedScope("online_access"))
+        ) {
+            console.warn(msg.noExpiresAt)
+        }
     }
 
     /**
@@ -482,16 +514,42 @@ export default class Client
         return this;
     }
 
+    /**
+     * Checks if the given scope has been granted
+     */
     hasGrantedScope(scope: string): boolean
     {
         const scopes = String(this.state.tokenResponse?.scope || "").trim().split(/\s+/);
         return scopes.indexOf(scope) > -1;
     }
 
+    /**
+     * Checks if the given scope has been requested
+     */
     hasRequestedScope(scope: string): boolean
     {
         const scopes = String(this.state.scope || "").trim().split(/\s+/);
         return scopes.indexOf(scope) > -1;
+    }
+
+    /**
+     * Compares the requested scopes (from `state.scope`) with the granted
+     * scopes (from `state.tokenResponse.scope`). Emits a warning if any of
+     * the requested scopes was not granted.
+     */
+    checkScopes()
+    {
+        const requestedScopes = String(this.state.scope || "").trim().split(/\s+/).filter(Boolean);
+        const grantedScopes = String(this.state.tokenResponse?.scope || "").trim().split(/\s+/);
+        const rejectedScopes = []
+        for (const requested of requestedScopes) {
+            if (grantedScopes.indexOf(requested) === -1) {
+                rejectedScopes.push(requested)
+            }
+        }
+        if (rejectedScopes.length) {
+            console.warn(msg.rejectedScopes, rejectedScopes.join('", "'))
+        }
     }
 
     /**
@@ -502,36 +560,16 @@ export default class Client
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
-            // We have been authorized against this server but we don't know
-            // the patient. This should be a scope issue.
-            if (!tokenResponse.patient) {
-                if (!this.hasGrantedScope("launch") && !this.hasGrantedScope("launch/patient")) {
-                    debug("Unable to get the ID of the selected patient. Insufficient scopes granted.");
-                    if (this.hasRequestedScope("launch")) {
-                        debug("The authorization server did not grant the 'launch' scope you requested");
-                    } else {
-                        debug("To get the selected patient, try adding 'launch' to the scopes you are requesting");
-                    }
-                    if (this.hasRequestedScope("launch/patient")) {
-                        debug("The authorization server did not grant the 'launch/patient' scope you requested");
-                    } else {
-                        debug("To get the selected patient, try adding 'launch/patient' to the scopes you are requesting")
-                    }
-                }
-                else {
-                    // The server should have returned the patient!
-                    debug("The ID of the selected patient is not available. Please check if the server supports that.");
-                }
-                return null;
+            if (tokenResponse.patient) {
+                return tokenResponse.patient;
             }
-            return tokenResponse.patient;
-        }
-
-        if (this.state.authorizeUri) {
-            debug("You are trying to get the ID of the selected patient but the app is not authorized yet.");
-        }
-        else {
-            debug("Please don't use open fhir servers if you need to access launch context items like the selected patient.");
+            console.warn(
+                this.hasGrantedScope("launch") || this.hasGrantedScope("launch/patient") ?
+                msg.noPatientAvailable :
+                msg.noPatientScopes
+            );
+        } else {
+            console.warn(this.state.authorizeUri ? msg.noPatientBeforeAuth : msg.noPatientFromOpenServer);
         }
         return null;
     }
@@ -546,46 +584,16 @@ export default class Client
     {
         const tokenResponse = this.state.tokenResponse;
         if (tokenResponse) {
-            // We have been authorized against this server but we don't know
-            // the encounter. This should be a scope issue.
-            if (!tokenResponse.encounter) {
-
-                const requested = {
-                    launch: this.hasRequestedScope("launch"),
-                    launchEncounter: this.hasRequestedScope("launch/encounter")
-                };
-
-                const granted = {
-                    launch: this.hasGrantedScope("launch"),
-                    launchEncounter: this.hasGrantedScope("launch/encounter")
-                };
-
-                if (granted.launch || granted.launchEncounter) {
-                    debug("The ID of the selected encounter is not available. Please check if your server supports that, and that the selected patient has any recorded encounters.");
-                }
-                else {
-                    debug("Unable to get the ID of the selected encounter. Insufficient scopes granted.");
-                    if (requested.launch) {
-                        debug("The authorization server did not grant the 'launch' scope you requested");
-                    } else {
-                        debug("To get the selected encounter, try adding 'launch' to the scopes you are requesting");
-                    }
-                    if (requested.launchEncounter) {
-                        debug("The authorization server did not grant the 'launch/encounter' scope you requested");
-                    } else {
-                        debug("To get the selected encounter, try adding 'launch/encounter' to the scopes you are requesting");
-                    }
-                }
-                return null;
+            if (tokenResponse.encounter) {
+                return tokenResponse.encounter;
             }
-            return tokenResponse.encounter;
-        }
-
-        if (this.state.authorizeUri) {
-            debug("You are trying to get the ID of the selected encounter but the app is not authorized yet.");
-        }
-        else {
-            debug("Please don't use open fhir servers if you need to access launch context items like the selected encounter.");
+            console.warn(
+                this.hasGrantedScope("launch") || this.hasGrantedScope("launch/encounter") ?
+                msg.noEncounterAvailable :
+                msg.noEncounterScopes
+            );
+        } else {
+            console.warn(this.state.authorizeUri ? msg.noEncounterBeforeAuth : msg.noEncounterFromOpenServer);
         }
         return null;
     }
@@ -607,46 +615,14 @@ export default class Client
                 const hasOpenid   = this.hasGrantedScope("openid");
                 const hasProfile  = this.hasGrantedScope("profile");
                 const hasFhirUser = this.hasGrantedScope("fhirUser");
-
-                if (hasOpenid && (hasFhirUser || hasProfile)) {
-                    debug("The id_token is not available. Please check if your server supports that.");
-                }
-                else {
-                    if (!hasOpenid) {
-                        if (this.hasRequestedScope("openid")) {
-                            debug("The authorization server did not grant the 'openid' scope you requested");
-                        } else {
-                            debug("To get the current user, please add 'openid' to the scopes you are requesting");
-                        }
-                    }
-
-                    if (!hasFhirUser) {
-                        if (this.hasRequestedScope("fhirUser")) {
-                            debug("The authorization server did not grant the 'fhirUser' scope you requested");
-                        } else {
-                            debug("To get the current user, please add 'fhirUser' to the scopes you are requesting");
-                        }
-                    }
-
-                    if (!hasProfile) {
-                        if (this.hasRequestedScope("profile")) {
-                            debug("The authorization server did not grant the 'profile' scope you requested");
-                        } else {
-                            debug("To get the current user, please add 'profile' to the scopes you are requesting");
-                        }
-                    }
-                }
-
+                console.warn(hasOpenid && (hasFhirUser || hasProfile) ? msg.noUserAvailable : msg.noUserScopes);
                 return null;
             }
+
             return jwtDecode(idToken) as fhirclient.IDToken;
         }
-        if (this.state.authorizeUri) {
-            debug("You are trying to get the id_token but the app is not authorized yet.");
-        }
-        else {
-            debug("Please don't use open fhir servers if you need to access launch context items like the id_token.");
-        }
+
+        console.warn(this.state.authorizeUri ? msg.noUserBeforeAuth : msg.noUserFromOpenServer);
         return null;
     }
 
@@ -707,16 +683,19 @@ export default class Client
     }
 
     /**
-     * Used internally to clear the state of the instance and the state in the
-     * associated storage.
+     * Calls the `save` callback option (if one is provided) to persist the instance
+     * - In browsers, clients returned by smart.ready or smart.init will persist in
+     *   sessionStorage
+     * - In servers, clients returned by smart.ready or smart.init will persist in
+     *   the request session (unless configured otherwise)
+     * - Direct Client instances will not persist anywhere, unless a `save` option
+     *   is passed to the constructor
      */
-    async clearAuthorization() {
-        this.state.tokenResponse = {};
-        return this.storage?.clear()
-    }
-
-    private async _saveState() {
-        return this.storage?.save(this.state)
+    async saveState()
+    {
+        if (this.options.save) {
+            await this.options.save(this.state)
+        }
     }
 
     /**
@@ -805,7 +784,7 @@ export default class Client
     {
         const debugRequest = _debug.extend("client:request");
         if (!requestOptions) {
-            throw new Error("request requires an url or request options as argument");
+            throw new Error(msg.requestNeedsArgs);
         }
 
         // url -----------------------------------------------------------------
@@ -880,16 +859,17 @@ export default class Client
 
                     // !accessToken -> not authorized -> No session. Need to launch.
                     if (!this.getState("tokenResponse.access_token")) {
-                        error.message += "\nThis app cannot be accessed directly. Please launch it as SMART app!";
+                        error.message += "\n" + msg.appRequiresSMART;
                         throw error;
                     }
 
                     // auto-refresh not enabled and Session expired.
                     // Need to re-launch. Clear state to start over!
                     if (!options.useRefreshToken) {
-                        debugRequest("Your session has expired and the useRefreshToken option is set to false. Please re-launch the app.");
-                        await this.clearAuthorization();
-                        error.message += "\nSession expired! Please re-launch the app.";
+                        debugRequest(msg.sessionExpiredAndNoRefresh);
+                        this.state.tokenResponse = {};
+                        await this.saveState();
+                        error.message += "\n" + msg.sessionExpired;
                         throw error;
                     }
 
@@ -899,9 +879,10 @@ export default class Client
 
                     // otherwise -> auto-refresh failed. Session expired.
                     // Need to re-launch. Clear state to start over!
-                    debugRequest("Auto-refresh failed! Please re-launch the app.");
-                    await this.clearAuthorization();
-                    error.message += "\nSession expired! Please re-launch the app.";
+                    debugRequest(msg.autoRefreshFailed);
+                    this.state.tokenResponse = {};
+                    await this.saveState();
+                    error.message += "\n" + msg.sessionExpired;
                     throw error;
                 }
                 throw error;
@@ -910,7 +891,7 @@ export default class Client
             // Handle 403 ------------------------------------------------------
             .catch((error: HttpError) => {
                 if (error.status == 403) {
-                    debugRequest("Permission denied! Please make sure that you have requested the proper scopes.");
+                    debugRequest(msg.requestGot403);
                 }
                 throw error;
             })
@@ -1067,18 +1048,18 @@ export default class Client
 
         const refreshToken = this.state?.tokenResponse?.refresh_token;
         if (!refreshToken) {
-            return Promise.reject(new Error("Unable to refresh. No refresh_token found."));
+            return Promise.reject(new Error(msg.cantRefreshNoToken));
         }
 
         const tokenUri = this.state.tokenUri;
         if (!tokenUri) {
-            return Promise.reject(new Error("Unable to refresh. No tokenUri found."));
+            return Promise.reject(new Error(msg.cantRefreshNoTokenUri));
         }
 
         const hasOfflineAccess = this.hasGrantedScope("offline_access");
         const hasOnlineAccess  = this.hasGrantedScope("online_access");
         if (!hasOfflineAccess && !hasOnlineAccess) {
-            return Promise.reject(new Error("Unable to refresh. No offline_access or online_access scope found."));
+            return Promise.reject(new Error(msg.cantRefreshNoScopes));
         }    
 
         const refreshRequestOptions = {
@@ -1111,11 +1092,12 @@ export default class Client
             this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions)
             .then(data => {
                 if (!data.access_token) {
-                    throw new Error("No access token received");
+                    throw new Error(msg.gotNoAccessToken);
                 }
                 debugRefresh("Received new access token response %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 this.state.expiresAt = getAccessTokenExpiration(data);
+                this.checkScopes()
                 return this.state;
             })
             .catch((error: Error) => {
@@ -1127,7 +1109,7 @@ export default class Client
             })
             .finally(() => {
                 this._refreshTask = null;
-                return this._saveState()
+                return this.saveState()
                     .catch((e) => debugRefresh(e.message))
                     .then(() => this.state)
             });

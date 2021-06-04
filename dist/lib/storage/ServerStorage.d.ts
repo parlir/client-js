@@ -22,4 +22,6 @@ export default class ServerStorage {
      * did not exist).
      */
     unset(key: string): Promise<boolean>;
+    clear(): Promise<void>;
+    save(data: fhirclient.JsonObject): Promise<fhirclient.JsonObject>;
 }

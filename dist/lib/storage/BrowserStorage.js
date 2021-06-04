@@ -16,7 +16,7 @@ class Storage {
       return JSON.parse(value);
     }
 
-    return null;
+    return undefined;
   }
   /**
    * Sets the `value` on `key` and returns a promise that will be resolved
@@ -42,6 +42,18 @@ class Storage {
     }
 
     return false;
+  }
+
+  async clear() {
+    return sessionStorage.clear();
+  }
+
+  async save(data) {
+    for (const key of Object.keys(data)) {
+      await this.set(key, data[key]);
+    }
+
+    return data;
   }
 
 }

@@ -2,7 +2,9 @@
 // Note: the following 2 imports appear as unused but they affect how tsc is
 // generating type definitions!
 import { fhirclient } from "../types";
-import Client from "../Client";
+import { Client } from "../Client";
+
+import * as util from "../util"
 
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
@@ -37,7 +39,8 @@ const FHIR = {
         ready,
         authorize,
         init
-    }
+    },
+    util
 };
 
 export = FHIR;

@@ -65,6 +65,10 @@ export default class Window extends EventEmitter
         return Buffer.from(str, "base64").toString("ascii");
     }
 
+    btoa(str: string) {
+        return Buffer.from(str).toString("base64")
+    }
+
     addEventListener(event: string, handler: (event?:any) => any)
     {
         this.on(event, handler);

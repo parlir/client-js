@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import Client from "./Client";
+import { Client } from "./Client";
 import { getPath, byCodes, byCode } from "./lib";
 import { IncomingMessage } from "http";
 
@@ -63,7 +63,7 @@ declare namespace fhirclient {
          * Creates and returns a Client instance that can be used to query the
          * FHIR server.
          */
-        client(state: string | fhirclient.ClientState): Client;
+        client(state: string | SMARTState): Client;
     }
 
     interface BrowserFHIRSettings extends JsonObject {
@@ -150,16 +150,6 @@ declare namespace fhirclient {
         relative(path: string): string;
 
         /**
-         * Base64 to ASCII string
-         */
-        btoa(str: string): string;
-
-        /**
-         * ASCII string to Base64
-         */
-        atob(str: string): string;
-
-        /**
          * Returns a reference to the AbortController class
          */
         getAbortController(): typeof AbortController;
@@ -197,6 +187,10 @@ declare namespace fhirclient {
          * did not exist).
          */
         unset: (key: string) => Promise<boolean>;
+
+        clear: () => Promise<void>;
+
+        save: (data: JsonObject) => Promise<JsonObject>;
     }
 
     // =========================================================================
@@ -299,10 +293,11 @@ declare namespace fhirclient {
     }
 
     /**
-     * Describes the state that should be passed to the Client constructor.
-     * Everything except `serverUrl` is optional
+     * Properties persisted in storage and passed between the authorize and
+     * ready endpoints. The `authorize` function will write these to the
+     * storage and the `ready` function will read them from the storage.
      */
-    interface ClientState {
+    interface SMARTState {
         /**
          * The base URL of the Fhir server. The library should have detected it
          * at authorization time from request query params of from config options.
@@ -316,49 +311,26 @@ declare namespace fhirclient {
         clientId?: string;
 
         /**
-         * The URI to redirect to after successful authorization, as set in the
-         * configuration options.
-         */
-        redirectUri?: string;
-
-        /**
-         * The access scopes that you requested in your options (or an empty string).
-         * @see http://docs.smarthealthit.org/authorization/scopes-and-launch-context/
-         */
-        scope?: string;
-
-        /**
          * Your client secret if you have one (for confidential clients)
          */
         clientSecret?: string;
 
         /**
-         * The (encrypted) access token, in case you have completed the auth flow
-         * already.
-         */
-        // access_token?: string;
-
-        /**
-         * The response object received from the token endpoint while trying to
-         * exchange the auth code for an access token (if you have reached that point).
-         */
-        tokenResponse?: TokenResponse;
-
-        /**
          * The username for basic auth. If present, `password` must also be provided.
          */
-        username?: string;
+         username?: string;
+
+         /**
+          * The password for basic auth. If present, `username` must also be provided.
+          */
+         password?: string;
 
         /**
-         * The password for basic auth. If present, `username` must also be provided.
+         * If `true`, the app will be initialized in the specified [[target]].
+         * Otherwise, the app will be initialized in the window in which
+         * [[authorize]] was called.
          */
-        password?: string;
-
-        /**
-         * You could register new SMART client at this endpoint (if the server
-         * supports dynamic client registration)
-         */
-        registrationUri?: string;
+        completeInTarget?: boolean;
 
         /**
          * You must call this endpoint to ask for authorization code
@@ -372,16 +344,43 @@ declare namespace fhirclient {
         tokenUri?: string;
 
         /**
-         * The key under which this state is persisted in the storage
+         * The redirectUri from the authorize options
          */
-        key?: string;
+        redirectUri?: string;
 
         /**
-         * If `true`, the app requested to be initialized in the specified [[target]].
-         * Otherwise, the app requested to be initialized in the window in which
-         * [[authorize]] was called.
+         * The registrationUri (af any) as extracted from the capability statement
          */
-        completeInTarget?: boolean;
+        registrationUri?: string;
+
+        /**
+         * The access scopes that you requested in your authorize options
+         * @see http://docs.smarthealthit.org/authorization/scopes-and-launch-context/
+         */
+        scope?: string;
+
+        /**
+         * Do we want to send cookies while making a request to the token
+         * endpoint in order to obtain new access token using existing
+         * refresh token. In rare cases the auth server might require the
+         * client to send cookies along with those requests. In this case
+         * developers will have to change this before initializing the app
+         * like so:
+         * `FHIR.oauth2.settings.refreshTokenWithCredentials = "include";`
+         * or
+         * `FHIR.oauth2.settings.refreshTokenWithCredentials = "same-origin";`
+         * Can be one of:
+         * "include"     - always send cookies
+         * "same-origin" - only send cookies if we are on the same domain (default)
+         * "omit"        - do not send cookies
+         */
+        // refreshTokenWithCredentials?: "omit" | "include" | "same-origin";
+        
+        /**
+         * The response object received from the token endpoint while trying to
+         * exchange the auth code for an access token (if you have reached that point).
+         */
+        tokenResponse?: TokenResponse;
 
         /**
          * An Unix timestamp (JSON numeric value representing the number of
@@ -389,6 +388,32 @@ declare namespace fhirclient {
          * received from the server.
          */
         expiresAt?: number;
+    }
+
+    /**
+     * Describes the state that should be passed to the Client constructor.
+     * Everything except `serverUrl` is optional
+     */
+    interface ClientOptions {
+
+        save?: (state: SMARTState) => any
+
+        /**
+         * Do we want to send cookies while making a request to the token
+         * endpoint in order to obtain new access token using existing
+         * refresh token. In rare cases the auth server might require the
+         * client to send cookies along with those requests. In this case
+         * developers will have to change this before initializing the app
+         * like so:
+         * `FHIR.oauth2.settings.refreshTokenWithCredentials = "include";`
+         * or
+         * `FHIR.oauth2.settings.refreshTokenWithCredentials = "same-origin";`
+         * Can be one of:
+         * "include"     - always send cookies
+         * "same-origin" - only send cookies if we are on the same domain (default)
+         * "omit"        - do not send cookies
+         */
+        refreshWithCredentials?: "omit" | "include" | "same-origin";
     }
 
     /**
@@ -736,6 +761,7 @@ declare namespace fhirclient {
 
     interface IDToken {
         profile: string;
+        fhirUser?: string;
         aud: string;
         sub: string;
         iss: string;

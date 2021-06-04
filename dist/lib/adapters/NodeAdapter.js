@@ -101,26 +101,6 @@ class NodeAdapter {
     return this._storage;
   }
   /**
-   * Base64 to ASCII string
-   */
-
-
-  btoa(str) {
-    // The "global." makes Webpack understand that it doesn't have to
-    // include the Buffer code in the bundle
-    return global.Buffer.from(str).toString("base64");
-  }
-  /**
-   * ASCII string to Base64
-   */
-
-
-  atob(str) {
-    // The "global." makes Webpack understand that it doesn't have to
-    // include the Buffer code in the bundle
-    return global.Buffer.from(str, "base64").toString("ascii");
-  }
-  /**
    * Returns a reference to the AbortController constructor. In browsers,
    * AbortController will always be available as global (native or polyfilled)
    */
@@ -143,7 +123,15 @@ class NodeAdapter {
       ready: (...args) => smart_1.ready(this, ...args),
       authorize: options => smart_1.authorize(this, options),
       init: options => smart_1.init(this, options),
-      client: state => new Client_1.default(this, state),
+      client: state => {
+        if (typeof state === "string") {
+          state = {
+            serverUrl: state
+          };
+        }
+
+        return new Client_1.Client(state);
+      },
       options: this.options
     };
   }

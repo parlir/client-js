@@ -54,14 +54,6 @@ export default class BrowserAdapter implements fhirclient.Adapter {
         prototype: AbortController;
     };
     /**
-     * ASCII string to Base64
-     */
-    atob(str: string): string;
-    /**
-     * Base64 to ASCII string
-     */
-    btoa(str: string): string;
-    /**
      * Creates and returns adapter-aware SMART api. Not that while the shape of
      * the returned object is well known, the arguments to this function are not.
      * Those who override this method are free to require any environment-specific

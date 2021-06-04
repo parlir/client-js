@@ -77,7 +77,7 @@
 <span class="hljs-keyword">const</span> client = FHIR.client(<span class="hljs-string">"https://r4.smarthealthit.org"</span>);
 
 <span class="hljs-comment">// SERVER</span>
-<span class="hljs-keyword">const</span> client = smart(req, res).client(<span class="hljs-string">"https://r4.smarthealthit.org"</span>);</code></pre>
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> Client(<span class="hljs-string">"https://r4.smarthealthit.org"</span>);</code></pre>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
@@ -104,7 +104,6 @@
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_client_.client.html#_refreshtask" class="tsd-kind-icon">_refresh<wbr>Task</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_client_.client.html#api" class="tsd-kind-icon">api</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_client_.client.html#encounter" class="tsd-kind-icon">encounter</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_client_.client.html#environment" class="tsd-kind-icon">environment</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_client_.client.html#patient" class="tsd-kind-icon">patient</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_client_.client.html#state" class="tsd-kind-icon">state</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_client_.client.html#user" class="tsd-kind-icon">user</a></li>
@@ -117,7 +116,7 @@
 						<section class="tsd-index-section ">
 							<h3>Other Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_client_.client.html#_clearstate" class="tsd-kind-icon">_clear<wbr>State</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#checkscopes" class="tsd-kind-icon">check<wbr>Scopes</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#connect" class="tsd-kind-icon">connect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#getauthorizationheader" class="tsd-kind-icon">get<wbr>Authorization<wbr>Header</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#getencounterid" class="tsd-kind-icon">get<wbr>Encounter<wbr>Id</a></li>
@@ -129,6 +128,9 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#getstate" class="tsd-kind-icon">get<wbr>State</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#getuserid" class="tsd-kind-icon">get<wbr>User<wbr>Id</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#getusertype" class="tsd-kind-icon">get<wbr>User<wbr>Type</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#hasgrantedscope" class="tsd-kind-icon">has<wbr>Granted<wbr>Scope</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#hasrequestedscope" class="tsd-kind-icon">has<wbr>Requested<wbr>Scope</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#savestate" class="tsd-kind-icon">save<wbr>State</a></li>
 							</ul>
 							<h3>Request Methods</h3>
 							<ul class="tsd-index-list">
@@ -146,6 +148,12 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_client_.client.html#getpath" class="tsd-kind-icon">get<wbr>Path</a></li>
 							</ul>
 						</section>
+						<section class="tsd-index-section ">
+							<h3>Object literals</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-object-literal tsd-parent-kind-class"><a href="_client_.client.html#options" class="tsd-kind-icon">options</a></li>
+							</ul>
+						</section>
 					</div>
 				</section>
 			</section>
@@ -155,28 +163,33 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Client<span class="tsd-signature-symbol">(</span>environment<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.adapter.html" class="tsd-signature-type">Adapter</a>, state<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_client_.client.html" class="tsd-signature-type">Client</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Client<span class="tsd-signature-symbol">(</span>state<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.clientoptions.html" class="tsd-signature-type">ClientOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_client_.client.html" class="tsd-signature-type">Client</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L356">src/Client.ts:356</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L386">src/Client.ts:386</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Validates the parameters, creates an instance and tries to connect it to
-									FhirJS, if one is available globally.</p>
+									<ul>
+										<li>Validates parameters</li>
+										<li>Creates an instance</li>
+										<li>If in browser, tries to connect it to FhirJS, if one is available globally</li>
+										<li>Initializes the <code>patient</code>, <code>user</code> and <code>encounter</code> APIs</li>
+										<li>Checks for rejected scopes</li>
+									</ul>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>environment: <a href="../interfaces/_types_d_.fhirclient.adapter.html" class="tsd-signature-type">Adapter</a></h5>
+									<h5>state: <a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>state: <a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_types_d_.fhirclient.clientoptions.html" class="tsd-signature-type">ClientOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="_client_.client.html" class="tsd-signature-type">Client</a></h4>
@@ -189,10 +202,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
 					<a name="_refreshtask" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _refresh<wbr>Task</h3>
-					<div class="tsd-signature tsd-kind-icon">_refresh<wbr>Task<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+					<div class="tsd-signature tsd-kind-icon">_refresh<wbr>Task<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L356">src/Client.ts:356</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L386">src/Client.ts:386</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -212,7 +225,7 @@
 					<div class="tsd-signature tsd-kind-icon">api<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L350">src/Client.ts:350</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L380">src/Client.ts:380</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -221,6 +234,11 @@
 								<strong>NOTE:</strong> This will only be available if <code>fhir.js</code> is used. Otherwise it
 							will be <code>undefined</code>.</p>
 						</div>
+						<dl class="tsd-comment-tags">
+							<dt>deprecated</dt>
+							<dd><p>FhirJS integration will be removed in the next major release</p>
+							</dd>
+						</dl>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
@@ -229,7 +247,7 @@
 					<div class="tsd-signature tsd-kind-icon">encounter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L288">src/Client.ts:288</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L317">src/Client.ts:317</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -269,32 +287,12 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="environment" class="tsd-anchor"></a>
-					<h3>environment</h3>
-					<div class="tsd-signature tsd-kind-icon">environment<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.adapter.html" class="tsd-signature-type">Adapter</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L233">src/Client.ts:233</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The adapter to use to connect to the current environment. Currently we have:</p>
-							<ul>
-								<li>BrowserAdapter - for browsers</li>
-								<li>NodeAdapter - for Express or vanilla NodeJS servers</li>
-								<li>HapiAdapter - for HAPI NodeJS servers</li>
-							</ul>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="patient" class="tsd-anchor"></a>
 					<h3>patient</h3>
 					<div class="tsd-signature tsd-kind-icon">patient<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L239">src/Client.ts:239</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L267">src/Client.ts:267</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -313,6 +311,11 @@
 										<p>This is the FhirJS Patient API. It will ONLY exist if the <code>Client</code>
 										instance is &quot;connected&quot; to FhirJS.</p>
 									</div>
+									<dl class="tsd-comment-tags">
+										<dt>deprecated</dt>
+										<dd><p>FhirJS integration will be removed in the next major release</p>
+										</dd>
+									</dl>
 								</div>
 							</li>
 							<li class="tsd-parameter">
@@ -387,18 +390,18 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="state" class="tsd-anchor"></a>
 					<h3>state</h3>
-					<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a></div>
+					<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L225">src/Client.ts:225</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L257">src/Client.ts:257</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>The state of the client instance is an object with various properties.
 								It contains some details about how the client has been authorized and
-								determines the behavior of the client instance. This state is persisted
-							in <code>SessionStorage</code> in browsers or in request session on the servers.</p>
+								determines the behavior of the client instance. If a <code>storage</code> is
+							passed to the constructor, this state will also be persisted there.</p>
 						</div>
 					</div>
 				</section>
@@ -408,7 +411,7 @@
 					<div class="tsd-signature tsd-kind-icon">user<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L309">src/Client.ts:309</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L338">src/Client.ts:338</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -484,7 +487,7 @@
 					<div class="tsd-signature tsd-kind-icon">units<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;units</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1124">src/Client.ts:1124</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1175">src/Client.ts:1175</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -501,7 +504,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L47">src/lib.ts:47</a></li>
+												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/lib.ts#L47">src/lib.ts:47</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -522,7 +525,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L28">src/lib.ts:28</a></li>
+												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/lib.ts#L28">src/lib.ts:28</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -551,7 +554,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/lib.ts#L39">src/lib.ts:39</a></li>
+												<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/lib.ts#L39">src/lib.ts:39</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -577,26 +580,27 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Other Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
-					<a name="_clearstate" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _clear<wbr>State</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">_clear<wbr>State<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="checkscopes" class="tsd-anchor"></a>
+					<h3>check<wbr>Scopes</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">check<wbr>Scopes<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L637">src/Client.ts:637</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L540">src/Client.ts:540</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Used internally to clear the state of the instance and the state in the
-									associated storage.</p>
+									<p>Compares the requested scopes (from <code>state.scope</code>) with the granted
+										scopes (from <code>state.tokenResponse.scope</code>). Emits a warning if any of
+									the requested scopes was not granted.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -610,7 +614,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L435">src/Client.ts:435</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L484">src/Client.ts:484</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -643,7 +647,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L620">src/Client.ts:620</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L672">src/Client.ts:672</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -669,7 +673,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L506">src/Client.ts:506</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L583">src/Client.ts:583</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -697,7 +701,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1175">src/Client.ts:1175</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1226">src/Client.ts:1226</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -725,7 +729,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L582">src/Client.ts:582</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L634">src/Client.ts:634</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -752,7 +756,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1163">src/Client.ts:1163</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1214">src/Client.ts:1214</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -775,7 +779,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L539">src/Client.ts:539</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L606">src/Client.ts:606</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -802,7 +806,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L472">src/Client.ts:472</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L559">src/Client.ts:559</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -828,7 +832,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1155">src/Client.ts:1155</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1206">src/Client.ts:1206</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -865,7 +869,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L594">src/Client.ts:594</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L646">src/Client.ts:646</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -890,7 +894,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L607">src/Client.ts:607</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L659">src/Client.ts:659</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -903,6 +907,92 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 								<span class="tsd-signature-symbol"> | </span>
 								<span class="tsd-signature-type">null</span>
 							</h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="hasgrantedscope" class="tsd-anchor"></a>
+					<h3>has<wbr>Granted<wbr>Scope</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">has<wbr>Granted<wbr>Scope<span class="tsd-signature-symbol">(</span>scope<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L520">src/Client.ts:520</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Checks if the given scope has been granted</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>scope: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="hasrequestedscope" class="tsd-anchor"></a>
+					<h3>has<wbr>Requested<wbr>Scope</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">has<wbr>Requested<wbr>Scope<span class="tsd-signature-symbol">(</span>scope<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L529">src/Client.ts:529</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Checks if the given scope has been requested</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>scope: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="savestate" class="tsd-anchor"></a>
+					<h3>save<wbr>State</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">save<wbr>State<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L694">src/Client.ts:694</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Calls the <code>save</code> callback option (if one is provided) to persist the instance</p>
+									<ul>
+										<li>In browsers, clients returned by smart.ready or smart.init will persist in
+										sessionStorage</li>
+										<li>In servers, clients returned by smart.ready or smart.init will persist in
+										the request session (unless configured otherwise)</li>
+										<li>Direct Client instances will not persist anywhere, unless a <code>save</code> option
+										is passed to the constructor</li>
+									</ul>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -919,7 +1009,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L655">src/Client.ts:655</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L709">src/Client.ts:709</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -967,7 +1057,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L709">src/Client.ts:709</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L763">src/Client.ts:763</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1011,13 +1101,13 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 					<a name="refresh" class="tsd-anchor"></a>
 					<h3>refresh</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">refresh<span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">refresh<span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L988">src/Client.ts:988</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1044">src/Client.ts:1044</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1040,7 +1130,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1048,13 +1138,13 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 					<a name="refreshifneeded" class="tsd-anchor"></a>
 					<h3>refresh<wbr>IfNeeded</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">refresh<wbr>IfNeeded<span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">refresh<wbr>IfNeeded<span class="tsd-signature-symbol">(</span>requestOptions<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L962">src/Client.ts:962</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1018">src/Client.ts:1018</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1075,7 +1165,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.clientstate.html" class="tsd-signature-type">ClientState</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_d_.fhirclient.smartstate.html" class="tsd-signature-type">SMARTState</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1089,7 +1179,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L725">src/Client.ts:725</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L779">src/Client.ts:779</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1136,7 +1226,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L682">src/Client.ts:682</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L736">src/Client.ts:736</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1192,7 +1282,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1088">src/Client.ts:1088</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1139">src/Client.ts:1139</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1242,7 +1332,7 @@ client.getState(<span class="hljs-string">"tokenResponse.patient"</span>); <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1113">src/Client.ts:1113</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1164">src/Client.ts:1164</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1311,7 +1401,7 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/dfb95c5/src/Client.ts#L1139">src/Client.ts:1139</a></li>
+									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L1190">src/Client.ts:1190</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1349,6 +1439,29 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<p>Whatever is found in the path or undefined</p>
 						</li>
 					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Object literals</h2>
+				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-class">
+					<a name="options" class="tsd-anchor"></a>
+					<h3>options</h3>
+					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L259">src/Client.ts:259</a></li>
+						</ul>
+					</aside>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
+						<a name="options.refreshwithcredentials" class="tsd-anchor"></a>
+						<h3>refresh<wbr>With<wbr>Credentials</h3>
+						<div class="tsd-signature tsd-kind-icon">refresh<wbr>With<wbr>Credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"same-origin"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;same-origin&quot;</span></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/Client.ts#L260">src/Client.ts:260</a></li>
+							</ul>
+						</aside>
+					</section>
 				</section>
 			</section>
 		</div>
@@ -1389,6 +1502,9 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 						<a href="../modules/_lib_.html">&quot;lib&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
+						<a href="../modules/_middleware_.html">&quot;middleware&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_settings_.html">&quot;settings&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -1399,9 +1515,6 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_storage_serverstorage_.html">&quot;storage/<wbr>Server<wbr>Storage&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_strings_.html">&quot;strings&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_types_d_.html">&quot;types.d&quot;</a>
@@ -1428,9 +1541,6 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 								<a href="_client_.client.html#encounter" class="tsd-kind-icon">encounter</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_client_.client.html#environment" class="tsd-kind-icon">environment</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_client_.client.html#patient" class="tsd-kind-icon">patient</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
@@ -1442,14 +1552,14 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_client_.client.html#user" class="tsd-kind-icon">user</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
-								<a href="_client_.client.html#_clearstate" class="tsd-kind-icon">_clear<wbr>State</a>
-							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_client_.client.html#bycode" class="tsd-kind-icon">by<wbr>Code</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_client_.client.html#bycodes" class="tsd-kind-icon">by<wbr>Codes</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_client_.client.html#checkscopes" class="tsd-kind-icon">check<wbr>Scopes</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_client_.client.html#connect" class="tsd-kind-icon">connect</a>
@@ -1494,6 +1604,12 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 								<a href="_client_.client.html#getusertype" class="tsd-kind-icon">get<wbr>User<wbr>Type</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_client_.client.html#hasgrantedscope" class="tsd-kind-icon">has<wbr>Granted<wbr>Scope</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_client_.client.html#hasrequestedscope" class="tsd-kind-icon">has<wbr>Requested<wbr>Scope</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_client_.client.html#refresh" class="tsd-kind-icon">refresh</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -1502,8 +1618,14 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="_client_.client.html#request-1" class="tsd-kind-icon">request</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_client_.client.html#savestate" class="tsd-kind-icon">save<wbr>State</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
 								<a href="_client_.client.html#update" class="tsd-kind-icon">update</a>
+							</li>
+							<li class=" tsd-kind-object-literal tsd-parent-kind-class">
+								<a href="_client_.client.html#options" class="tsd-kind-icon">options</a>
 							</li>
 						</ul>
 					</li>
@@ -1526,6 +1648,9 @@ filter(<span class="hljs-string">"laboratory"</span>, <span class="hljs-string">
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-private tsd-is-not-exported">
 						<a href="../modules/_client_.html#resolverefs" class="tsd-kind-icon">resolve<wbr>Refs</a>
+					</li>
+					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module">
+						<a href="../modules/_client_.html#msg" class="tsd-kind-icon">msg</a>
 					</li>
 				</ul>
 			</nav>

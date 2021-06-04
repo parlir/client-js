@@ -1,6 +1,6 @@
 import { fhirclient } from "../types";
 import { ready, authorize, init } from "../smart";
-import Client from "../Client";
+import { Client } from "../Client";
 import ServerStorage from "../storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import { IncomingMessage, ServerResponse } from "http";
@@ -127,7 +127,7 @@ export default class NodeAdapter implements fhirclient.Adapter
             ready    : (...args: any[]) => ready(this, ...args),
             authorize: options => authorize(this, options),
             init     : options => init(this, options),
-            client   : (state: string | fhirclient.ClientOptions) => {
+            client   : (state: string | fhirclient.SMARTState) => {
                 if (typeof state === "string") {
                     state = { serverUrl: state }
                 }

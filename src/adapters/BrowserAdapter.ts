@@ -1,9 +1,7 @@
 import { ready, authorize, init } from "../smart";
-import Client from "../Client";
+import { Client } from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
 import { fhirclient } from "../types";
-import { SMART_KEY } from "../settings"
-import NamespacedStorage from "../storage/NamespacedStorage";
 
 /**
  * Browser Adapter
@@ -139,19 +137,14 @@ export default class BrowserAdapter implements fhirclient.Adapter
             ready    : (...args: any[]) => ready(this, ...args),
             authorize: options => authorize(this, options),
             init     : options => init(this, options),
-            client   : (state: string | fhirclient.ClientOptions) => {
+            client   : (state: string | fhirclient.SMARTState) => {
                 if (typeof state === "string") {
-                    state = {
-                        serverUrl: state,
-                        refreshWithCredentials: this.options.refreshTokenWithCredentials
-                    }
-                } else {
-                    state = {
-                        refreshWithCredentials: this.options.refreshTokenWithCredentials,
-                        ...state
-                    }
+                    state = { serverUrl: state }
                 }
-                return new Client(state)
+                const client = new Client(state, {
+                    refreshWithCredentials: this.options.refreshTokenWithCredentials
+                })
+                return client
             },
             options  : this.options
         };

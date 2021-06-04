@@ -1,11 +1,12 @@
 import { fhirclient } from "../types";
-import Client from "../Client";
+import { Client } from "../Client";
+import * as util from "../util";
 declare const FHIR: {
     AbortController: {
         new (): AbortController;
         prototype: AbortController;
     };
-    client: (state: string | fhirclient.ClientState) => Client;
+    client: (state: string | fhirclient.SMARTState) => Client;
     oauth2: {
         settings: fhirclient.BrowserFHIRSettings;
         ready: {
@@ -15,5 +16,6 @@ declare const FHIR: {
         authorize: (options: fhirclient.AuthorizeParams) => Promise<string | void>;
         init: (options: fhirclient.AuthorizeParams) => Promise<Client>;
     };
+    util: typeof util;
 };
 export = FHIR;

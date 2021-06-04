@@ -11,10 +11,9 @@ import {
     isBrowser,
     btoa
 } from "./lib";
-import Client from "./Client";
+import { Client } from "./Client";
 import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
-import NamespacedStorage from "./storage/NamespacedStorage";
 
 
 const debug = _debug.extend("oauth2");
@@ -627,7 +626,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         await Storage.set(SMART_KEY, key);
     }
 
-    const client = new Client({ ...state, storage: new NamespacedStorage(Storage, key) });
+    const client = new Client(state, { save: (state) => Storage.set(key + "", state)});
     debug("Created client instance: %O", client);
     return client;
 }
@@ -667,7 +666,7 @@ export function buildTokenRequest(code: string, state: fhirclient.SMARTState): R
     // Basic authentication is required, where the username is the app’s
     // client_id and the password is the app’s client_secret (see example).
     if (clientSecret) {
-        requestOptions.headers.Authorization = "Basic " + btoa(
+        requestOptions.headers.authorization = "Basic " + btoa(
             clientId + ":" + clientSecret
         );
         debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
@@ -726,7 +725,7 @@ export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client
  * @param env The adapter
  * @param options The authorize options
  */
-export async function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client|never>
+export async function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]): Promise<Client|never>
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
@@ -744,7 +743,9 @@ export async function init(env: fhirclient.Adapter, options: fhirclient.Authoriz
     const key     = state || await storage.get(SMART_KEY);
     const cached  = await storage.get(key);
     if (cached) {
-        return new Client({ ...cached, storage: new NamespacedStorage(storage, key) });
+        return new Client(cached, {
+            save: (state: fhirclient.SMARTState) => storage.set(key, state)
+        })
     }
 
     // Otherwise try to launch

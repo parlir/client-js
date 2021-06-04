@@ -47,6 +47,18 @@ class ServerStorage {
     return false;
   }
 
+  async clear() {
+    this.request.session = {};
+  }
+
+  async save(data) {
+    for (const key of Object.keys(data)) {
+      await this.set(key, data[key]);
+    }
+
+    return data;
+  }
+
 }
 
 exports.default = ServerStorage;

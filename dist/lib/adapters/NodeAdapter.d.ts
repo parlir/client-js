@@ -46,14 +46,6 @@ export default class NodeAdapter implements fhirclient.Adapter {
      */
     getStorage(): fhirclient.Storage;
     /**
-     * Base64 to ASCII string
-     */
-    btoa(str: string): string;
-    /**
-     * ASCII string to Base64
-     */
-    atob(str: string): string;
-    /**
      * Returns a reference to the AbortController constructor. In browsers,
      * AbortController will always be available as global (native or polyfilled)
      */

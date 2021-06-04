@@ -99,17 +99,15 @@ client.request("Patient", {
 **Resolve References**
 ```js
 // Resolves with augmented Encounter or rejects with an Error
-client.request(
-    "Encounter/518a522a-4b10-47db-9daf-53b726d32607",
+client.request("Encounter/518a522a-4b10-47db-9daf-53b726d32607", {
     resolveReferences: [ "serviceProvider" ]
-);
+});
 ```
 
 **Extracting multiple related resources from single Observation:**
 ```js
 // Resolves with Object (augmented Observation) or rejects with an Error
-client.request(
-    "Observation/smart-691-bmi",
+client.request("Observation/smart-691-bmi", {
     resolveReferences: [
         "context",                 // The Encounter
         "context.serviceProvider", // The Organization (hospital)
@@ -117,7 +115,7 @@ client.request(
         "subject",                 // The Patient
         "identifier..assigner"     // All identifier assigners
     ]
-);
+});
 ```
 
 **Getting the references as separate object**
@@ -131,11 +129,10 @@ the promise will be resolved with an object having two properties:
 
 ```js
 // Resolves with Object ({ data, references }) or rejects with an Error
-client.request(
-    "Encounter/518a522a-4b10-47db-9daf-53b726d32607",
+client.request("Encounter/518a522a-4b10-47db-9daf-53b726d32607", {
     resolveReferences: [ "serviceProvider" ],
     graph: false
-);
+});
 ```
 
 ### client.create(resource: Object, requestOptions = {}) `Promise<Object>`

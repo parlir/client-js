@@ -19,17 +19,12 @@ Object.defineProperty(exports, "KEY", {
   }
 });
 const debug = lib_1.debug.extend("oauth2");
-
-function isBrowser() {
-  return typeof window === "object";
-}
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
  * browser) because it might have to be re-used by the client
  * @param baseUrl The base URL of the FHIR server
  */
-
 
 function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
@@ -213,6 +208,7 @@ async function authorize(env, params = {}) {
     patientId,
     encounterId,
     client_id,
+    noRedirect,
     target,
     width,
     height
@@ -222,7 +218,6 @@ async function authorize(env, params = {}) {
     launch,
     fhirServiceUrl,
     redirectUri,
-    noRedirect,
     scope = "",
     clientId,
     completeInTarget
@@ -262,7 +257,7 @@ async function authorize(env, params = {}) {
     scope += " launch";
   }
 
-  if (isBrowser()) {
+  if (lib_1.isBrowser()) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp();
 
@@ -291,10 +286,10 @@ async function authorize(env, params = {}) {
     serverUrl,
     clientSecret,
     tokenResponse: {},
-    key: stateKey,
+    // key: stateKey,
     completeInTarget
   };
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
+  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
   if (fullSessionStorageSupport) {
     await storage.set(settings_1.SMART_KEY, stateKey);
@@ -358,7 +353,7 @@ async function authorize(env, params = {}) {
     return redirectUrl;
   }
 
-  if (target && isBrowser()) {
+  if (target && lib_1.isBrowser()) {
     let win;
     win = await lib_1.getTargetWindow(target, width, height);
 
@@ -482,10 +477,10 @@ async function completeAuth(env) {
 
 
   let state = await Storage.get(key);
-  const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
   // complete, send the location back to our opener and exit.
 
-  if (isBrowser() && state && !state.completeInTarget) {
+  if (lib_1.isBrowser() && state && !state.completeInTarget) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
     // be called again. In rare cases the opener or parent might also be
@@ -524,7 +519,7 @@ async function completeAuth(env) {
 
   const hasState = params.has("state");
 
-  if (isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
+  if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
     // `code` is the flag that tell us to request an access token.
     // We have to remove it, otherwise the page will authorize on
     // every load!
@@ -571,7 +566,7 @@ async function completeAuth(env) {
     }
 
     debug("Preparing to exchange the code for access token...");
-    const requestOptions = buildTokenRequest(env, code, state);
+    const requestOptions = buildTokenRequest(code, state);
     debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
     // includes an access token or a message indicating that the
     // authorization request has been denied.
@@ -584,7 +579,7 @@ async function completeAuth(env) {
     } // Now we need to determine when is this authorization going to expire
 
 
-    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse, env); // save the tokenResponse so that we don't have to re-authorize on
+    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
     // every page reload
 
     state = Object.assign(Object.assign({}, state), {
@@ -600,7 +595,9 @@ async function completeAuth(env) {
     await Storage.set(settings_1.SMART_KEY, key);
   }
 
-  const client = new Client_1.default(env, state);
+  const client = new Client_1.Client(state, {
+    save: state => Storage.set(key + "", state)
+  });
   debug("Created client instance: %O", client);
   return client;
 }
@@ -611,7 +608,7 @@ exports.completeAuth = completeAuth;
  * creates it's configuration and returns it in a Promise.
  */
 
-function buildTokenRequest(env, code, state) {
+function buildTokenRequest(code, state) {
   const {
     redirectUri,
     clientSecret,
@@ -646,7 +643,7 @@ function buildTokenRequest(env, code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.Authorization = "Basic " + env.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -726,7 +723,9 @@ async function init(env, options) {
   const cached = await storage.get(key);
 
   if (cached) {
-    return new Client_1.default(env, cached);
+    return new Client_1.Client(cached, {
+      save: state => storage.set(key, state)
+    });
   } // Otherwise try to launch
 
 

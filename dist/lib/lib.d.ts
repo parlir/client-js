@@ -89,13 +89,22 @@ export declare function absolute(path: string, baseUrl?: string): string;
  * @category Utility
  */
 export declare function randomString(strLength?: number, charSet?: string): string;
+export declare function isBrowser(): boolean;
+/**
+ * Base64 to ASCII
+ */
+export declare function atob(str: string): string;
+/**
+ * ASCII to Base64
+ */
+export declare function btoa(str: string): string;
 /**
  * Decodes a JWT token and returns it's body.
  * @param token The token to read
  * @param env An `Adapter` or any other object that has an `atob` method
  * @category Utility
  */
-export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirclient.JsonObject | null;
+export declare function jwtDecode(token: string): fhirclient.JsonObject | null;
 /**
  * Given a token response, computes and returns the expiresAt timestamp.
  * Note that this should only be used immediately after an access token is
@@ -103,7 +112,7 @@ export declare function jwtDecode(token: string, env: fhirclient.Adapter): fhirc
  * @param tokenResponse
  * @param env
  */
-export declare function getAccessTokenExpiration(tokenResponse: fhirclient.TokenResponse, env: fhirclient.Adapter): number;
+export declare function getAccessTokenExpiration(tokenResponse: fhirclient.TokenResponse): number;
 /**
  * Groups the observations by code. Returns a map that will look like:
  * ```js
