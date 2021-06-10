@@ -5,8 +5,8 @@ import { fetch }           from "cross-fetch"
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill"
 import mockDebug           from "./mocks/mockDebug"
 import mockServer          from "./mocks/mockServer"
-import { Client, msg }     from "../src/Client"
-import { KEY }             from "../src/smart"
+import { Client, msg }     from "../src/lib/Client"
+import { KEY }             from "../src/lib/smart"
 import { fhirclient }      from "../src/types"
 import { btoa }            from "../src/lib"
 import MemoryStorage       from "./mocks/MemoryStorage"
@@ -2695,6 +2695,7 @@ describe("FHIR.client", () => {
                 serverUrl: mockUrl,
                 tokenUri: mockUrl,
                 scope: "a offline_access",
+                expiresAt: Date.now() + 300,
                 tokenResponse: {
                     "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiZWIzMjcxZTEtYWUxYi00NjQ0LTkzMzItNDFlMzJjODI5NDg2IiwiZW5jb3VudGVyIjoiMzFiMThhYTAtMGRhNy00NDYwLTk2MzMtMDRhZjQxNDY2ZDc2In0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1ODcxMDk2NCwiZXhwIjoxNTkwMjQ2OTY1fQ.f5yNY-yKKDe0a59_eFgp6s0rHSgPLXgmAWDPz_hEUgs",
                     "expires_in"   : 1,

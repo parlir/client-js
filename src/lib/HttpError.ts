@@ -1,4 +1,4 @@
-import { fhirclient } from "./types";
+import { fhirclient } from "../types";
 
 
 export default class HttpError extends Error
@@ -20,6 +20,8 @@ export default class HttpError extends Error
      */
     statusText: string;
 
+    body?: any;
+
     /**
      * Reference to the HTTP Response object
      */
@@ -40,21 +42,21 @@ export default class HttpError extends Error
             try {
                 const type = this.response.headers.get("Content-Type") || "text/plain";
                 if (type.match(/\bjson\b/i)) {
-                    let body = await this.response.json();
-                    if (body.error) {
-                        this.message += "\n" + body.error;
-                        if (body.error_description) {
-                            this.message += ": " + body.error_description;
+                    this.body = await this.response.json();
+                    if (this.body.error) {
+                        this.message += "\n" + this.body.error;
+                        if (this.body.error_description) {
+                            this.message += ": " + this.body.error_description;
                         }
                     }
                     else {
-                        this.message += "\n\n" + JSON.stringify(body, null, 4);
+                        this.message += "\n\n" + JSON.stringify(this.body, null, 4);
                     }
                 }
                 else if (type.match(/^text\//i)) {
-                    let body = await this.response.text();
-                    if (body) {
-                        this.message += "\n\n" + body;
+                    this.body = await this.response.text();
+                    if (this.body) {
+                        this.message += "\n\n" + this.body;
                     }
                 }
             } catch {

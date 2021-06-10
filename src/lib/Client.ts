@@ -4,21 +4,19 @@ import {
     getPath,
     setPath,
     jwtDecode,
-    makeArray,
     request,
-    byCode,
-    byCodes,
     units,
     getPatientParam,
     fetchConformanceStatement,
     getAccessTokenExpiration,
     btoa,
-    isBrowser
-} from "./lib";
-
+    isBrowser,
+    assert
+} from ".";
+import { byCode, byCodes, makeArray } from "../util"
 import { patientCompartment, fhirVersions } from "./settings";
 import HttpError from "./HttpError";
-import { fhirclient } from "./types";
+import { fhirclient } from "../types";
 
 // $lab:coverage:off$
 // @ts-ignore
@@ -44,13 +42,9 @@ async function contextualize(
     async function contextualURL(_url: URL) {
         const resourceType = _url.pathname.split("/").pop();
 
-        if (!resourceType) {
-            throw new Error(`Invalid url "${_url}"`);
-        }
+        assert(resourceType, `Invalid url "${_url}"`);
 
-        if (patientCompartment.indexOf(resourceType) == -1) {
-            throw new Error(`Cannot filter "${resourceType}" resources by patient`);
-        }
+        assert(patientCompartment.indexOf(resourceType) > -1, `Cannot filter "${resourceType}" resources by patient`);
 
         const conformance = await fetchConformanceStatement(client.state.serverUrl);
         const searchParam = getPatientParam(conformance, resourceType);
@@ -276,6 +270,7 @@ export class Client
          * If there is no patient context, it will reject with an error.
          * @param {fhirclient.FetchOptions} [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
+         * @method
          */
         read: fhirclient.RequestFunction<fhirclient.FHIR.Patient>
 
@@ -295,6 +290,7 @@ export class Client
          * to handle even binary responses. Can also be a [[CombinedFetchResult]]
          * object if the `requestOptions.includeResponse`s has been set to true.
          * @category Request
+         * @method
          */
         request: <R = fhirclient.FetchResult>(
             requestOptions: string|URL|fhirclient.RequestOptions,
@@ -399,9 +395,10 @@ export class Client
         }
 
         // Valid serverUrl is required!
-        if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
-            throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-        }
+        assert(
+            state.serverUrl && state.serverUrl.match(/https?:\/\/.+/),
+            "A \"serverUrl\" option is required and must begin with \"http(s)\""
+        )
 
         Object.assign(this.options, options);
 
@@ -465,8 +462,9 @@ export class Client
 
         if (!this.state.expiresAt &&
             this.state.tokenUri &&
-            this.state.tokenResponse?.access_token &&
-            this.state.tokenResponse?.refresh_token &&
+            this.state.tokenResponse &&
+            this.state.tokenResponse.access_token &&
+            this.state.tokenResponse.refresh_token &&
             (this.hasGrantedScope("offline_access") || this.hasGrantedScope("online_access"))
         ) {
             console.warn(msg.noExpiresAt)
@@ -523,14 +521,14 @@ export class Client
         return scopes.indexOf(scope) > -1;
     }
 
-    /**
-     * Checks if the given scope has been requested
-     */
-    hasRequestedScope(scope: string): boolean
-    {
-        const scopes = String(this.state.scope || "").trim().split(/\s+/);
-        return scopes.indexOf(scope) > -1;
-    }
+    // /**
+    //  * Checks if the given scope has been requested
+    //  */
+    // hasRequestedScope(scope: string): boolean
+    // {
+    //     const scopes = String(this.state.scope || "").trim().split(/\s+/);
+    //     return scopes.indexOf(scope) > -1;
+    // }
 
     /**
      * Compares the requested scopes (from `state.scope`) with the granted
@@ -635,7 +633,12 @@ export class Client
     {
         const idToken = this.getIdToken();
         if (idToken) {
-            return idToken.fhirUser || idToken.profile;
+            // Epic may return a full url like
+            // @see https://github.com/smart-on-fhir/client-js/issues/105
+            if (idToken.fhirUser) {
+                return idToken.fhirUser.split("/").slice(-2).join("/");
+            }
+            return idToken.profile
         }
         return null;
     }
@@ -783,9 +786,7 @@ export class Client
     ): Promise<T>
     {
         const debugRequest = _debug.extend("client:request");
-        if (!requestOptions) {
-            throw new Error(msg.requestNeedsArgs);
-        }
+        assert(requestOptions, msg.requestNeedsArgs);
 
         // url -----------------------------------------------------------------
         let url: string;
@@ -1091,9 +1092,7 @@ export class Client
 
             this._refreshTask = request<fhirclient.TokenResponse>(tokenUri, refreshRequestOptions)
             .then(data => {
-                if (!data.access_token) {
-                    throw new Error(msg.gotNoAccessToken);
-                }
+                assert(data.access_token, msg.gotNoAccessToken);
                 debugRefresh("Received new access token response %O", data);
                 Object.assign(this.state.tokenResponse, data);
                 this.state.expiresAt = getAccessTokenExpiration(data);

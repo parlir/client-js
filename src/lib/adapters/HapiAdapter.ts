@@ -1,7 +1,7 @@
 import NodeAdapter from "./NodeAdapter";
 import ServerStorage from "../storage/ServerStorage";
-import { fhirclient } from "../types";
 import { ResponseToolkit, Request, ResponseObject } from "hapi";
+import { fhirclient } from "../../types";
 
 interface HapiAdapterOptions {
     request: Request;
@@ -75,22 +75,22 @@ export default class HapiAdapter extends NodeAdapter
     //     ).replace(":", "");
     // }
 
-    /**
-     * This is the static entry point and MUST be provided
-     * @param request The hapi request
-     * @param h The hapi response toolkit
-     * @param storage Custom storage instance or a storage factory function
-     */
-    static smart(
-        request: Request,
-        h: ResponseToolkit,
-        storage?: fhirclient.Storage | fhirclient.storageFactory
-    )
-    {
-        return new HapiAdapter({
-            request,
-            responseToolkit: h,
-            storage
-        }).getSmartApi();
-    }
+    // /**
+    //  * This is the static entry point and MUST be provided
+    //  * @param request The hapi request
+    //  * @param h The hapi response toolkit
+    //  * @param storage Custom storage instance or a storage factory function
+    //  */
+    // static smart(
+    //     request: Request,
+    //     h: ResponseToolkit,
+    //     storage?: fhirclient.Storage | fhirclient.storageFactory
+    // )
+    // {
+    //     return new HapiAdapter({
+    //         request,
+    //         responseToolkit: h,
+    //         storage
+    //     }).getSmartApi();
+    // }
 }

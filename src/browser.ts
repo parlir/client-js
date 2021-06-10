@@ -1,17 +1,18 @@
 
 // Note: the following 2 imports appear as unused but they affect how tsc is
 // generating type definitions!
-import { fhirclient } from "../types";
-import { Client } from "../Client";
+import { fhirclient } from "./types";
+import { Client } from "./lib/Client";
 
-import * as util from "../util"
+import * as util from "./util"
+import * as smart from "./lib/smart"
 
 // In Browsers we create an adapter, get the SMART api from it and build the
 // global FHIR object
-import BrowserAdapter from "../adapters/BrowserAdapter";
+import BrowserAdapter from "./lib/adapters/BrowserAdapter";
 
 const adapter = new BrowserAdapter();
-const { ready, authorize, init, client, options } = adapter.getSmartApi();
+// const { options } = adapter.getSmartApi();
 
 // We have two kinds of browser builds - "pure" for new browsers and "legacy"
 // for old ones. In pure builds we assume that the browser supports everything
@@ -30,18 +31,24 @@ if (typeof FHIRCLIENT_PURE == "undefined") {
     }
 }
 
+
+
 // $lab:coverage:off$
 const FHIR = {
-    AbortController: window.AbortController,
-    client,
-    oauth2: {
-        settings: options,
-        ready,
-        authorize,
-        init
-    },
+    Client,
+    SMART: {
+        authorize(options: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]) {
+            return smart.authorize(adapter, options)
+        },
+        ready(onSuccess?: (client: Client) => any, onError?: (error: Error) => any) {
+            return smart.ready(adapter, onSuccess, onError)
+        },
+        init(options: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]) {
+            return smart.init(adapter, options)
+        }
+    } as fhirclient.SMART,
     util
 };
 
-export = FHIR;
+export = FHIR
 // $lab:coverage:on$

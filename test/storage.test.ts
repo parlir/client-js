@@ -1,9 +1,9 @@
 import { expect }        from "@hapi/code"
 import * as Lab          from "@hapi/lab"
 import { fhirclient }    from "../src/types"
-import BrowserStorage    from "../src/storage/BrowserStorage"
+import BrowserStorage    from "../src/lib/storage/BrowserStorage"
 import MockWindow        from "./mocks/Window"
-import ServerStorage     from "../src/storage/ServerStorage"
+import ServerStorage     from "../src/lib/storage/ServerStorage"
 
 
 export const lab = Lab.script();

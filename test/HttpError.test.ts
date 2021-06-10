@@ -1,6 +1,6 @@
 import { expect } from "@hapi/code";
 import * as Lab   from "@hapi/lab";
-import HttpError  from "../src/HttpError";
+import HttpError  from "../src/lib/HttpError";
 import {Response} from "cross-fetch";
 
 export const lab = Lab.script();

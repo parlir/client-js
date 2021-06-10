@@ -3,9 +3,9 @@
         "sourceMap": false,
         "noImplicitAny": true,
         "module": "CommonJS",
-        "target": "ES2017",
+        "target": "ES2020",
         "importHelpers": false,
-        "outDir": "dist/lib",
+        "outDir": "dist",
         "listEmittedFiles": false,
         "declaration": true
     },

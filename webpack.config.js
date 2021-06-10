@@ -5,7 +5,7 @@ const { DefinePlugin } = require("webpack");
 
 const BASE_CONFIG = {
     context: __dirname,
-    entry  : "./src/entry/browser.ts",
+    entry  : "./src/browser.ts",
     target : "web",
     devtool: "source-map",
     output : {

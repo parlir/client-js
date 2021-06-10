@@ -1,27 +1,103 @@
 
-import { expect }        from "@hapi/code";
-import * as Lab          from "@hapi/lab";
-import Adapter           from "../src/adapters/NodeAdapter";
-import { KEY }           from "../src/smart";
-import ServerStorage     from "../src/storage/ServerStorage";
-import FHIR              = require("../src/entry/node");
+import { expect }        from "@hapi/code"
+import * as Lab          from "@hapi/lab"
+import * as express      from "express"
+import * as session      from "express-session"
+import { fetch }         from "cross-fetch"
+import * as nock         from "nock"
+import { SMART }         from "../src/express"
+import Adapter           from "../src/lib/adapters/NodeAdapter";
+// import { KEY }           from "../src/lib/smart";
+import ServerStorage     from "../src/lib/storage/ServerStorage";
+// import FHIR              from "../src/lib/adapters/NodeAdapter";
 
 // Mocks
 import mockServer        from "./mocks/mockServer";
-import HttpRequest       from "./mocks/HttpRequest";
-import HttpResponse      from "./mocks/HttpResponse";
-import MemoryStorage     from "./mocks/MemoryStorage";
-import { IncomingMessage } from "http";
+// import HttpRequest       from "./mocks/HttpRequest";
+// import HttpResponse      from "./mocks/HttpResponse";
+// import MemoryStorage     from "./mocks/MemoryStorage";
+import { Server, IncomingMessage } from "http";
+import { AddressInfo } from "net"
+import { assert } from "../src/lib"
 
 export const lab = Lab.script();
 const { it, describe, before, after, afterEach } = lab;
 
 let mockDataServer, mockUrl;
 
+const ACCESS_TOKEN_RESPONSE = {
+    patient     : "b2536dd3-bccd-4d22-8355-ab20acdf240b",
+    encounter   : "e3ec2d15-4c27-4607-a45c-2f84962b0700",
+    token_type  : "bearer",
+    scope       : "launch openid fhirUser user/*.* patient/*.* launch/encounter launch/patient profile",
+    client_id   : "whatever",
+    expires_in  : 3600,
+    access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuZWVkX3BhdGllbnRfYmFubmVyIjp0cnVlLCJ" +
+                    "zbWFydF9zdHlsZV91cmwiOiJodHRwczovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZy9zbWFydC1" +
+                    "zdHlsZS5qc29uIiwicGF0aWVudCI6ImIyNTM2ZGQzLWJjY2QtNGQyMi04MzU1LWFiMjBhY2RmMjQ" +
+                    "wYiIsImVuY291bnRlciI6ImUzZWMyZDE1LTRjMjctNDYwNy1hNDVjLTJmODQ5NjJiMDcwMCIsInJ" +
+                    "lZnJlc2hfdG9rZW4iOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKamI" +
+                    "yNTBaWGgwSWpwN0ltNWxaV1JmY0dGMGFXVnVkRjlpWVc1dVpYSWlPblJ5ZFdVc0luTnRZWEowWDN" +
+                    "OMGVXeGxYM1Z5YkNJNkltaDBkSEJ6T2k4dmJHRjFibU5vTG5OdFlYSjBhR1ZoYkhSb2FYUXViM0p" +
+                    "uTDNOdFlYSjBMWE4wZVd4bExtcHpiMjRpTENKd1lYUnBaVzUwSWpvaVlqSTFNelprWkRNdFltTmp" +
+                    "aQzAwWkRJeUxUZ3pOVFV0WVdJeU1HRmpaR1l5TkRCaUlpd2laVzVqYjNWdWRHVnlJam9pWlRObFl" +
+                    "6SmtNVFV0TkdNeU55MDBOakEzTFdFME5XTXRNbVk0TkRrMk1tSXdOekF3SW4wc0ltTnNhV1Z1ZEY" +
+                    "5cFpDSTZJbTE1WDNkbFlsOWhjSEFpTENKelkyOXdaU0k2SW05d1pXNXBaQ0JtYUdseVZYTmxjaUJ" +
+                    "2Wm1ac2FXNWxYMkZqWTJWemN5QjFjMlZ5THlvdUtpQndZWFJwWlc1MEx5b3VLaUJzWVhWdVkyZ3Z" +
+                    "aVzVqYjNWdWRHVnlJR3hoZFc1amFDOXdZWFJwWlc1MElIQnliMlpwYkdVaUxDSjFjMlZ5SWpvaVV" +
+                    "ISmhZM1JwZEdsdmJtVnlMM050WVhKMExWQnlZV04wYVhScGIyNWxjaTAzTVRRNE1qY3hNeUlzSW1" +
+                    "saGRDSTZNVFUxT1RFek9Ea3hNeXdpWlhod0lqb3hOVGt3TmpjME9URTBmUS4tRXk3d2RGU2xtZm9" +
+                    "Rcm03SE54QWdKUUJKUEtkdGZIN2tMMVo5MUw2MF84IiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInN" +
+                    "jb3BlIjoib3BlbmlkIGZoaXJVc2VyIG9mZmxpbmVfYWNjZXNzIHVzZXIvKi4qIHBhdGllbnQvKi4" +
+                    "qIGxhdW5jaC9lbmNvdW50ZXIgbGF1bmNoL3BhdGllbnQgcHJvZmlsZSIsImNsaWVudF9pZCI6Im1" +
+                    "5X3dlYl9hcHAiLCJleHBpcmVzX2luIjozNjAwLCJpZF90b2tlbiI6ImV5SjBlWEFpT2lKS1YxUWl" +
+                    "MQ0poYkdjaU9pSlNVekkxTmlKOS5leUp3Y205bWFXeGxJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnR" +
+                    "ZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbVpvYVhKVmMyVnlJam9pVUhKaFk" +
+                    "zUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbUYxWkN" +
+                    "JNkltMTVYM2RsWWw5aGNIQWlMQ0p6ZFdJaU9pSmtZakl6WkRCa1pUSTFOamM0WlRZM01EazVZbU0" +
+                    "wTXpRek1qTmtZekJrT1RZMU1UTmlOVFV5TW1RMFlqYzBNV05pWVRNNVpqZGpPVEprTUdNME5tRmx" +
+                    "JaXdpYVhOeklqb2lhSFIwY0RvdkwyeGhkVzVqYUM1emJXRnlkR2hsWVd4MGFHbDBMbTl5WnlJc0l" +
+                    "tbGhkQ0k2TVRVMU9URXpPRGt4TkN3aVpYaHdJam94TlRVNU1UUXlOVEUwZlEuT3RiSWNzNW55RUt" +
+                    "hRDJrQVBhc20xRFlGaXhIdlZia0Mxd1F5czNvYTNULTRUZjh3eFc1Nmh6VUswWlFlT0tfZ0VJeGl" +
+                    "TRm45dExvVXZLYXVfTTFXUlZEMTFGUHl1bHZzMVE4RWJHNVBRODNNQnVkY3BaUUpfdXVGYlZjR3N" +
+                    "ETXkyeEVhXzhqQUhrSFBBVk5qajhGUnNRQ1JaQzBIZmcwTmJYbGkzeU9oQUZLMUxxVFVjcm5qZnd" +
+                    "ELXNhazBVR1FTMUg2T2dJTG5UWUxybFRUSW9uZm5XUmRwV0pqakloM19HQ2s1ay04TFU4QUFSYVB" +
+                    "jU0UzWmhlem9LVFNmd1FuMVhPMTAxZzVoMzM3cFpsZWFJbEZsaHhQUkZTS3RwWHo3QkVlemtVaTV" +
+                    "DSnFONGQycU5vQks5a2FwbGpGWUVWZFBqUnFhQm50NGJsbXlGUlhqaGRNTndBIiwiaWF0IjoxNTU" +
+                    "5MTM4OTE0LCJleHAiOjE1NTkxNDI1MTR9.lhfmhXYfoaI4QcJYvFnr2FMn_RHO8aXSzzkXzwNpc7w",
+    code        : "123"
+}
+
+const FHIR_SERVER_URL = "http://fhirserver.dev"
+const AUTH_SERVER_URL = "http://authserver.dev"
+const APP_SERVER_PORT = 23456
+
+
+
+function startServer(app: express.Application): Promise<{ server: Server, address: string }> {
+    return new Promise((resolve) => {
+        // app.use(function (
+        //     error: Error,
+        //     req: express.Request,
+        //     res: express.Response,
+        //     next: express.NextFunction
+        // ) {
+        //     // console.dir(error)
+        //     console.error(error);
+        //     res.status(500).end()
+        // });
+        let server = app.listen(APP_SERVER_PORT, "127.0.0.1", () => {
+            const { address, port } = server.address() as AddressInfo
+            resolve({ server, address: `http://${address}:${port}`})
+        })    
+    })
+}
+
 
 before(() => {
     // debug.enable("FHIRClient:*");
     return new Promise((resolve, reject) => {
+        // @ts-ignore
         mockDataServer = mockServer.listen(null, "0.0.0.0", error => {
             if (error) {
                 return reject(error);
@@ -53,149 +129,719 @@ afterEach(() => {
     mockServer.clear();
 });
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 describe("Complete authorization [SERVER]", () => {
-    it ("code flow authorization", async () => {
 
-        const key = "my-random-state";
+    let appServer: Server;
 
-        const req1   = new HttpRequest("http://localhost/launch?launch=123&state=" + key);
-        const res1   = new HttpResponse();
-        const smart1 = FHIR(req1 as any, res1 as any);
+    afterEach(() => {
+        nock.cleanAll()
+        if (appServer) {
+            return new Promise((resolve, reject) => appServer.close((error) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(void 0)
+                }
+            }))
+        }
+    })
 
-        // mock our oauth endpoints
-        mockServer.mock({
-            headers: { "content-type": "application/json" },
-            status: 200,
-            body: {
-                authorization_endpoint: mockUrl,
-                token_endpoint: mockUrl
+    async function launchApp(app: express.Application, { launchUri }: { launchUri: string } = { launchUri: "/launch" }) {
+        const { address, server } = await startServer(app);
+        appServer = server;
+        let cookie: string;
+    
+        // Mock all involved destinations
+        // --------------------------------------------------------------------
+        const fhirServer = nock(FHIR_SERVER_URL);
+        const authServer = nock(AUTH_SERVER_URL);
+    
+        fhirServer.get('/.well-known/smart-configuration').reply(200, {
+            authorization_endpoint: AUTH_SERVER_URL + '/authorize',
+            token_endpoint: AUTH_SERVER_URL + '/token'
+        });
+    
+        fhirServer.get('/metadata').query(true).reply(404);
+    
+        authServer.get("/authorize").query(true).reply((uri) => {
+            const query = new URLSearchParams(uri.split("?", 2).pop());
+            return [ 302, "", { location: `${query.get("redirect_uri")}?code=234&state=${query.get("state")}` }]
+        })
+    
+        authServer.post("/token").query(true).reply(200, ACCESS_TOKEN_RESPONSE)
+        
+        // We are the EHR here! Request the launch uri but don't let it redirect
+        // because we want to capture the cookie
+        // --------------------------------------------------------------------
+        const launchURL = new URL(launchUri, address)
+        const params    = launchURL.searchParams;
+        const hasFhirServiceUrl = params.has("fhirServiceUrl")
+        
+        let hasIss    = !hasFhirServiceUrl && params.has("iss")
+        let hasLaunch = !hasFhirServiceUrl && params.has("launch")
+
+        if (!hasFhirServiceUrl) {
+            if (!hasLaunch) {
+                params.set("launch", "123")
+                hasLaunch = true
             }
-        });
 
-        await smart1.authorize({
-            iss        : mockUrl,
-            scope      : "my_scope",
-            clientId   : "my_client_id",
-            redirectUri: "http://localhost/index"
-        });
-
-        expect(res1.status).to.equal(302);
-        expect(res1.headers.location).to.exist();
-
-        const url = new URL(res1.headers.location);
-
-        expect(url.searchParams.get("response_type")).to.equal("code");
-        expect(url.searchParams.get("client_id")).to.equal("my_client_id");
-        expect(url.searchParams.get("scope")).to.equal("my_scope launch");
-        expect(url.searchParams.get("launch")).to.equal("123");
-        expect(url.searchParams.get("redirect_uri")).to.exist();
-        expect(url.searchParams.get("state")).to.exist();
-
-        // Now we have been redirected to `redirect` and then back to our
-        // redirect_uri. It is time to complete the authorization.
-        const code   = url.searchParams.get("state");
-        const req2   = new HttpRequest("http://localhost/index?code=123&state=" + code);
-        req2.session = req1.session; // inherit the session
-        const res2   = new HttpResponse();
-        const smart2 = FHIR(req2 as any, res2 as any);
-
-        // mock our access token response
-        mockServer.mock({
-            headers: { "content-type": "application/json" },
-            status: 200,
-            body: {
-                "need_patient_banner": true,
-                "smart_style_url": "https://launch.smarthealthit.org/smart-style.json",
-                "patient": "b2536dd3-bccd-4d22-8355-ab20acdf240b",
-                "encounter": "e3ec2d15-4c27-4607-a45c-2f84962b0700",
-                "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTkwNjc0OTE0fQ.-Ey7wdFSlmfoQrm7HNxAgJQBJPKdtfH7kL1Z91L60_8",
-                "token_type": "bearer",
-                "scope": "openid fhirUser offline_access user/*.* patient/*.* launch/encounter launch/patient profile",
-                "client_id": "my_web_app",
-                "expires_in": 3600,
-                "id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImF1ZCI6Im15X3dlYl9hcHAiLCJzdWIiOiJkYjIzZDBkZTI1Njc4ZTY3MDk5YmM0MzQzMjNkYzBkOTY1MTNiNTUyMmQ0Yjc0MWNiYTM5ZjdjOTJkMGM0NmFlIiwiaXNzIjoiaHR0cDovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZyIsImlhdCI6MTU1OTEzODkxNCwiZXhwIjoxNTU5MTQyNTE0fQ.OtbIcs5nyEKaD2kAPasm1DYFixHvVbkC1wQys3oa3T-4Tf8wxW56hzUK0ZQeOK_gEIxiSFn9tLoUvKau_M1WRVD11FPyulvs1Q8EbG5PQ83MBudcpZQJ_uuFbVcGsDMy2xEa_8jAHkHPAVNjj8FRsQCRZC0Hfg0NbXli3yOhAFK1LqTUcrnjfwD-sak0UGQS1H6OgILnTYLrlTTIonfnWRdpWJjjIh3_GCk5k-8LU8AARaPcSE3ZhezoKTSfwQn1XO101g5h337pZleaIlFlhxPRFSKtpXz7BEezkUi5CJqN4d2qNoBK9kapljFYEVdPjRqaBnt4blmyFRXjhdMNwA",
-                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuZWVkX3BhdGllbnRfYmFubmVyIjp0cnVlLCJzbWFydF9zdHlsZV91cmwiOiJodHRwczovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZy9zbWFydC1zdHlsZS5qc29uIiwicGF0aWVudCI6ImIyNTM2ZGQzLWJjY2QtNGQyMi04MzU1LWFiMjBhY2RmMjQwYiIsImVuY291bnRlciI6ImUzZWMyZDE1LTRjMjctNDYwNy1hNDVjLTJmODQ5NjJiMDcwMCIsInJlZnJlc2hfdG9rZW4iOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKamIyNTBaWGgwSWpwN0ltNWxaV1JmY0dGMGFXVnVkRjlpWVc1dVpYSWlPblJ5ZFdVc0luTnRZWEowWDNOMGVXeGxYM1Z5YkNJNkltaDBkSEJ6T2k4dmJHRjFibU5vTG5OdFlYSjBhR1ZoYkhSb2FYUXViM0puTDNOdFlYSjBMWE4wZVd4bExtcHpiMjRpTENKd1lYUnBaVzUwSWpvaVlqSTFNelprWkRNdFltTmpaQzAwWkRJeUxUZ3pOVFV0WVdJeU1HRmpaR1l5TkRCaUlpd2laVzVqYjNWdWRHVnlJam9pWlRObFl6SmtNVFV0TkdNeU55MDBOakEzTFdFME5XTXRNbVk0TkRrMk1tSXdOekF3SW4wc0ltTnNhV1Z1ZEY5cFpDSTZJbTE1WDNkbFlsOWhjSEFpTENKelkyOXdaU0k2SW05d1pXNXBaQ0JtYUdseVZYTmxjaUJ2Wm1ac2FXNWxYMkZqWTJWemN5QjFjMlZ5THlvdUtpQndZWFJwWlc1MEx5b3VLaUJzWVhWdVkyZ3ZaVzVqYjNWdWRHVnlJR3hoZFc1amFDOXdZWFJwWlc1MElIQnliMlpwYkdVaUxDSjFjMlZ5SWpvaVVISmhZM1JwZEdsdmJtVnlMM050WVhKMExWQnlZV04wYVhScGIyNWxjaTAzTVRRNE1qY3hNeUlzSW1saGRDSTZNVFUxT1RFek9Ea3hNeXdpWlhod0lqb3hOVGt3TmpjME9URTBmUS4tRXk3d2RGU2xtZm9Rcm03SE54QWdKUUJKUEtkdGZIN2tMMVo5MUw2MF84IiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGZoaXJVc2VyIG9mZmxpbmVfYWNjZXNzIHVzZXIvKi4qIHBhdGllbnQvKi4qIGxhdW5jaC9lbmNvdW50ZXIgbGF1bmNoL3BhdGllbnQgcHJvZmlsZSIsImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJleHBpcmVzX2luIjozNjAwLCJpZF90b2tlbiI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSlNVekkxTmlKOS5leUp3Y205bWFXeGxJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbVpvYVhKVmMyVnlJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbUYxWkNJNkltMTVYM2RsWWw5aGNIQWlMQ0p6ZFdJaU9pSmtZakl6WkRCa1pUSTFOamM0WlRZM01EazVZbU0wTXpRek1qTmtZekJrT1RZMU1UTmlOVFV5TW1RMFlqYzBNV05pWVRNNVpqZGpPVEprTUdNME5tRmxJaXdpYVhOeklqb2lhSFIwY0RvdkwyeGhkVzVqYUM1emJXRnlkR2hsWVd4MGFHbDBMbTl5WnlJc0ltbGhkQ0k2TVRVMU9URXpPRGt4TkN3aVpYaHdJam94TlRVNU1UUXlOVEUwZlEuT3RiSWNzNW55RUthRDJrQVBhc20xRFlGaXhIdlZia0Mxd1F5czNvYTNULTRUZjh3eFc1Nmh6VUswWlFlT0tfZ0VJeGlTRm45dExvVXZLYXVfTTFXUlZEMTFGUHl1bHZzMVE4RWJHNVBRODNNQnVkY3BaUUpfdXVGYlZjR3NETXkyeEVhXzhqQUhrSFBBVk5qajhGUnNRQ1JaQzBIZmcwTmJYbGkzeU9oQUZLMUxxVFVjcm5qZndELXNhazBVR1FTMUg2T2dJTG5UWUxybFRUSW9uZm5XUmRwV0pqakloM19HQ2s1ay04TFU4QUFSYVBjU0UzWmhlem9LVFNmd1FuMVhPMTAxZzVoMzM3cFpsZWFJbEZsaHhQUkZTS3RwWHo3QkVlemtVaTVDSnFONGQycU5vQks5a2FwbGpGWUVWZFBqUnFhQm50NGJsbXlGUlhqaGRNTndBIiwiaWF0IjoxNTU5MTM4OTE0LCJleHAiOjE1NTkxNDI1MTR9.lhfmhXYfoaI4QcJYvFnr2FMn_RHO8aXSzzkXzwNpc7w",
-                "code": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTU5MTM5MjEzfQ.G2dLcSnjpwM_joWTxWLfL48vhdlj3zGV9Os5cKREYcY"
+            if (!hasIss) {
+                params.set("iss", FHIR_SERVER_URL)
+                hasIss = true
             }
+        }
+
+        // console.log(1, launchURL.href)
+
+        
+        // --------------------------------------------------------------------
+        // Step 1 - call the launch endpoint:
+        // - EHR Launch        - call it with launch and iss
+        // - Standalone Launch - call it with iss
+        // - Fake Launch       - call it with fhirServiceUrl
+        // --------------------------------------------------------------------
+        const res1 = await fetch(launchURL.href, {
+            redirect   : "manual",
+            credentials: "include", // hasIss ? "omit" : "include",
+            mode       : "navigate"
+        })
+
+        // --------------------------------------------------------------------
+        // Step 2 - handle the redirect
+        // - EHR Launch        - redirects to the auth server
+        // - Standalone Launch - redirects to the auth server
+        // - Fake Launch       - redirects to the redirectUri with state param
+        // --------------------------------------------------------------------
+        const redirectLocation = res1.headers.get("location")
+        const cookieHeader = res1.headers.get("set-cookie")
+        assert(redirectLocation, `No redirect location returned by the launch call (${launchURL.href}). Status ${res1.status}`)
+        assert(cookieHeader, `No cookie returned by the launch call (${launchURL.href}). ${await res1.text()}`)
+        cookie = cookieHeader.replace(/;.+$/, "")
+        const res2 = await fetch(redirectLocation, {
+            redirect: "manual",
+            mode    : "navigate",
+            credentials: "include", // hasFhirServiceUrl ? "include" : "omit",
+            headers    : { cookie } // hasFhirServiceUrl ? { cookie } : {}
+        })
+
+        // --------------------------------------------------------------------
+        // Step 2.1 - early exit for fake auth
+        // We are already at the redirect url. No further redirects are needed.
+        // --------------------------------------------------------------------
+        if (!res2.headers.get("location")) {
+            return {
+                response: res2,
+                cookie
+            }
+        }
+        
+
+        // --------------------------------------------------------------------
+        // Step 3 - the redirect endpoint
+        // - EHR Launch        - we should have code and state params
+        // - Standalone Launch - we should have code and state params
+        // - Fake Launch       - we should have a redirectUri param
+        // --------------------------------------------------------------------
+        // console.log(2, res2.headers.get("location"))
+        const res3 = await fetch(res2.headers.get("location") + "", {
+            redirect   : "manual",
+            credentials: "include",
+            mode       : "navigate",
+            headers    : { cookie }
         });
 
-        const client = await smart2.ready();
+        if (!hasFhirServiceUrl && res3.headers.get("location")) {
+            return {
+                response: await fetch(res3.headers.get("location") + "", {
+                    // redirect   : "follow",
+                    credentials: "include",
+                    mode       : "navigate",
+                    headers    : { cookie }
+                }),
+                cookie
+            };
+        }
 
-        expect(client.patient.id).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
-        expect(client.encounter.id).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
-        expect(client.user.id).to.equal("smart-Practitioner-71482713");
-        expect(client.user.resourceType).to.equal("Practitioner");
+        return {
+            response: res3,
+            cookie
+        };
+    }
+
+    it ("app.use(SMART())", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        app.use(SMART({ clientId: "whatever" }))
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app);
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        
+    });
+
+    it ("app.use(SMART({ launchUri: 'my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use(SMART({
+            clientId: "clientId1", 
+            launchUri: "my-launch"
+        }))
+
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use(SMART({ launchUri: './my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use(SMART({
+            clientId: "clientId1", 
+            launchUri: "./my-launch"
+        }))
+
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use(SMART({ launchUri: '/my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use(SMART({
+            clientId: "clientId1", 
+            launchUri: "/my-launch"
+        }))
+
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use(SMART({ launchUri: 'http://.../my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use(SMART({
+            clientId: "clientId1", 
+            launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/my-launch`
+        }))
+
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+        
+        const { response } = await launchApp(app, { launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/my-launch` });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART())", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({ clientId: "clientId1" }))
+
+        app.get("/base/path", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ launchUri: 'my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            launchUri: "my-launch"
+        }))
+
+        app.get("/base/path", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ launchUri: './my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            launchUri: "./my-launch"
+        }))
+
+        app.get("/base/path", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ launchUri: '/base/path/my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            launchUri: "/base/path/my-launch"
+        }))
+
+        app.get("/base/path", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ launchUri: 'http://.../base/path/my-launch' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/base/path/my-launch`
+        }))
+
+        app.get("/base/path", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/base/path/my-launch` });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ redirectUri: 'my-app' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            redirectUri: "my-app"
+        }))
+
+        app.get("/base/path/my-app", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ redirectUri: './my-app' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            redirectUri: "./my-app"
+        }))
+
+        app.get("/base/path/my-app", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ redirectUri: '/base/path/my-app' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            redirectUri: "/base/path/my-app"
+        }))
+
+        app.get("/base/path/my-app", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ redirectUri: 'http://.../base/path/my-app' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            redirectUri: `http://127.0.0.1:${APP_SERVER_PORT}/base/path/my-app`
+        }))
+
+        app.get("/base/path/my-app", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    it ("app.use('/base/path', SMART({ launchUri: 'my-launch', redirectUri: 'my-app' }))", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use("/base/path", SMART({
+            clientId: "clientId1", 
+            launchUri: "my-launch",
+            redirectUri: "my-app"
+        }))
+
+        app.get("/base/path/my-app", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/base/path/my-launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    })
+
+    describe("with router", () => {
+        it ("app.use(SMART())", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            const router = express.Router({ mergeParams: true });
+            router.use(SMART({ clientId: "whatever" }))
+            router.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+            app.use("/fhir", router);
+            const { response } = await launchApp(app, { launchUri: "/fhir/launch" });
+            const patientId = await response.text()
+            expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        });
+        
+        it ("app.use(SMART({ launchUri: 'my-launch' }))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            const router = express.Router({ mergeParams: true });
+            router.use(SMART({
+                clientId: "clientId1", 
+                launchUri: "my-launch"
+            }))
+            router.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+            app.use("/fhir", router);
+            const { response } = await launchApp(app, { launchUri: "/fhir/my-launch" });
+            const patientId = await response.text()
+            expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        })
+
+        it ("app.use(SMART({ launchUri: './my-launch' }))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            const router = express.Router({ mergeParams: true });
+            router.use(SMART({
+                clientId: "clientId1", 
+                launchUri: "./my-launch"
+            }))
+            router.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+            app.use("/fhir", router);
+            const { response } = await launchApp(app, { launchUri: "/fhir/my-launch" });
+            const patientId = await response.text()
+            expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        })
+    
+        it ("app.use(SMART({ launchUri: '/fhir/my-launch' }))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            const router = express.Router({ mergeParams: true });
+            router.use(SMART({
+                clientId: "clientId1", 
+                launchUri: "/fhir/my-launch"
+            }))
+            router.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+            app.use("/fhir", router);
+            const { response } = await launchApp(app, { launchUri: "/fhir/my-launch" });
+            const patientId = await response.text()
+            expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        })
+    
+        it ("app.use(SMART({ launchUri: 'http://.../fhir/my-launch' }))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            const router = express.Router({ mergeParams: true });
+            router.use(SMART({
+                clientId: "clientId1", 
+                launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/fhir/my-launch`
+            }))
+            router.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+            app.use("/fhir", router);
+            const { response } = await launchApp(app, { launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/fhir/my-launch` });
+            const patientId = await response.text()
+            expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        })
+    })
+
+    describe("with multiple configurations", () => {
+        it ("app.use(SMART([cfg, cfg, ...]))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            app.use(SMART([
+                { clientId: "clientId1", issMatch: () => false },
+                { clientId: "clientId2", issMatch: () => true  }
+            ]))
+            app.get("/", (req, res) => res.end(req.fhirClient.state.clientId))
+            const { response } = await launchApp(app, { launchUri: "/launch" });
+            const clientId = await response.text()
+            expect(clientId).to.equal("clientId2")
+        });
+
+        it ("app.use(SMART([{ launchUri: 'my-launch' }, ...]))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            app.use(SMART([
+                { clientId: "clientId1", issMatch: () => false },
+                { clientId: "clientId2", issMatch: () => true, launchUri: 'my-launch'  }
+            ]))
+            app.get("/", (req, res) => res.end(req.fhirClient.state.clientId))
+            const { response } = await launchApp(app, { launchUri: "/my-launch" });
+            const clientId = await response.text()
+            expect(clientId).to.equal("clientId2")
+        })
+
+        it ("app.use(SMART([{ launchUri: '/my-launch' }, ...]))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            app.use(SMART([
+                { clientId: "clientId1", issMatch: () => false },
+                { clientId: "clientId2", issMatch: () => true, launchUri: '/my-launch'  }
+            ]))
+            app.get("/", (req, res) => res.end(req.fhirClient.state.clientId))
+            const { response } = await launchApp(app, { launchUri: "/my-launch" });
+            const clientId = await response.text()
+            expect(clientId).to.equal("clientId2")
+        })
+
+        it ("app.use(SMART([{ launchUri: './my-launch' }, ...]))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            app.use(SMART([
+                { clientId: "clientId1", issMatch: () => false },
+                { clientId: "clientId2", issMatch: () => true, launchUri: './my-launch'  }
+            ]))
+            app.get("/", (req, res) => res.end(req.fhirClient.state.clientId))
+            const { response } = await launchApp(app, { launchUri: "/my-launch" });
+            const clientId = await response.text()
+            expect(clientId).to.equal("clientId2")
+        })
+
+        it ("app.use(SMART([{ multiple: true }, ...]))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            app.use(SMART([ 
+                { clientId: "clientId1", issMatch: () => false },
+                { clientId: "clientId2", issMatch: () => true, multiple: true }
+            ]))
+            app.get("/", (req, res) => res.end(req.fhirClient.state.clientId))
+            const { response } = await launchApp(app, { launchUri: "/launch" });
+            const clientId = await response.text()
+            expect(clientId).to.equal("clientId2")
+            expect(response.url).to.match(/\?state=[a-zA-Z0-9]+/)
+        })
+
+        it ("app.use(SMART([{ fhirServiceUrl: 'http://...' }, ...]))", async () => {
+            const app = express()
+            app.use(session({ secret: "my secret", resave: false, saveUninitialized: false }));
+            app.use(SMART([
+                { clientId: "clientId1", issMatch: () => false },
+                { clientId: "clientId2", issMatch: () => true, fhirServiceUrl: FHIR_SERVER_URL }
+            ]))
+            app.get("/", (req, res) => res.end(req.fhirClient.state.clientId))
+            const { response } = await launchApp(app, {
+                launchUri: `http://127.0.0.1:${APP_SERVER_PORT}/launch?fhirServiceUrl=${encodeURIComponent(FHIR_SERVER_URL)}`
+            });
+            const clientId = await response.text()
+            expect(clientId).to.equal("clientId2")
+        })
+    })
+
+    it.skip ("code flow in router", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        const router = express.Router({ mergeParams: true });
+        app.use("/fhir", router);
+        router.use(SMART({
+            clientId: "clientId1", 
+            // launchUri: "/fhir/launch",
+            redirectUri: "/app"
+        }))
+        router.get("/app", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app, { launchUri: "/fhir/launch" });
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        
+    });
+
+    it ("code flow with multiple configs and multiple=true", async () => {
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        app.use(SMART([
+            { clientId: "clientId1", multiple: true, issMatch: () => false },
+            { clientId: "clientId2", multiple: true, issMatch: () => true  }
+        ]))
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+
+        const { response } = await launchApp(app);
+        const patientId = await response.text()
+        expect(patientId).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+        
     });
 
     it ("refresh an authorized page", async () => {
 
-        const key = "my-random-state";
+        // Create a server to test with ---------------------------------------
+        const app = express()
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        app.use(SMART({ clientId: "whatever" }))
+        app.get("/", (req, res) => res.end(req.fhirClient.patient.id))
+        
+        const { response, cookie } = await launchApp(app);
 
-        const req     = new HttpRequest("http://localhost/index");
-        const res     = new HttpResponse();
-        const storage = new MemoryStorage();
-        const smart   = FHIR(req as any, res as any, storage);
+        const response2 = await fetch(response.url, {
+            credentials: "include",
+            mode       : "navigate",
+            headers    : { cookie }
+        })
 
-        await storage.set(KEY, key);
-        await storage.set(key, {
-            clientId     : "my_web_app",
-            scope        : "whatever",
-            redirectUri  : "whatever",
-            serverUrl    : mockUrl,
-            tokenResponse: {
-                "need_patient_banner": true,
-                "smart_style_url": "https://launch.smarthealthit.org/smart-style.json",
-                "patient": "b2536dd3-bccd-4d22-8355-ab20acdf240b",
-                "encounter": "e3ec2d15-4c27-4607-a45c-2f84962b0700",
-                "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTkwNjc0OTE0fQ.-Ey7wdFSlmfoQrm7HNxAgJQBJPKdtfH7kL1Z91L60_8",
-                "token_type": "bearer",
-                "scope": "openid fhirUser offline_access user/*.* patient/*.* launch/encounter launch/patient profile",
-                "client_id": "my_web_app",
-                "expires_in": 3600,
-                "id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImF1ZCI6Im15X3dlYl9hcHAiLCJzdWIiOiJkYjIzZDBkZTI1Njc4ZTY3MDk5YmM0MzQzMjNkYzBkOTY1MTNiNTUyMmQ0Yjc0MWNiYTM5ZjdjOTJkMGM0NmFlIiwiaXNzIjoiaHR0cDovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZyIsImlhdCI6MTU1OTEzODkxNCwiZXhwIjoxNTU5MTQyNTE0fQ.OtbIcs5nyEKaD2kAPasm1DYFixHvVbkC1wQys3oa3T-4Tf8wxW56hzUK0ZQeOK_gEIxiSFn9tLoUvKau_M1WRVD11FPyulvs1Q8EbG5PQ83MBudcpZQJ_uuFbVcGsDMy2xEa_8jAHkHPAVNjj8FRsQCRZC0Hfg0NbXli3yOhAFK1LqTUcrnjfwD-sak0UGQS1H6OgILnTYLrlTTIonfnWRdpWJjjIh3_GCk5k-8LU8AARaPcSE3ZhezoKTSfwQn1XO101g5h337pZleaIlFlhxPRFSKtpXz7BEezkUi5CJqN4d2qNoBK9kapljFYEVdPjRqaBnt4blmyFRXjhdMNwA",
-                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuZWVkX3BhdGllbnRfYmFubmVyIjp0cnVlLCJzbWFydF9zdHlsZV91cmwiOiJodHRwczovL2xhdW5jaC5zbWFydGhlYWx0aGl0Lm9yZy9zbWFydC1zdHlsZS5qc29uIiwicGF0aWVudCI6ImIyNTM2ZGQzLWJjY2QtNGQyMi04MzU1LWFiMjBhY2RmMjQwYiIsImVuY291bnRlciI6ImUzZWMyZDE1LTRjMjctNDYwNy1hNDVjLTJmODQ5NjJiMDcwMCIsInJlZnJlc2hfdG9rZW4iOiJleUowZVhBaU9pSktWMVFpTENKaGJHY2lPaUpJVXpJMU5pSjkuZXlKamIyNTBaWGgwSWpwN0ltNWxaV1JmY0dGMGFXVnVkRjlpWVc1dVpYSWlPblJ5ZFdVc0luTnRZWEowWDNOMGVXeGxYM1Z5YkNJNkltaDBkSEJ6T2k4dmJHRjFibU5vTG5OdFlYSjBhR1ZoYkhSb2FYUXViM0puTDNOdFlYSjBMWE4wZVd4bExtcHpiMjRpTENKd1lYUnBaVzUwSWpvaVlqSTFNelprWkRNdFltTmpaQzAwWkRJeUxUZ3pOVFV0WVdJeU1HRmpaR1l5TkRCaUlpd2laVzVqYjNWdWRHVnlJam9pWlRObFl6SmtNVFV0TkdNeU55MDBOakEzTFdFME5XTXRNbVk0TkRrMk1tSXdOekF3SW4wc0ltTnNhV1Z1ZEY5cFpDSTZJbTE1WDNkbFlsOWhjSEFpTENKelkyOXdaU0k2SW05d1pXNXBaQ0JtYUdseVZYTmxjaUJ2Wm1ac2FXNWxYMkZqWTJWemN5QjFjMlZ5THlvdUtpQndZWFJwWlc1MEx5b3VLaUJzWVhWdVkyZ3ZaVzVqYjNWdWRHVnlJR3hoZFc1amFDOXdZWFJwWlc1MElIQnliMlpwYkdVaUxDSjFjMlZ5SWpvaVVISmhZM1JwZEdsdmJtVnlMM050WVhKMExWQnlZV04wYVhScGIyNWxjaTAzTVRRNE1qY3hNeUlzSW1saGRDSTZNVFUxT1RFek9Ea3hNeXdpWlhod0lqb3hOVGt3TmpjME9URTBmUS4tRXk3d2RGU2xtZm9Rcm03SE54QWdKUUJKUEtkdGZIN2tMMVo5MUw2MF84IiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGZoaXJVc2VyIG9mZmxpbmVfYWNjZXNzIHVzZXIvKi4qIHBhdGllbnQvKi4qIGxhdW5jaC9lbmNvdW50ZXIgbGF1bmNoL3BhdGllbnQgcHJvZmlsZSIsImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJleHBpcmVzX2luIjozNjAwLCJpZF90b2tlbiI6ImV5SjBlWEFpT2lKS1YxUWlMQ0poYkdjaU9pSlNVekkxTmlKOS5leUp3Y205bWFXeGxJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbVpvYVhKVmMyVnlJam9pVUhKaFkzUnBkR2x2Ym1WeUwzTnRZWEowTFZCeVlXTjBhWFJwYjI1bGNpMDNNVFE0TWpjeE15SXNJbUYxWkNJNkltMTVYM2RsWWw5aGNIQWlMQ0p6ZFdJaU9pSmtZakl6WkRCa1pUSTFOamM0WlRZM01EazVZbU0wTXpRek1qTmtZekJrT1RZMU1UTmlOVFV5TW1RMFlqYzBNV05pWVRNNVpqZGpPVEprTUdNME5tRmxJaXdpYVhOeklqb2lhSFIwY0RvdkwyeGhkVzVqYUM1emJXRnlkR2hsWVd4MGFHbDBMbTl5WnlJc0ltbGhkQ0k2TVRVMU9URXpPRGt4TkN3aVpYaHdJam94TlRVNU1UUXlOVEUwZlEuT3RiSWNzNW55RUthRDJrQVBhc20xRFlGaXhIdlZia0Mxd1F5czNvYTNULTRUZjh3eFc1Nmh6VUswWlFlT0tfZ0VJeGlTRm45dExvVXZLYXVfTTFXUlZEMTFGUHl1bHZzMVE4RWJHNVBRODNNQnVkY3BaUUpfdXVGYlZjR3NETXkyeEVhXzhqQUhrSFBBVk5qajhGUnNRQ1JaQzBIZmcwTmJYbGkzeU9oQUZLMUxxVFVjcm5qZndELXNhazBVR1FTMUg2T2dJTG5UWUxybFRUSW9uZm5XUmRwV0pqakloM19HQ2s1ay04TFU4QUFSYVBjU0UzWmhlem9LVFNmd1FuMVhPMTAxZzVoMzM3cFpsZWFJbEZsaHhQUkZTS3RwWHo3QkVlemtVaTVDSnFONGQycU5vQks5a2FwbGpGWUVWZFBqUnFhQm50NGJsbXlGUlhqaGRNTndBIiwiaWF0IjoxNTU5MTM4OTE0LCJleHAiOjE1NTkxNDI1MTR9.lhfmhXYfoaI4QcJYvFnr2FMn_RHO8aXSzzkXzwNpc7w",
-                "code": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTU5MTM5MjEzfQ.G2dLcSnjpwM_joWTxWLfL48vhdlj3zGV9Os5cKREYcY"
+        expect(await response2.text()).to.equal(ACCESS_TOKEN_RESPONSE.patient)
+    });
+
+    it("can bypass oauth by passing `fhirServiceUrl`", async () => {
+        const app = express()
+        
+        app.use(session({
+            secret: "my secret",
+            resave: false,
+            saveUninitialized: false
+        }));
+        
+        app.use(SMART({ clientId: "whatever" }))
+        
+        app.get("/", (req, res) => req.fhirClient.request("Patient").then(pt => res.json(pt)))
+
+        const { address, server } = await startServer(app);
+        appServer = server;
+
+        nock(FHIR_SERVER_URL).get("/Patient").reply(200, { resourceType: "Patient" })
+
+        const res1 = await fetch(`${address}/launch?fhirServiceUrl=${encodeURIComponent(FHIR_SERVER_URL)}`, {
+            redirect   : "manual",
+            credentials: "include",
+            mode       : "navigate"
+        })
+        
+        const cookieHeader = res1.headers.get("set-cookie")
+        const location = res1.headers.get("location")
+        assert(cookieHeader, "No cookie returned by the launch call")
+        assert(location, "Did not redirect")
+
+        const res2 = await fetch(location, {
+            credentials: "include",
+            headers: {
+                cookie: cookieHeader.replace(/;.+$/, "")
             }
-        });
+        })
 
-        const client = await smart.ready();
-
-        expect(client.patient.id).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
-        expect(client.encounter.id).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
-        expect(client.user.id).to.equal("smart-Practitioner-71482713");
-        expect(client.user.resourceType).to.equal("Practitioner");
+        expect(await res2.json()).to.equal({ resourceType: "Patient" })
     });
 
-    it ("can bypass oauth by passing `fhirServiceUrl` to `authorize`", async () => {
-        const req   = new HttpRequest("http://localhost/launch");
-        const res   = new HttpResponse();
-        const smart = FHIR(req as any, res as any);
-        await smart.authorize({ fhirServiceUrl: "http://localhost" });
-        expect(res.status).to.equal(302);
-        expect(res.headers.location).to.exist();
-        const url = new URL(res.headers.location);
-        expect(url.href).to.match(/http:\/\/localhost\/\?state=./);
-    });
-
-    it ("appends 'launch' to the scopes if needed", async () => {
-        const req     = new HttpRequest("http://localhost/launch");
-        const res     = new HttpResponse();
-        const storage = new MemoryStorage();
-        const smart   = FHIR(req as any, res as any, storage);
-        await smart.authorize({
-            fhirServiceUrl: "http://localhost",
-            scope: "x",
-            launch: "123"
-        });
-        expect(res.status).to.equal(302);
-        expect(res.headers.location).to.exist();
-        const url = new URL(res.headers.location);
-        const state = url.searchParams.get("state");
-        const stored = await storage.get(state + "");
-        expect(stored.scope).to.equal("x launch");
-    });
+    // it.skip ("appends 'launch' to the scopes if needed", async () => {
+    //     const req     = new HttpRequest("http://localhost/launch");
+    //     const res     = new HttpResponse();
+    //     const storage = new MemoryStorage();
+    //     const smart   = FHIR(req as any, res as any, storage);
+    //     await smart.authorize({
+    //         fhirServiceUrl: "http://localhost",
+    //         scope: "x",
+    //         launch: "123"
+    //     });
+    //     expect(res.status).to.equal(302);
+    //     expect(res.headers.location).to.exist();
+    //     const url = new URL(res.headers.location);
+    //     const state = url.searchParams.get("state");
+    //     const stored = await storage.get(state + "");
+    //     expect(stored.scope).to.equal("x launch");
+    // });
 
     // it ("can do standalone launch");
 });
@@ -270,7 +916,7 @@ describe("NodeAdapter", () => {
 
     it ("getStorage() works with factory function", () => {
 
-        const callLog = [];
+        const callLog: any[] = [];
 
         const fakeStorage: any = { fakeStorage: "whatever" };
 

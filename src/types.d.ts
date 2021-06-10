@@ -1,26 +1,26 @@
 /// <reference lib="dom" />
 
-import { Client } from "./Client";
-import { getPath, byCodes, byCode } from "./lib";
+import { Client } from "./lib/Client";
+// import { getPath, byCodes, byCode } from ".";
 import { IncomingMessage } from "http";
 
 // tslint:disable-next-line: no-namespace
-declare namespace fhirclient {
+declare module fhirclient {
 
     interface RequestWithSession extends IncomingMessage {
         session: fhirclient.JsonObject;
     }
 
     interface SMART {
-        options: BrowserFHIRSettings;
+        // options: BrowserFHIRSettings;
 
         /**
          * This should be called on your `redirect_uri`. Returns a Promise that
          * will eventually be resolved with a Client instance that you can use
          * to query the fhir server.
          */
-        ready(): Promise<Client>;
-        ready(onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
+        // ready(): Promise<Client>;
+        ready(onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
 
         /**
          * Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
@@ -63,7 +63,7 @@ declare namespace fhirclient {
          * Creates and returns a Client instance that can be used to query the
          * FHIR server.
          */
-        client(state: string | SMARTState): Client;
+        // client(state: string | SMARTState): Client;
     }
 
     interface BrowserFHIRSettings extends JsonObject {
@@ -75,17 +75,6 @@ declare namespace fhirclient {
          * ONLY RELEVANT IN BROWSERS!
          */
         replaceBrowserHistory?: boolean;
-
-        /**
-         * When set to true, this variable will fully utilize HTML5
-         * sessionStorage API. This variable can be overridden to false by
-         * setting `FHIR.oauth2.settings.fullSessionStorageSupport = false`.
-         * When set to false, the sessionStorage will be keyed by a state
-         * variable. This is to allow the embedded IE browser instances
-         * instantiated on a single thread to continue to function without
-         * having sessionStorage data shared across the embedded IE instances.
-         */
-        fullSessionStorageSupport?: boolean;
 
         /**
          * Do we want to send cookies while making a request to the token
@@ -134,7 +123,7 @@ declare namespace fhirclient {
          * path
          * @param path The relative path to redirect to
          */
-        redirect(to: string): void | Promise<any>;
+        redirect(to: string): any;
 
         /**
          * This must return a Storage object
@@ -161,7 +150,7 @@ declare namespace fhirclient {
          * arguments. For example in node we will need a request, a response and
          * optionally a storage or storage factory function.
          */
-        getSmartApi(): SMART;
+        // getSmartApi(): any//SMART;
     }
 
     /**
@@ -388,6 +377,23 @@ declare namespace fhirclient {
          * received from the server.
          */
         expiresAt?: number;
+
+        /**
+         * - If `true`, multiple apps can be launched, maintaining separate
+         *   sessions. However, a `state` URL parameter is used as session
+         *   identifier. This means that users can see and even modify that
+         *   state parameter, breaking the app or making it select the wrong
+         *   session.
+         * - If `false`, an app can be started multiple times in different
+         *   tabs but it will (re)use a single session. For example, if an
+         *   app is launched against R4 server and then launched again in
+         *   new tab against STU3, after refreshing the first one it will
+         *   switch to STU3 as well.
+         * 
+         * Defaults to `false`, only because that makes more sense in
+         * production (assuming EHR environment)
+         */
+         multiple?: boolean
     }
 
     /**
@@ -459,19 +465,12 @@ declare namespace fhirclient {
 
         /**
          * Defaults to the current directory (it's index file)
-         * @alias redirect_uri
          */
         redirectUri?: string;
 
         /**
-         * Same as redirectUri
-         * @alias redirectUri
-         * @deprecated
-         */
-        redirect_uri?: string;
-
-        /**
-         * 
+         * If set to true `authorize` will resolve with the redirect url as string
+         * instead of actually redirecting. Useful for debugging.
          */
         noRedirect?: boolean;
 
@@ -480,19 +479,8 @@ declare namespace fhirclient {
          * EHR. This is not required if you only intend to communicate with open
          * FHIR servers. Note: For backwards compatibility reasons we also accept
          * `client_id` instead of `clientId`!
-         * @alias client_id
          */
         clientId?: string;
-
-        /**
-         * The client_id that you have obtained while registering your app in the
-         * EHR. This is not required if you only intend to communicate with open
-         * FHIR servers. Note: For backwards compatibility reasons we accept
-         * `client_id` as an alias of `clientId`!
-         * @alias clientId
-         * @deprecated
-         */
-        client_id?: string;
 
         /**
          * One or more space-separated scopes that you would like to request from
@@ -566,10 +554,27 @@ declare namespace fhirclient {
          * [[authorize]] was called.
          */
         completeInTarget?: boolean;
+
+        /**
+         * - If `true`, multiple apps can be launched, maintaining separate
+         *   sessions. However, a `state` URL parameter is used as session
+         *   identifier. This means that users can see and even modify that
+         *   state parameter, breaking the app or making it select the wrong
+         *   session.
+         * - If `false`, an app can be started multiple times in different
+         *   tabs but it will (re)use a single session. For example, if an
+         *   app is launched against R4 server and then launched again in
+         *   new tab against STU3, after refreshing the first one it will
+         *   switch to STU3 as well.
+         * 
+         * Defaults to `false`, only because that makes more sense in
+         * production (assuming EHR environment)
+         */
+        multiple?: boolean
     }
 
     /**
-     * Additional options that can be passed to `client.request` to control its
+     * Additional options that can be passed to `[client.request]` to control its
      * behavior
      */
     interface FhirOptions {
@@ -633,6 +638,16 @@ declare namespace fhirclient {
          * Only applicable if you use `resolveReferences`. If `false`, the resolved
          * references will not be "mounted" in the result tree, but will be returned
          * as separate map object instead. **Defaults to `true`**.
+         * 
+         * @example
+         * **Fetch references in a separate object**
+         * ```js
+         * // Resolves with Object ({ data, references }) or rejects with an Error
+         * client.request("Encounter/518a522a-4b10-47db-9daf-53b726d32607", {
+         *     resolveReferences: [ "serviceProvider" ],
+         *     graph: false
+         * });
+         * ```
          */
         graph?: boolean;
 
@@ -640,9 +655,12 @@ declare namespace fhirclient {
          * One or more references to resolve. Single item can be specified as a
          * string or as an array of one string. Multiple items must be specified as
          * array.
-         * - Each item is a dot-separated path to the desired reference within the
-         *   result object, excluding the "reference" property. For example
-         *   `context.serviceProvider` will look for `{Response}.context.serviceProvider.reference`.
+         * - The paths are relative to the current resource. For example, use
+         *   `subject` instead of `entry.resource.subject`.
+         * - Path can have arbitrary depth but should not include the last
+         *   `reference` segment. For example the path `a.b.c` will resolve
+         *   `{current resource}.a.b.c.reference` but will mount the result at
+         *   `{current resource}.a.b.c`.
          * - If the target is an array of references (E.g.
          *   [Patient.generalPractitioner](http://hl7.org/fhir/R4/patient-definitions.html#Patient.generalPractitioner)), you can request one or more of them by index (E.g. `generalPractitioner.0`).
          *   If the index is not specified, all the references in the array will be
@@ -654,6 +672,29 @@ declare namespace fhirclient {
          *   subject and encounter in parallel, and then proceed to encounter.serviceProvider.
          * - This option does not work with contained references (they are "already
          *   resolved" anyway).
+         * 
+         * @example
+         * **Resolve serviceProvider references**
+         * ```js
+         * // Resolves with augmented Encounter or rejects with an Error
+         * client.request("Encounter/id", {
+         *     resolveReferences: [ "serviceProvider" ]
+         * });
+         * ```
+         * @example
+         * **Extracting multiple related resources from single Observation**
+         * ```js
+         * // Resolves with Object (augmented Observation) or rejects with an Error
+         * client.request("Observation/smart-691-bmi", {
+         *    resolveReferences: [
+         *        "context",                 // The Encounter (STU-3)
+         *        "context.serviceProvider", // The Organization (hospital, STU-3)
+         *        "performer.0",             // The Practitioner (the first "performer")
+         *        "subject",                 // The Patient
+         *        "identifier..assigner"     // All identifier assigners
+         *    ]
+         * });
+         * ```
          */
         resolveReferences?: string|string[];
 

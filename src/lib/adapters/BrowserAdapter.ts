@@ -1,7 +1,7 @@
 import { ready, authorize, init } from "../smart";
 import { Client } from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
-import { fhirclient } from "../types";
+import { fhirclient } from "../../types";
 
 /**
  * Browser Adapter
@@ -32,17 +32,6 @@ export default class BrowserAdapter implements fhirclient.Adapter
             // Replaces the browser's current URL
             // using window.history.replaceState API or by reloading.
             replaceBrowserHistory: true,
-
-            // When set to true, this variable will fully utilize
-            // HTML5 sessionStorage API.
-            // This variable can be overridden to false by setting
-            // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-            // When set to false, the sessionStorage will be keyed
-            // by a state variable. This is to allow the embedded IE browser
-            // instances instantiated on a single thread to continue to
-            // function without having sessionStorage data shared
-            // across the embedded IE instances.
-            fullSessionStorageSupport: true,
 
             // Do we want to send cookies while making a request to the token
             // endpoint in order to obtain new access token using existing
@@ -124,29 +113,29 @@ export default class BrowserAdapter implements fhirclient.Adapter
         return AbortController;
     }
 
-    /**
-     * Creates and returns adapter-aware SMART api. Not that while the shape of
-     * the returned object is well known, the arguments to this function are not.
-     * Those who override this method are free to require any environment-specific
-     * arguments. For example in node we will need a request, a response and
-     * optionally a storage or storage factory function.
-     */
-    getSmartApi(): fhirclient.SMART
-    {
-        return {
-            ready    : (...args: any[]) => ready(this, ...args),
-            authorize: options => authorize(this, options),
-            init     : options => init(this, options),
-            client   : (state: string | fhirclient.SMARTState) => {
-                if (typeof state === "string") {
-                    state = { serverUrl: state }
-                }
-                const client = new Client(state, {
-                    refreshWithCredentials: this.options.refreshTokenWithCredentials
-                })
-                return client
-            },
-            options  : this.options
-        };
-    }
+    // /**
+    //  * Creates and returns adapter-aware SMART api. Not that while the shape of
+    //  * the returned object is well known, the arguments to this function are not.
+    //  * Those who override this method are free to require any environment-specific
+    //  * arguments. For example in node we will need a request, a response and
+    //  * optionally a storage or storage factory function.
+    //  */
+    // getSmartApi(): fhirclient.SMART
+    // {
+    //     return {
+    //         ready    : (...args: any[]) => ready(this, ...args),
+    //         authorize: options => authorize(this, options),
+    //         init     : options => init(this, options),
+    //         client   : (state: string | fhirclient.SMARTState) => {
+    //             if (typeof state === "string") {
+    //                 state = { serverUrl: state }
+    //             }
+    //             const client = new Client(state, {
+    //                 refreshWithCredentials: this.options.refreshTokenWithCredentials
+    //             })
+    //             return client
+    //         },
+    //         options  : this.options
+    //     };
+    // }
 }

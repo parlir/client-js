@@ -1,8 +1,7 @@
 import { expect }   from "@hapi/code";
 import * as Lab     from "@hapi/lab";
-import { Response } from "cross-fetch";
 import * as lib     from "../src/lib";
-import HttpError    from "../src/HttpError";
+import * as util    from "../src/util";
 import mockServer   from "./mocks/mockServer";
 import ServerEnv    from "./mocks/ServerEnvironment";
 import BrowserEnv   from "./mocks/BrowserEnvironment";
@@ -16,31 +15,31 @@ describe("Lib", () => {
     describe("setPath", () => {
         it ("works as expected", () => {
             const data = { a: 1, b: [0, { a: 2 }] };
-            expect(lib.setPath(data, "b.1.a", 3)).to.equal({ a: 1, b: [0, { a: 3 }] });
-            expect(lib.setPath(data, "b.2"  , 7)).to.equal({ a: 1, b: [0, { a: 3 }, 7] });
+            expect(util.setPath(data, "b.1.a", 3)).to.equal({ a: 1, b: [0, { a: 3 }] });
+            expect(util.setPath(data, "b.2"  , 7)).to.equal({ a: 1, b: [0, { a: 3 }, 7] });
         });
 
         it ("does nothing if the first argument is null", () => {
             // @ts-ignore
-            expect(lib.setPath(null, "b.1.a", 3)).to.equal(null);
+            expect(util.setPath(null, "b.1.a", 3)).to.equal(null);
         });
     });
 
     describe("getPath", () => {
         it ("returns the first arg if no path", () => {
             const data = {};
-            expect(lib.getPath(data)).to.equal(data);
+            expect(util.getPath(data)).to.equal(data);
         });
 
         it ("returns the first arg for empty path", () => {
             const data = {};
-            expect(lib.getPath(data, "")).to.equal(data);
+            expect(util.getPath(data, "")).to.equal(data);
         });
 
         it ("works as expected", () => {
             const data = { a: 1, b: [0, { a: 2 }] };
-            expect(lib.getPath(data, "b.1.a")).to.equal(2);
-            expect(lib.getPath(data, "b.4.a")).to.equal(undefined);
+            expect(util.getPath(data, "b.1.a")).to.equal(2);
+            expect(util.getPath(data, "b.4.a")).to.equal(undefined);
         });
 
         it ("dive into arrays", () => {
@@ -69,7 +68,7 @@ describe("Lib", () => {
             };
 
             for (let path in map) {
-                expect(lib.getPath(data, path)).to.equal(map[path]);
+                expect(util.getPath(data, path)).to.equal(map[path]);
             }
         });
     });
@@ -120,40 +119,40 @@ describe("Lib", () => {
 
         it ("Using expires_in in the browser", () => {
             const now = Math.floor(Date.now() / 1000);
-            expect(lib.getAccessTokenExpiration({ expires_in: 10 }, new BrowserEnv())).to.equal(now + 10);
+            expect(lib.getAccessTokenExpiration({ expires_in: 10 })).to.equal(now + 10);
         });
 
         it ("Using expires_in on the server", () => {
             const now = Math.floor(Date.now() / 1000);
-            expect(lib.getAccessTokenExpiration({ expires_in: 10 }, new ServerEnv())).to.equal(now + 10);
+            expect(lib.getAccessTokenExpiration({ expires_in: 10 })).to.equal(now + 10);
         });
 
         it ("Using token.exp in the browser", () => {
             const env = new BrowserEnv();
             const now = Math.floor(Date.now() / 1000);
             const access_token = "." + env.btoa(JSON.stringify({ exp: now + 10 })) + ".";
-            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 10);
+            expect(lib.getAccessTokenExpiration({ access_token })).to.equal(now + 10);
         });
 
         it ("Using token.exp on the server", () => {
             const env = new ServerEnv();
             const now = Math.floor(Date.now() / 1000);
             const access_token = "." + env.btoa(JSON.stringify({ exp: now + 10 })) + ".";
-            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 10);
+            expect(lib.getAccessTokenExpiration({ access_token })).to.equal(now + 10);
         });
 
         it ("fails back to 5 min in the browser", () => {
             const env = new BrowserEnv();
             const now = Math.floor(Date.now() / 1000);
             const access_token = "x";
-            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 300);
+            expect(lib.getAccessTokenExpiration({ access_token })).to.equal(now + 300);
         });
 
         it ("fails back to 5 min on the server", () => {
             const env = new ServerEnv();
             const now = Math.floor(Date.now() / 1000);
             const access_token = "x";
-            expect(lib.getAccessTokenExpiration({ access_token }, env)).to.equal(now + 300);
+            expect(lib.getAccessTokenExpiration({ access_token })).to.equal(now + 300);
         });
     });
 

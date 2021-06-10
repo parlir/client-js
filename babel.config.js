@@ -22,7 +22,7 @@ module.exports = {
                 }]
             ]
         },
-        module: {
+        module: { // not used since v3
             presets: [
                 ["@babel/preset-env", {
                     useBuiltIns: "usage",

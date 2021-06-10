@@ -1,10 +1,8 @@
-import { fhirclient } from "../types";
-import { ready, authorize, init } from "../smart";
-import { Client } from "../Client";
 import ServerStorage from "../storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import { IncomingMessage, ServerResponse } from "http";
 import { TLSSocket } from "tls";
+import { fhirclient } from "../../types";
 
 
 interface NodeAdapterOptions {
@@ -71,7 +69,8 @@ export default class NodeAdapter implements fhirclient.Adapter
         }
 
         const protocol = this.getProtocol();
-        const orig = String(req.headers["x-original-uri"] || req.url);
+        // @ts-ignore
+        const orig = String(req.headers["x-original-uri"] || req.originalUrl || req.url);
         return new URL(orig, protocol + "://" + host);
     }
 
@@ -114,26 +113,26 @@ export default class NodeAdapter implements fhirclient.Adapter
         return AbortController;
     }
 
-    /**
-     * Creates and returns adapter-aware SMART api. Not that while the shape of
-     * the returned object is well known, the arguments to this function are not.
-     * Those who override this method are free to require any environment-specific
-     * arguments. For example in node we will need a request, a response and
-     * optionally a storage or storage factory function.
-     */
-    getSmartApi(): fhirclient.SMART
-    {
-        return {
-            ready    : (...args: any[]) => ready(this, ...args),
-            authorize: options => authorize(this, options),
-            init     : options => init(this, options),
-            client   : (state: string | fhirclient.SMARTState) => {
-                if (typeof state === "string") {
-                    state = { serverUrl: state }
-                }
-                return new Client(state)
-            },
-            options  : this.options
-        };
-    }
+    // /**
+    //  * Creates and returns adapter-aware SMART api. Not that while the shape of
+    //  * the returned object is well known, the arguments to this function are not.
+    //  * Those who override this method are free to require any environment-specific
+    //  * arguments. For example in node we will need a request, a response and
+    //  * optionally a storage or storage factory function.
+    //  */
+    // getSmartApi(): fhirclient.SMART
+    // {
+    //     return {
+    //         ready    : (...args: any[]) => ready(this, ...args),
+    //         authorize: options => authorize(this, options),
+    //         init     : options => init(this, options),
+    //         client   : (state: string | fhirclient.SMARTState) => {
+    //             if (typeof state === "string") {
+    //                 state = { serverUrl: state }
+    //             }
+    //             return new Client(state)
+    //         },
+    //         options  : this.options
+    //     };
+    // }
 }

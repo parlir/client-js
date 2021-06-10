@@ -4,7 +4,7 @@ require("./mocks/mockDebug");
 import { URL }    from "url";
 import { expect } from "@hapi/code";
 import * as Lab   from "@hapi/lab";
-import * as smart from "../src/smart";
+import * as smart from "../src/lib/smart";
 import * as lib   from "../src/lib";
 
 // mocks
@@ -109,7 +109,7 @@ describe("Browser tests", () => {
                 iss: mockUrl,
                 launch: "123",
                 scope: "my_scope",
-                client_id: "my_client_id"
+                clientId: "my_client_id"
             });
 
             // Now we have been redirected to `redirect` and then back to our
@@ -150,12 +150,9 @@ describe("Browser tests", () => {
             expect(client.getUserType()).to.equal("Practitioner");
         });
 
-        it ("code flow with fullSessionStorageSupport = false", async () => {
+        it ("code flow in multiple mode", async () => {
 
-            const env = new BrowserEnv({
-                fullSessionStorageSupport: false,
-                replaceBrowserHistory: false
-            });
+            const env = new BrowserEnv();
 
             const Storage = env.getStorage();
 
@@ -172,7 +169,8 @@ describe("Browser tests", () => {
                 iss: mockUrl,
                 launch: "123",
                 scope: "my_scope",
-                client_id: "my_client_id"
+                clientId: "my_client_id",
+                multiple: true
             });
 
             // Now we have been redirected to `redirect` and then back to our
@@ -182,7 +180,6 @@ describe("Browser tests", () => {
             // Get the state parameter from the URL
             const key = redirect.searchParams.get("state"); // console.log(redirect);
 
-            // console.log(redirect, state, storage.get(state));
             expect(await Storage.get(key), "must have set a state at " + key).to.exist();
 
             // mock our access token response
@@ -200,13 +197,13 @@ describe("Browser tests", () => {
 
             const client = await smart.completeAuth(env);
 
-            // make sure tha browser history was not replaced
-            expect(window.history._location).to.equal("");
+            // make sure the code parameter is removed
+            expect(window.history._location).to.equal("http://localhost/?state=" + key);
 
-            // without fullSessionStorageSupport our key lives at the URL!
+            // in multiple mode our key lives at the URL!
             expect(
                 await Storage.get(smart.KEY),
-                `without fullSessionStorageSupport a '${smart.KEY}' key should not be used`
+                `in multiple mode a '${smart.KEY}' key should not be used`
             ).to.not.exist();
 
 
@@ -222,16 +219,16 @@ describe("Browser tests", () => {
 
         it ("refresh an authorized page", async () => {
 
-            const env = new BrowserEnv();
-            const Storage = env.getStorage();
-            const key = "whatever-random-key";
+            const adapter = new BrowserEnv();
+            const storage = adapter.getStorage();
+            const key     = "whatever-random-key";
 
-            await Storage.set(smart.KEY, key);
-            await Storage.set(key, {
-                clientId     : "my_web_app",
-                scope        : "whatever",
-                redirectUri  : "whatever",
-                serverUrl    : mockUrl,
+            await storage.set(smart.KEY, key);
+            await storage.set(key, {
+                clientId   : "my_web_app",
+                scope      : "whatever",
+                redirectUri: "whatever",
+                serverUrl  : mockUrl,
                 key,
                 tokenResponse: {
                     "need_patient_banner": true,
@@ -248,10 +245,11 @@ describe("Browser tests", () => {
                     "code": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb250ZXh0Ijp7Im5lZWRfcGF0aWVudF9iYW5uZXIiOnRydWUsInNtYXJ0X3N0eWxlX3VybCI6Imh0dHBzOi8vbGF1bmNoLnNtYXJ0aGVhbHRoaXQub3JnL3NtYXJ0LXN0eWxlLmpzb24iLCJwYXRpZW50IjoiYjI1MzZkZDMtYmNjZC00ZDIyLTgzNTUtYWIyMGFjZGYyNDBiIiwiZW5jb3VudGVyIjoiZTNlYzJkMTUtNGMyNy00NjA3LWE0NWMtMmY4NDk2MmIwNzAwIn0sImNsaWVudF9pZCI6Im15X3dlYl9hcHAiLCJzY29wZSI6Im9wZW5pZCBmaGlyVXNlciBvZmZsaW5lX2FjY2VzcyB1c2VyLyouKiBwYXRpZW50LyouKiBsYXVuY2gvZW5jb3VudGVyIGxhdW5jaC9wYXRpZW50IHByb2ZpbGUiLCJ1c2VyIjoiUHJhY3RpdGlvbmVyL3NtYXJ0LVByYWN0aXRpb25lci03MTQ4MjcxMyIsImlhdCI6MTU1OTEzODkxMywiZXhwIjoxNTU5MTM5MjEzfQ.G2dLcSnjpwM_joWTxWLfL48vhdlj3zGV9Os5cKREYcY"
                 }
             });
-
-            env.redirect("http://localhost/");
-            const client = await smart.completeAuth(env);
-
+            console.log(1)
+            adapter.redirect("http://localhost/");
+            console.log(2)
+            const client = await smart.ready(adapter);
+            console.log(3)
             expect(client.patient.id).to.equal("b2536dd3-bccd-4d22-8355-ab20acdf240b");
             expect(client.encounter.id).to.equal("e3ec2d15-4c27-4607-a45c-2f84962b0700");
             expect(client.user.id).to.equal("smart-Practitioner-71482713");
@@ -340,7 +338,7 @@ describe("Browser tests", () => {
                 iss: mockUrl,
                 // launch: "123",
                 scope: "my_scope",
-                client_id: "my_client_id"
+                clientId: "my_client_id"
             });
 
             // Now we have been redirected to `redirect` and then back to our
@@ -1107,7 +1105,7 @@ describe("Browser tests", () => {
                     env.once("redirect", async () => {
                         env.redirect("http://localhost/?code=123&state=" + env.getUrl().searchParams.get("state"));
                         smart.init(env, {
-                            client_id : "my_web_app",
+                            clientId : "my_web_app",
                             scope     : "launch/patient",
                             iss       : mockUrl
                         }).then(resolve).catch(reject);
@@ -1116,7 +1114,7 @@ describe("Browser tests", () => {
                     // This first call will NEVER resolve, but it will
                     // trigger a "redirect" event
                     smart.init(env, {
-                        client_id : "my_web_app",
+                        clientId : "my_web_app",
                         scope     : "launch/patient",
                         iss       : mockUrl
                     }).catch(reject);
@@ -1130,7 +1128,7 @@ describe("Browser tests", () => {
                 // Now rey once again to test the page refresh flow
                 env.redirect("http://localhost/?state=" + env.getUrl().searchParams.get("state"));
                 client = await smart.init(env, {
-                    client_id : "my_web_app",
+                    clientId : "my_web_app",
                     scope     : "launch/patient",
                     iss       : mockUrl
                 });
@@ -1184,7 +1182,7 @@ describe("Browser tests", () => {
                     env.once("redirect", async () => {
                         env.redirect("http://localhost/?code=123&state=" + env.getUrl().searchParams.get("state"));
                         smart.init(env, {
-                            client_id : "my_web_app",
+                            clientId : "my_web_app",
                             scope     : "launch/patient",
                             iss       : mockUrl
                         }).then(resolve).catch(reject);
@@ -1193,7 +1191,7 @@ describe("Browser tests", () => {
                     // This first call will NEVER resolve, but it will
                     // trigger a "redirect" event
                     smart.init(env, {
-                        client_id : "my_web_app",
+                        clientId : "my_web_app",
                         scope     : "launch/patient",
                         iss       : mockUrl
                     }).catch(reject);
@@ -1208,7 +1206,7 @@ describe("Browser tests", () => {
                 // Now redirect once again to test the page refresh flow
                 env.redirect("http://localhost/?code=123");
                 client = await smart.init(env, {
-                    client_id : "my_web_app",
+                    clientId : "my_web_app",
                     scope     : "launch/patient",
                     iss       : mockUrl
                 });

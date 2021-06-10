@@ -9,11 +9,12 @@ import {
     getAccessTokenExpiration,
     getTargetWindow,
     isBrowser,
-    btoa
-} from "./lib";
+    btoa,
+    assert
+} from ".";
 import { Client } from "./Client";
 import { SMART_KEY } from "./settings";
-import { fhirclient } from "./types";
+import { fhirclient } from "../types";
 
 
 const debug = _debug.extend("oauth2");
@@ -41,9 +42,7 @@ export function fetchWellKnownJson(baseUrl = "/", requestOptions?: RequestInit):
 function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions?: RequestInit): Promise<fhirclient.OAuthSecurityExtensions>
 {
     return fetchWellKnownJson(baseUrl, requestOptions).then(meta => {
-        if (!meta.authorization_endpoint || !meta.token_endpoint) {
-            throw new Error("Invalid wellKnownJson");
-        }
+        assert(meta.authorization_endpoint && meta.token_endpoint, "Invalid wellKnownJson");
         return {
             registrationUri: meta.registration_endpoint  || "",
             authorizeUri   : meta.authorization_endpoint,
@@ -174,17 +173,14 @@ export async function authorize(
     params: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[] = {}
 ): Promise<string|void>
 {
-    const url = env.getUrl();
+    const url = env.getUrl(); 
 
     // Multiple config for EHR launches ---------------------------------------
     if (Array.isArray(params)) {
+
         const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
-        if (!urlISS) {
-            throw new Error(
-                'Passing in an "iss" url parameter is required if authorize ' +
-                'uses multiple configurations'
-            );
-        }
+        assert(urlISS,'Passing in an "iss" url parameter is required if authorize uses multiple configurations');
+
         // pick the right config
         const cfg = params.find(x => {
             if (x.issMatch) {
@@ -200,25 +196,23 @@ export async function authorize(
             }
             return false;
         });
-        if (!cfg) {
-            throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
-        }
+
+        assert(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
         return await authorize(env, cfg);
     }
     // ------------------------------------------------------------------------
 
     // Obtain input
     const {
-        redirect_uri,
         clientSecret,
         fakeTokenResponse,
         patientId,
         encounterId,
-        client_id,
         noRedirect,
         target,
         width,
-        height
+        height,
+        multiple
     } = params;
 
     let {
@@ -238,14 +232,6 @@ export async function authorize(
     fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
     launch         = url.searchParams.get("launch")         || launch;
 
-    if (!clientId) {
-        clientId = client_id;
-    }
-
-    if (!redirectUri) {
-        redirectUri = redirect_uri;
-    }
-
     if (!redirectUri) {
         redirectUri = env.relative(".");
     } else if (!redirectUri.match(/^https?\:\/\//)) {
@@ -255,12 +241,7 @@ export async function authorize(
     const serverUrl = String(iss || fhirServiceUrl || "");
 
     // Validate input
-    if (!serverUrl) {
-        throw new Error(
-            "No server url found. It must be specified as `iss` or as " +
-            "`fhirServiceUrl` parameter"
-        );
-    }
+    assert(serverUrl, 'No server url found. It must be specified as "iss" or as "fhirServiceUrl" parameter');
 
     if (iss) {
         debug("Making %s launch...", launch ? "EHR" : "standalone");
@@ -268,7 +249,7 @@ export async function authorize(
 
     // append launch scope if needed
     if (launch && !scope.match(/launch/)) {
-        scope += " launch";
+        scope = scope ? scope + " launch" : "launch";
     }
 
     if (isBrowser()) {
@@ -297,8 +278,8 @@ export async function authorize(
 
     // If `authorize` is called, make sure we clear any previous state (in case
     // this is a re-authorize)
-    const oldKey = await storage.get(SMART_KEY);
-    await storage.unset(oldKey);
+    // const oldKey = await storage.get(SMART_KEY);
+    // await storage.unset(oldKey);
 
     // create initial state
     const stateKey = randomString(16);
@@ -310,14 +291,11 @@ export async function authorize(
         clientSecret,
         tokenResponse: {},
         // key: stateKey,
+        multiple,
         completeInTarget
     };
 
-    const fullSessionStorageSupport = isBrowser() ?
-        getPath(env, "options.fullSessionStorageSupport") :
-        true;
-
-    if (fullSessionStorageSupport) {
+    if (!multiple) {
         await storage.set(SMART_KEY, stateKey);
     }
 
@@ -340,7 +318,7 @@ export async function authorize(
 
     // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
     if (fhirServiceUrl && !iss) {
-        debug("Making fake launch...");
+        console.log("Making fake launch...");
         await storage.set(stateKey, state);
         if (noRedirect) {
             return redirectUrl;
@@ -391,7 +369,7 @@ export async function authorize(
             try {
                 // Also remove any old state from the target window and then
                 // transfer the current state there
-                win.sessionStorage.removeItem(oldKey);
+                // win.sessionStorage.removeItem(oldKey);
                 win.sessionStorage.setItem(stateKey, JSON.stringify(state));
             } catch (ex) {
                 _debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
@@ -462,25 +440,83 @@ export function onMessage(e: MessageEvent) {
     }
 }
 
+async function cleanUpUrl(adapter: fhirclient.Adapter) {
+    const url                  = adapter.getUrl();
+    const storage              = adapter.getStorage();
+    const params               = url.searchParams;
+    const code                 = params.get("code");
+    const state                = params.get("state");
+
+    const from = url.href
+
+    // `code` is the flag that tells us to request an access token. We have to
+    // remove it, otherwise the page will authorize on every load!
+    if (code) {
+        params.delete("code");
+        debug("Removed code parameter from the url.");
+    }
+
+    // Unless we are in "multiple" mode, we no longer need the `state` key. It
+    // will be stored to a well known location at `sessionStorage[SMART_KEY]`.
+    if (state) {
+        const stored = await storage.get(state);
+        if (!stored.multiple) {
+            await storage.set(SMART_KEY, state);
+            params.delete("state");
+            debug("Removed state parameter from the url.");
+        }
+    }
+
+
+    // If the browser does not support the replaceState method for the History
+    // Web API, the "code" parameter cannot be removed. As a consequence, the
+    // page will (re)authorize on every load. The workaround is to reload the
+    // page to new location without those parameters (as we do for servers).
+    if (isBrowser() && window.history.replaceState) {
+        window.history.replaceState({}, "", url.href);
+    } else {
+        // console.log("redirect from", from, "to", url.href)
+        return adapter.redirect(url.href)
+    }
+}
+
+async function getAccessToken(adapter: fhirclient.Adapter, code: string, state: string): Promise<fhirclient.TokenResponse> {
+
+    assert(code, "'code' parameter is required");
+    assert(state, "'state' parameter is required");
+
+    const storage = adapter.getStorage();
+
+    let stored = (await storage.get(state)) as fhirclient.SMARTState;
+
+    debug("Preparing to exchange the code for access token...");
+    const requestOptions = buildTokenRequest(code, stored);
+    debug("Token request options: %O", requestOptions);
+    assert(stored.tokenUri, "No tokenUri found for this server")
+
+    // @ts-ignore The EHR authorization server SHALL return a JSON
+    // structure that includes an access token or a message indicating
+    // that the authorization request has been denied.
+    const tokenResponse = await request<fhirclient.TokenResponse>(stored.tokenUri, requestOptions);
+    debug("Token response: %O", tokenResponse);
+    assert(tokenResponse.access_token, "Failed to obtain access token.");
+    return tokenResponse
+}
+
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
+export async function completeAuth(env: fhirclient.Adapter): Promise<any>
 {
-    const url     = env.getUrl();
-    const Storage = env.getStorage();
-    const params  = url.searchParams;
-
-    let key                    = params.get("state");
+    const url                  = env.getUrl();
+    const Storage              = env.getStorage();
+    const params               = url.searchParams;
     const code                 = params.get("code");
     const authError            = params.get("error");
     const authErrorDescription = params.get("error_description");
-
-    if (!key) {
-        key = await Storage.get(SMART_KEY);
-    }
+    const key                  = params.get("state")
 
     // Start by checking the url for `error` and `error_description` parameters.
     // This happens when the auth server rejects our authorization attempt. In
@@ -491,26 +527,15 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     // manually). However, if `completeAuth()` is being called, we can assume
     // that the url comes from the auth server (otherwise the app won't work
     // anyway).
-    if (authError || authErrorDescription) {
-        throw new Error([
-            authError,
-            authErrorDescription
-        ].filter(Boolean).join(": "));
-    }
+    assert(!(authError || authErrorDescription), [authError, authErrorDescription].filter(Boolean).join(": "));
 
     debug("key: %s, code: %s", key, code);
 
-    // key might be coming from the page url so it might be empty or missing
-    if (!key) {
-        throw new Error("No 'state' parameter found. Please (re)launch the app.");
-    }
+    // key is coming from the page url so it might be empty or missing
+    assert(key, "No 'state' parameter found. Please launch this as SMART app.");
 
     // Check if we have a previous state
-    let state = (await Storage.get(key)) as fhirclient.SMARTState;
-
-    const fullSessionStorageSupport = isBrowser() ?
-        getPath(env, "options.fullSessionStorageSupport") :
-        true;
+    let state = (await Storage.get(key)) as fhirclient.SMARTState; // console.log(state)
 
     // If we are in a popup window or an iframe and the authorization is
     // complete, send the location back to our opener and exit.
@@ -542,44 +567,8 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
 
     url.searchParams.delete("complete");
 
-    // Do we have to remove the `code` and `state` params from the URL?
-    const hasState = params.has("state");
-
-    if (isBrowser() && getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
-        // `code` is the flag that tell us to request an access token.
-        // We have to remove it, otherwise the page will authorize on
-        // every load!
-        if (code) {
-            params.delete("code");
-            debug("Removed code parameter from the url.");
-        }
-
-        // If we have `fullSessionStorageSupport` it means we no longer
-        // need the `state` key. It will be stored to a well know
-        // location - sessionStorage[SMART_KEY]. However, no
-        // fullSessionStorageSupport means that this "well know location"
-        // might be shared between windows and tabs. In this case we
-        // MUST keep the `state` url parameter.
-        if (hasState && fullSessionStorageSupport) {
-            params.delete("state");
-            debug("Removed state parameter from the url.");
-        }
-
-        // If the browser does not support the replaceState method for the
-        // History Web API, the "code" parameter cannot be removed. As a
-        // consequence, the page will (re)authorize on every load. The
-        // workaround is to reload the page to new location without those
-        // parameters. If that is not acceptable replaceBrowserHistory
-        // should be set to false.
-        if (window.history.replaceState) {
-            window.history.replaceState({}, "", url.href);
-        }
-    }
-
     // If the state does not exist, it means the page has been loaded directly.
-    if (!state) {
-        throw new Error("No state found! Please (re)launch the app.");
-    }
+    assert(state, "No state found! Please (re)launch the app.");
 
     // Assume the client has already completed a token exchange when
     // there is no code (but we have a state) or access token is found in state
@@ -589,22 +578,9 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     // Otherwise, we have to complete the code flow
     if (!authorized && state.tokenUri) {
 
-        if (!code) {
-            throw new Error("'code' url parameter is required");
-        }
+        assert(code, "'code' url parameter is required");
 
-        debug("Preparing to exchange the code for access token...");
-        const requestOptions = buildTokenRequest(code, state);
-        debug("Token request options: %O", requestOptions);
-
-        // The EHR authorization server SHALL return a JSON structure that
-        // includes an access token or a message indicating that the
-        // authorization request has been denied.
-        const tokenResponse = await request<fhirclient.TokenResponse>(state.tokenUri, requestOptions);
-        debug("Token response: %O", tokenResponse);
-        if (!tokenResponse.access_token) {
-            throw new Error("Failed to obtain access token.");
-        }
+        const tokenResponse = await getAccessToken(env, code, key)
 
         // Now we need to determine when is this authorization going to expire
         state.expiresAt = getAccessTokenExpiration(tokenResponse);
@@ -616,19 +592,12 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
         debug("Authorization successful!");
     }
     else {
-        debug(state.tokenResponse?.access_token ?
-            "Already authorized" :
-            "No authorization needed"
-        );
+        debug(state.tokenResponse?.access_token ? "Already authorized" : "No authorization needed");
     }
 
-    if (fullSessionStorageSupport) {
-        await Storage.set(SMART_KEY, key);
-    }
+    await cleanUpUrl(env)
 
-    const client = new Client(state, { save: (state) => Storage.set(key + "", state)});
-    debug("Created client instance: %O", client);
-    return client;
+    return getClient(env, key)
 }
 
 /**
@@ -639,17 +608,9 @@ export function buildTokenRequest(code: string, state: fhirclient.SMARTState): R
 {
     const { redirectUri, clientSecret, tokenUri, clientId } = state;
 
-    if (!redirectUri) {
-        throw new Error("Missing state.redirectUri");
-    }
-
-    if (!tokenUri) {
-        throw new Error("Missing state.tokenUri");
-    }
-
-    if (!clientId) {
-        throw new Error("Missing state.clientId");
-    }
+    assert(redirectUri, "Missing state.redirectUri");
+    assert(tokenUri, "Missing state.tokenUri");
+    assert(clientId, "Missing state.clientId");
 
     const requestOptions: fhirclient.JsonObject = {
         method: "POST",
@@ -678,20 +639,52 @@ export function buildTokenRequest(code: string, state: fhirclient.SMARTState): R
     return requestOptions as RequestInit;
 }
 
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
+export async function getClient(adapter: fhirclient.Adapter, key: string): Promise<Client>
+{
+    const storage = adapter.getStorage(); 
+    const stored  = await storage.get(key);
+    assert(stored, "No state found in storage. Please (re)launch the SMART app")
+    return new Client(stored, {
+        save: (state: fhirclient.SMARTState) => storage.set(key, state)
+    });
+}
+
 export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>
 {
-    let task = completeAuth(env);
+    let task;
+    const url    = env.getUrl();
+    const params = url.searchParams;
+    const code   = params.get("code");
+    const state  = params.get("state");
+
+
+    // Coming back from the auth server. Must complete the auth flow
+    if (code) {
+        task = completeAuth(env)
+    }
+
+    // Revive an app in multiple mode
+    else if (state) {
+        task = getClient(env, state)
+    }
+
+    // Revive singular app
+    else {
+        const key = await env.getStorage().get(SMART_KEY)
+        if (!key) {
+            // console.log(env.getStorage())
+        }
+        task = getClient(env, key)
+    }
+
     if (onSuccess) {
         task = task.then(onSuccess);
     }
+
     if (onError) {
         task = task.catch(onError);
     }
+
     return task;
 }
 

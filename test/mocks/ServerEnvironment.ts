@@ -1,4 +1,4 @@
-import ServerStorage from "../../src/storage/ServerStorage";
+import ServerStorage from "../../src/lib/storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 import { fhirclient } from "../../src/types";
 

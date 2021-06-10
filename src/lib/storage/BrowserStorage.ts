@@ -1,4 +1,5 @@
-import { fhirclient } from "../types";
+import { fhirclient } from "../../types";
+
 
 export default class Storage
 {

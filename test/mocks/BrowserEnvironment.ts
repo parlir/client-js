@@ -1,6 +1,6 @@
 /* global fhir */
 const EventEmitter = require("events");
-import BrowserStorage      from "../../src/storage/BrowserStorage";
+import BrowserStorage      from "../../src/lib/storage/BrowserStorage";
 import { fhirclient }      from "../../src/types";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
 
