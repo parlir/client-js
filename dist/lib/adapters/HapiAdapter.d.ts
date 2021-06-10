@@ -1,6 +1,6 @@
 import NodeAdapter from "./NodeAdapter";
-import { fhirclient } from "../types";
 import { ResponseToolkit, Request, ResponseObject } from "hapi";
+import { fhirclient } from "../../types";
 interface HapiAdapterOptions {
     request: Request;
     responseToolkit: ResponseToolkit;
@@ -27,12 +27,5 @@ export default class HapiAdapter extends NodeAdapter {
      * @param location The path to redirect to
      */
     redirect(location: string): ResponseObject;
-    /**
-     * This is the static entry point and MUST be provided
-     * @param request The hapi request
-     * @param h The hapi response toolkit
-     * @param storage Custom storage instance or a storage factory function
-     */
-    static smart(request: Request, h: ResponseToolkit, storage?: fhirclient.Storage | fhirclient.storageFactory): fhirclient.SMART;
 }
 export {};

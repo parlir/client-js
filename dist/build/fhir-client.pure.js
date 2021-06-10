@@ -82,7 +82,7 @@ window["FHIR"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/entry/browser.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/browser.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -1039,10 +1039,63 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/Client.ts":
-/*!***********************!*\
-  !*** ./src/Client.ts ***!
-  \***********************/
+/***/ "./src/browser.ts":
+/*!************************!*\
+  !*** ./src/browser.ts ***!
+  \************************/
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const Client_1 = __webpack_require__(/*! ./lib/Client */ "./src/lib/Client.ts");
+
+const util = __webpack_require__(/*! ./util */ "./src/util.ts");
+
+const smart = __webpack_require__(/*! ./lib/smart */ "./src/lib/smart.ts"); // In Browsers we create an adapter, get the SMART api from it and build the
+// global FHIR object
+
+
+const BrowserAdapter_1 = __webpack_require__(/*! ./lib/adapters/BrowserAdapter */ "./src/lib/adapters/BrowserAdapter.ts");
+
+const adapter = new BrowserAdapter_1.default(); // const { options } = adapter.getSmartApi();
+// We have two kinds of browser builds - "pure" for new browsers and "legacy"
+// for old ones. In pure builds we assume that the browser supports everything
+// we need. In legacy mode, the library also acts as a polyfill. Babel will
+// automatically polyfill everything except "fetch", which we have to handle
+// manually.
+// @ts-ignore
+
+if (false) {} // $lab:coverage:off$
+
+
+const FHIR = {
+  Client: Client_1.Client,
+  SMART: {
+    authorize(options) {
+      return smart.authorize(adapter, options);
+    },
+
+    ready(onSuccess, onError) {
+      return smart.ready(adapter, onSuccess, onError);
+    },
+
+    init(options) {
+      return smart.init(adapter, options);
+    }
+
+  },
+  util
+};
+module.exports = FHIR; // $lab:coverage:on$
+
+/***/ }),
+
+/***/ "./src/lib/Client.ts":
+/*!***************************!*\
+  !*** ./src/lib/Client.ts ***!
+  \***************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1054,9 +1107,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Client = exports.msg = void 0;
 
-const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+const _1 = __webpack_require__(/*! . */ "./src/lib/index.ts");
 
-const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
+const util_1 = __webpack_require__(/*! ../util */ "./src/util.ts");
+
+const settings_1 = __webpack_require__(/*! ./settings */ "./src/lib/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
 
 
@@ -1064,7 +1119,7 @@ const {
   Response
 } =  true ? window : undefined; // $lab:coverage:on$
 
-const debug = lib_1.debug.extend("client");
+const debug = _1.debug.extend("client");
 /**
  * Adds patient context to requestOptions object to be used with [[Client.request]]
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
@@ -1073,22 +1128,20 @@ const debug = lib_1.debug.extend("client");
  * @return requestOptions object contextualized to current patient
  */
 
+
 async function contextualize(requestOptions, client) {
-  const base = lib_1.absolute("/", client.state.serverUrl);
+  const base = _1.absolute("/", client.state.serverUrl);
 
   async function contextualURL(_url) {
     const resourceType = _url.pathname.split("/").pop();
 
-    if (!resourceType) {
-      throw new Error(`Invalid url "${_url}"`);
-    }
+    _1.assert(resourceType, `Invalid url "${_url}"`);
 
-    if (settings_1.patientCompartment.indexOf(resourceType) == -1) {
-      throw new Error(`Cannot filter "${resourceType}" resources by patient`);
-    }
+    _1.assert(settings_1.patientCompartment.indexOf(resourceType) > -1, `Cannot filter "${resourceType}" resources by patient`);
 
-    const conformance = await lib_1.fetchConformanceStatement(client.state.serverUrl);
-    const searchParam = lib_1.getPatientParam(conformance, resourceType);
+    const conformance = await _1.fetchConformanceStatement(client.state.serverUrl);
+
+    const searchParam = _1.getPatientParam(conformance, resourceType);
 
     _url.searchParams.set(searchParam, client.patient.id);
 
@@ -1141,11 +1194,11 @@ function getRef(refId, cache, client, signal) {
 
 
 function resolveRef(obj, path, graph, cache, client, signal) {
-  const node = lib_1.getPath(obj, path);
+  const node = _1.getPath(obj, path);
 
   if (node) {
     const isArray = Array.isArray(node);
-    return Promise.all(lib_1.makeArray(node).filter(Boolean).map((item, i) => {
+    return Promise.all(util_1.makeArray(node).filter(Boolean).map((item, i) => {
       const ref = item.reference;
 
       if (ref) {
@@ -1153,12 +1206,12 @@ function resolveRef(obj, path, graph, cache, client, signal) {
           if (graph) {
             if (isArray) {
               if (path.indexOf("..") > -1) {
-                lib_1.setPath(obj, `${path.replace("..", `.${i}.`)}`, sub);
+                _1.setPath(obj, `${path.replace("..", `.${i}.`)}`, sub);
               } else {
-                lib_1.setPath(obj, `${path}.${i}`, sub);
+                _1.setPath(obj, `${path}.${i}`, sub);
               }
             } else {
-              lib_1.setPath(obj, path, sub);
+              _1.setPath(obj, path, sub);
             }
           }
         }).catch(ex => {
@@ -1183,7 +1236,7 @@ function resolveRef(obj, path, graph, cache, client, signal) {
 
 function resolveRefs(obj, fhirOptions, cache, client, signal) {
   // 1. Sanitize paths, remove any invalid ones
-  let paths = lib_1.makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
+  let paths = util_1.makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
   .map(path => String(path).trim()).filter(Boolean); // No space-only strings
   // 2. Remove duplicates
 
@@ -1274,8 +1327,6 @@ class Client {
    * - Checks for rejected scopes
    */
   constructor(state, options = {}) {
-    var _a, _b;
-
     this.options = {
       refreshWithCredentials: "same-origin"
     };
@@ -1289,7 +1340,7 @@ class Client {
      * @category Utility
      */
 
-    this.units = lib_1.units;
+    this.units = _1.units;
 
     if (typeof state == "string") {
       state = {
@@ -1298,9 +1349,7 @@ class Client {
     } // Valid serverUrl is required!
 
 
-    if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-    }
+    _1.assert(state.serverUrl && state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
 
     Object.assign(this.options, options);
     this.state = state;
@@ -1364,14 +1413,14 @@ class Client {
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
 
-    if (lib_1.isBrowser()) {
+    if (_1.isBrowser()) {
       // @ts-ignore
       this.connect(window.fhir);
     }
 
     this.checkScopes();
 
-    if (!this.state.expiresAt && this.state.tokenUri && ((_a = this.state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token) && ((_b = this.state.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token) && (this.hasGrantedScope("offline_access") || this.hasGrantedScope("online_access"))) {
+    if (!this.state.expiresAt && this.state.tokenUri && this.state.tokenResponse && this.state.tokenResponse.access_token && this.state.tokenResponse.refresh_token && (this.hasGrantedScope("offline_access") || this.hasGrantedScope("online_access"))) {
       console.warn(exports.msg.noExpiresAt);
     }
   }
@@ -1432,16 +1481,15 @@ class Client {
 
     const scopes = String(((_a = this.state.tokenResponse) === null || _a === void 0 ? void 0 : _a.scope) || "").trim().split(/\s+/);
     return scopes.indexOf(scope) > -1;
-  }
-  /**
-   * Checks if the given scope has been requested
-   */
+  } // /**
+  //  * Checks if the given scope has been requested
+  //  */
+  // hasRequestedScope(scope: string): boolean
+  // {
+  //     const scopes = String(this.state.scope || "").trim().split(/\s+/);
+  //     return scopes.indexOf(scope) > -1;
+  // }
 
-
-  hasRequestedScope(scope) {
-    const scopes = String(this.state.scope || "").trim().split(/\s+/);
-    return scopes.indexOf(scope) > -1;
-  }
   /**
    * Compares the requested scopes (from `state.scope`) with the granted
    * scopes (from `state.tokenResponse.scope`). Emits a warning if any of
@@ -1532,7 +1580,7 @@ class Client {
         return null;
       }
 
-      return lib_1.jwtDecode(idToken);
+      return _1.jwtDecode(idToken);
     }
 
     console.warn(this.state.authorizeUri ? exports.msg.noUserBeforeAuth : exports.msg.noUserFromOpenServer);
@@ -1549,7 +1597,13 @@ class Client {
     const idToken = this.getIdToken();
 
     if (idToken) {
-      return idToken.fhirUser || idToken.profile;
+      // Epic may return a full url like
+      // @see https://github.com/smart-on-fhir/client-js/issues/105
+      if (idToken.fhirUser) {
+        return idToken.fhirUser.split("/").slice(-2).join("/");
+      }
+
+      return idToken.profile;
     }
 
     return null;
@@ -1602,7 +1656,7 @@ class Client {
     } = this.state;
 
     if (username && password) {
-      return "Basic " + lib_1.btoa(username + ":" + password);
+      return "Basic " + _1.btoa(username + ":" + password);
     }
 
     return null;
@@ -1697,11 +1751,9 @@ class Client {
   async request(requestOptions, fhirOptions = {}, _resolvedRefs = {}) {
     var _a;
 
-    const debugRequest = lib_1.debug.extend("client:request");
+    const debugRequest = _1.debug.extend("client:request");
 
-    if (!requestOptions) {
-      throw new Error(exports.msg.requestNeedsArgs);
-    } // url -----------------------------------------------------------------
+    _1.assert(requestOptions, exports.msg.requestNeedsArgs); // url -----------------------------------------------------------------
 
 
     let url;
@@ -1713,7 +1765,7 @@ class Client {
       url = String(requestOptions.url);
     }
 
-    url = lib_1.absolute(url, this.state.serverUrl);
+    url = _1.absolute(url, this.state.serverUrl);
     const options = {
       graph: fhirOptions.graph !== false,
       flat: !!fhirOptions.flat,
@@ -1743,7 +1795,7 @@ class Client {
     }) // Make the request
     .then(requestOptions => {
       debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
-      return lib_1.request(url, requestOptions).then(result => {
+      return _1.request(url, requestOptions).then(result => {
         if (requestOptions.includeResponse) {
           response = result.response;
           return result.body;
@@ -1821,7 +1873,7 @@ class Client {
 
           if (--options.pageLimit) {
             const next = links.find(l => l.relation == "next");
-            _data = lib_1.makeArray(_data);
+            _data = util_1.makeArray(_data);
 
             if (next && next.url) {
               const nextPage = await this.request({
@@ -1839,10 +1891,10 @@ class Client {
 
               if (options.resolveReferences.length) {
                 Object.assign(_resolvedRefs, nextPage.references);
-                return _data.concat(lib_1.makeArray(nextPage.data || nextPage));
+                return _data.concat(util_1.makeArray(nextPage.data || nextPage));
               }
 
-              return _data.concat(lib_1.makeArray(nextPage));
+              return _data.concat(util_1.makeArray(nextPage));
             }
           }
         }
@@ -1912,7 +1964,8 @@ class Client {
   refresh(requestOptions = {}) {
     var _a, _b;
 
-    const debugRefresh = lib_1.debug.extend("client:refresh");
+    const debugRefresh = _1.debug.extend("client:refresh");
+
     debugRefresh("Attempting to refresh with refresh_token...");
     const refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
 
@@ -1952,7 +2005,7 @@ class Client {
 
       if (clientSecret) {
         // @ts-ignore
-        refreshRequestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+        refreshRequestOptions.headers.authorization = "Basic " + _1.btoa(clientId + ":" + clientSecret);
       }
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
@@ -1961,14 +2014,12 @@ class Client {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(data => {
-        if (!data.access_token) {
-          throw new Error(exports.msg.gotNoAccessToken);
-        }
+      this._refreshTask = _1.request(tokenUri, refreshRequestOptions).then(data => {
+        _1.assert(data.access_token, exports.msg.gotNoAccessToken);
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(this.state.tokenResponse, data);
-        this.state.expiresAt = lib_1.getAccessTokenExpiration(data);
+        this.state.expiresAt = _1.getAccessTokenExpiration(data);
         this.checkScopes();
         return this.state;
       }).catch(error => {
@@ -2008,7 +2059,7 @@ class Client {
 
 
   byCode(observations, property) {
-    return lib_1.byCode(observations, property);
+    return util_1.byCode(observations, property);
   }
   /**
    * First groups the observations by code using `byCode`. Then returns a function
@@ -2030,7 +2081,7 @@ class Client {
 
 
   byCodes(observations, property) {
-    return lib_1.byCodes(observations, property);
+    return util_1.byCodes(observations, property);
   }
   /**
    * Walks through an object (or array) and returns the value found at the
@@ -2048,7 +2099,7 @@ class Client {
 
 
   getPath(obj, path = "") {
-    return lib_1.getPath(obj, path);
+    return _1.getPath(obj, path);
   }
   /**
    * Returns a copy of the client state. Accepts a dot-separated path argument
@@ -2065,7 +2116,7 @@ class Client {
 
 
   getState(path = "") {
-    return lib_1.getPath({ ...this.state
+    return _1.getPath({ ...this.state
     }, path);
   }
   /**
@@ -2075,7 +2126,7 @@ class Client {
 
 
   getFhirVersion() {
-    return lib_1.fetchConformanceStatement(this.state.serverUrl).then(metadata => metadata.fhirVersion);
+    return _1.fetchConformanceStatement(this.state.serverUrl).then(metadata => metadata.fhirVersion);
   }
   /**
    * Returns a promise that will be resolved with the numeric fhir version
@@ -2096,10 +2147,10 @@ exports.Client = Client;
 
 /***/ }),
 
-/***/ "./src/HttpError.ts":
-/*!**************************!*\
-  !*** ./src/HttpError.ts ***!
-  \**************************/
+/***/ "./src/lib/HttpError.ts":
+/*!******************************!*\
+  !*** ./src/lib/HttpError.ts ***!
+  \******************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2126,22 +2177,22 @@ class HttpError extends Error {
         const type = this.response.headers.get("Content-Type") || "text/plain";
 
         if (type.match(/\bjson\b/i)) {
-          let body = await this.response.json();
+          this.body = await this.response.json();
 
-          if (body.error) {
-            this.message += "\n" + body.error;
+          if (this.body.error) {
+            this.message += "\n" + this.body.error;
 
-            if (body.error_description) {
-              this.message += ": " + body.error_description;
+            if (this.body.error_description) {
+              this.message += ": " + this.body.error_description;
             }
           } else {
-            this.message += "\n\n" + JSON.stringify(body, null, 4);
+            this.message += "\n\n" + JSON.stringify(this.body, null, 4);
           }
         } else if (type.match(/^text\//i)) {
-          let body = await this.response.text();
+          this.body = await this.response.text();
 
-          if (body) {
-            this.message += "\n\n" + body;
+          if (this.body) {
+            this.message += "\n\n" + this.body;
           }
         }
       } catch {// ignore
@@ -2167,10 +2218,10 @@ exports.default = HttpError;
 
 /***/ }),
 
-/***/ "./src/adapters/BrowserAdapter.ts":
-/*!****************************************!*\
-  !*** ./src/adapters/BrowserAdapter.ts ***!
-  \****************************************/
+/***/ "./src/lib/adapters/BrowserAdapter.ts":
+/*!********************************************!*\
+  !*** ./src/lib/adapters/BrowserAdapter.ts ***!
+  \********************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2181,11 +2232,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
-
-const Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
-
-const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
+const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/lib/storage/BrowserStorage.ts");
 /**
  * Browser Adapter
  */
@@ -2209,16 +2256,6 @@ class BrowserAdapter {
       // Replaces the browser's current URL
       // using window.history.replaceState API or by reloading.
       replaceBrowserHistory: true,
-      // When set to true, this variable will fully utilize
-      // HTML5 sessionStorage API.
-      // This variable can be overridden to false by setting
-      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-      // When set to false, the sessionStorage will be keyed
-      // by a state variable. This is to allow the embedded IE browser
-      // instances instantiated on a single thread to continue to
-      // function without having sessionStorage data shared
-      // across the embedded IE instances.
-      fullSessionStorageSupport: true,
       // Do we want to send cookies while making a request to the token
       // endpoint in order to obtain new access token using existing
       // refresh token. In rare cases the auth server might require the
@@ -2299,35 +2336,6 @@ class BrowserAdapter {
   getAbortController() {
     return AbortController;
   }
-  /**
-   * Creates and returns adapter-aware SMART api. Not that while the shape of
-   * the returned object is well known, the arguments to this function are not.
-   * Those who override this method are free to require any environment-specific
-   * arguments. For example in node we will need a request, a response and
-   * optionally a storage or storage factory function.
-   */
-
-
-  getSmartApi() {
-    return {
-      ready: (...args) => smart_1.ready(this, ...args),
-      authorize: options => smart_1.authorize(this, options),
-      init: options => smart_1.init(this, options),
-      client: state => {
-        if (typeof state === "string") {
-          state = {
-            serverUrl: state
-          };
-        }
-
-        const client = new Client_1.Client(state, {
-          refreshWithCredentials: this.options.refreshTokenWithCredentials
-        });
-        return client;
-      },
-      options: this.options
-    };
-  }
 
 }
 
@@ -2335,58 +2343,10 @@ exports.default = BrowserAdapter;
 
 /***/ }),
 
-/***/ "./src/entry/browser.ts":
-/*!******************************!*\
-  !*** ./src/entry/browser.ts ***!
-  \******************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const util = __webpack_require__(/*! ../util */ "./src/util.ts"); // In Browsers we create an adapter, get the SMART api from it and build the
-// global FHIR object
-
-
-const BrowserAdapter_1 = __webpack_require__(/*! ../adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.ts");
-
-const adapter = new BrowserAdapter_1.default();
-const {
-  ready,
-  authorize,
-  init,
-  client,
-  options
-} = adapter.getSmartApi(); // We have two kinds of browser builds - "pure" for new browsers and "legacy"
-// for old ones. In pure builds we assume that the browser supports everything
-// we need. In legacy mode, the library also acts as a polyfill. Babel will
-// automatically polyfill everything except "fetch", which we have to handle
-// manually.
-// @ts-ignore
-
-if (false) {} // $lab:coverage:off$
-
-
-const FHIR = {
-  AbortController: window.AbortController,
-  client,
-  oauth2: {
-    settings: options,
-    ready,
-    authorize,
-    init
-  },
-  util
-};
-module.exports = FHIR; // $lab:coverage:on$
-
-/***/ }),
-
-/***/ "./src/lib.ts":
-/*!********************!*\
-  !*** ./src/lib.ts ***!
-  \********************/
+/***/ "./src/lib/index.ts":
+/*!**************************!*\
+  !*** ./src/lib/index.ts ***!
+  \**************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2400,11 +2360,11 @@ module.exports = FHIR; // $lab:coverage:on$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
-const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
+const HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/lib/HttpError.ts");
 
-const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+const settings_1 = __webpack_require__(/*! ./settings */ "./src/lib/settings.ts");
 
 const debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js"); // $lab:coverage:off$
 // @ts-ignore
@@ -2682,22 +2642,6 @@ function setPath(obj, path, value, createEmpty = false) {
 
 exports.setPath = setPath;
 /**
- * If the argument is an array returns it as is. Otherwise puts it in an array
- * (`[arg]`) and returns the result
- * @param arg The element to test and possibly convert to array
- * @category Utility
- */
-
-function makeArray(arg) {
-  if (Array.isArray(arg)) {
-    return arg;
-  }
-
-  return [arg];
-}
-
-exports.makeArray = makeArray;
-/**
  * Given a path, converts it to absolute url based on the `baseUrl`. If baseUrl
  * is not provided, the result would be a rooted path (one that starts with `/`).
  * @param path The path to convert
@@ -2804,68 +2748,6 @@ function getAccessTokenExpiration(tokenResponse) {
 }
 
 exports.getAccessTokenExpiration = getAccessTokenExpiration;
-/**
- * Groups the observations by code. Returns a map that will look like:
- * ```js
- * const map = client.byCodes(observations, "code");
- * // map = {
- * //     "55284-4": [ observation1, observation2 ],
- * //     "6082-2": [ observation3 ]
- * // }
- * ```
- * @param observations Array of observations
- * @param property The name of a CodeableConcept property to group by
- */
-
-function byCode(observations, property) {
-  const ret = {};
-
-  function handleCodeableConcept(concept, observation) {
-    if (concept && Array.isArray(concept.coding)) {
-      concept.coding.forEach(({
-        code
-      }) => {
-        if (code) {
-          ret[code] = ret[code] || [];
-          ret[code].push(observation);
-        }
-      });
-    }
-  }
-
-  makeArray(observations).forEach(o => {
-    if (o.resourceType === "Observation" && o[property]) {
-      if (Array.isArray(o[property])) {
-        o[property].forEach(concept => handleCodeableConcept(concept, o));
-      } else {
-        handleCodeableConcept(o[property], o);
-      }
-    }
-  });
-  return ret;
-}
-
-exports.byCode = byCode;
-/**
- * First groups the observations by code using `byCode`. Then returns a function
- * that accepts codes as arguments and will return a flat array of observations
- * having that codes. Example:
- * ```js
- * const filter = client.byCodes(observations, "category");
- * filter("laboratory") // => [ observation1, observation2 ]
- * filter("vital-signs") // => [ observation3 ]
- * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
- * ```
- * @param observations Array of observations
- * @param property The name of a CodeableConcept property to group by
- */
-
-function byCodes(observations, property) {
-  const bank = byCode(observations, property);
-  return (...codes) => codes.filter(code => code + "" in bank).reduce((prev, code) => prev.concat(bank[code + ""]), []);
-}
-
-exports.byCodes = byCodes;
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.
@@ -3006,14 +2888,22 @@ async function getTargetWindow(target, width = 800, height = 720) {
 }
 
 exports.getTargetWindow = getTargetWindow;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+exports.assert = assert;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
-/***/ "./src/settings.ts":
-/*!*************************!*\
-  !*** ./src/settings.ts ***!
-  \*************************/
+/***/ "./src/lib/settings.ts":
+/*!*****************************!*\
+  !*** ./src/lib/settings.ts ***!
+  \*****************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3064,10 +2954,10 @@ exports.SMART_KEY = "SMART_KEY";
 
 /***/ }),
 
-/***/ "./src/smart.ts":
-/*!**********************!*\
-  !*** ./src/smart.ts ***!
-  \**********************/
+/***/ "./src/lib/smart.ts":
+/*!**************************!*\
+  !*** ./src/lib/smart.ts ***!
+  \**************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3077,14 +2967,14 @@ exports.SMART_KEY = "SMART_KEY";
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
+exports.init = exports.ready = exports.getClient = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
 /* global window */
 
-const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+const _1 = __webpack_require__(/*! . */ "./src/lib/index.ts");
 
-const Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
+const Client_1 = __webpack_require__(/*! ./Client */ "./src/lib/Client.ts");
 
-const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+const settings_1 = __webpack_require__(/*! ./settings */ "./src/lib/settings.ts");
 
 Object.defineProperty(exports, "KEY", {
   enumerable: true,
@@ -3092,7 +2982,8 @@ Object.defineProperty(exports, "KEY", {
     return settings_1.SMART_KEY;
   }
 });
-const debug = lib_1.debug.extend("oauth2");
+
+const debug = _1.debug.extend("oauth2");
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -3100,9 +2991,10 @@ const debug = lib_1.debug.extend("oauth2");
  * @param baseUrl The base URL of the FHIR server
  */
 
+
 function fetchWellKnownJson(baseUrl = "/", requestOptions) {
   const url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return lib_1.getAndCache(url, requestOptions).catch(ex => {
+  return _1.getAndCache(url, requestOptions).catch(ex => {
     throw new Error(`Failed to fetch the well-known json "${url}". ${ex.message}`);
   });
 }
@@ -3114,9 +3006,7 @@ exports.fetchWellKnownJson = fetchWellKnownJson;
 
 function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
   return fetchWellKnownJson(baseUrl, requestOptions).then(meta => {
-    if (!meta.authorization_endpoint || !meta.token_endpoint) {
-      throw new Error("Invalid wellKnownJson");
-    }
+    _1.assert(meta.authorization_endpoint && meta.token_endpoint, "Invalid wellKnownJson");
 
     return {
       registrationUri: meta.registration_endpoint || "",
@@ -3131,9 +3021,9 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
 
 
 function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOptions) {
-  return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(meta => {
+  return _1.fetchConformanceStatement(baseUrl, requestOptions).then(meta => {
     const nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    const extensions = (lib_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
+    const extensions = (_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(e => e.url === nsUri).map(o => o.extension)[0];
     const out = {
       registrationUri: "",
       authorizeUri: "",
@@ -3243,9 +3133,7 @@ async function authorize(env, params = {}) {
   if (Array.isArray(params)) {
     const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
 
-    if (!urlISS) {
-      throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
-    } // pick the right config
+    _1.assert(urlISS, 'Passing in an "iss" url parameter is required if authorize uses multiple configurations'); // pick the right config
 
 
     const cfg = params.find(x => {
@@ -3266,9 +3154,7 @@ async function authorize(env, params = {}) {
       return false;
     });
 
-    if (!cfg) {
-      throw new Error(`No configuration found matching the current "iss" parameter "${urlISS}"`);
-    }
+    _1.assert(cfg, `No configuration found matching the current "iss" parameter "${urlISS}"`);
 
     return await authorize(env, cfg);
   } // ------------------------------------------------------------------------
@@ -3276,16 +3162,15 @@ async function authorize(env, params = {}) {
 
 
   const {
-    redirect_uri,
     clientSecret,
     fakeTokenResponse,
     patientId,
     encounterId,
-    client_id,
     noRedirect,
     target,
     width,
-    height
+    height,
+    multiple
   } = params;
   let {
     iss,
@@ -3302,14 +3187,6 @@ async function authorize(env, params = {}) {
   fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
   launch = url.searchParams.get("launch") || launch;
 
-  if (!clientId) {
-    clientId = client_id;
-  }
-
-  if (!redirectUri) {
-    redirectUri = redirect_uri;
-  }
-
   if (!redirectUri) {
     redirectUri = env.relative(".");
   } else if (!redirectUri.match(/^https?\:\/\//)) {
@@ -3318,9 +3195,7 @@ async function authorize(env, params = {}) {
 
   const serverUrl = String(iss || fhirServiceUrl || ""); // Validate input
 
-  if (!serverUrl) {
-    throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
-  }
+  _1.assert(serverUrl, 'No server url found. It must be specified as "iss" or as "fhirServiceUrl" parameter');
 
   if (iss) {
     debug("Making %s launch...", launch ? "EHR" : "standalone");
@@ -3328,10 +3203,10 @@ async function authorize(env, params = {}) {
 
 
   if (launch && !scope.match(/launch/)) {
-    scope += " launch";
+    scope = scope ? scope + " launch" : "launch";
   }
 
-  if (lib_1.isBrowser()) {
+  if (_1.isBrowser()) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp();
 
@@ -3347,12 +3222,13 @@ async function authorize(env, params = {}) {
     }
   } // If `authorize` is called, make sure we clear any previous state (in case
   // this is a re-authorize)
+  // const oldKey = await storage.get(SMART_KEY);
+  // await storage.unset(oldKey);
+  // create initial state
 
 
-  const oldKey = await storage.get(settings_1.SMART_KEY);
-  await storage.unset(oldKey); // create initial state
+  const stateKey = _1.randomString(16);
 
-  const stateKey = lib_1.randomString(16);
   const state = {
     clientId,
     scope,
@@ -3361,11 +3237,11 @@ async function authorize(env, params = {}) {
     clientSecret,
     tokenResponse: {},
     // key: stateKey,
+    multiple,
     completeInTarget
   };
-  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
-  if (fullSessionStorageSupport) {
+  if (!multiple) {
     await storage.set(settings_1.SMART_KEY, stateKey);
   } // fakeTokenResponse to override stuff (useful in development)
 
@@ -3391,7 +3267,7 @@ async function authorize(env, params = {}) {
   let redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
   if (fhirServiceUrl && !iss) {
-    debug("Making fake launch...");
+    console.log("Making fake launch...");
     await storage.set(stateKey, state);
 
     if (noRedirect) {
@@ -3427,18 +3303,19 @@ async function authorize(env, params = {}) {
     return redirectUrl;
   }
 
-  if (target && lib_1.isBrowser()) {
+  if (target && _1.isBrowser()) {
     let win;
-    win = await lib_1.getTargetWindow(target, width, height);
+    win = await _1.getTargetWindow(target, width, height);
 
     if (win !== self) {
       try {
         // Also remove any old state from the target window and then
         // transfer the current state there
-        win.sessionStorage.removeItem(oldKey);
+        // win.sessionStorage.removeItem(oldKey);
         win.sessionStorage.setItem(stateKey, JSON.stringify(state));
       } catch (ex) {
-        lib_1.debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        _1.debug(`Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+
         win = self;
       }
     }
@@ -3448,7 +3325,8 @@ async function authorize(env, params = {}) {
         win.location.href = redirectUrl;
         self.addEventListener("message", onMessage);
       } catch (ex) {
-        lib_1.debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+        _1.debug(`Failed to modify window.location. Perhaps it is from different origin?. Failing back to "_self". %s`, ex);
+
         self.location.href = redirectUrl;
       }
     } else {
@@ -3509,11 +3387,74 @@ function onMessage(e) {
 }
 
 exports.onMessage = onMessage;
+
+async function cleanUpUrl(adapter) {
+  const url = adapter.getUrl();
+  const storage = adapter.getStorage();
+  const params = url.searchParams;
+  const code = params.get("code");
+  const state = params.get("state");
+  const from = url.href; // `code` is the flag that tells us to request an access token. We have to
+  // remove it, otherwise the page will authorize on every load!
+
+  if (code) {
+    params.delete("code");
+    debug("Removed code parameter from the url.");
+  } // Unless we are in "multiple" mode, we no longer need the `state` key. It
+  // will be stored to a well known location at `sessionStorage[SMART_KEY]`.
+
+
+  if (state) {
+    const stored = await storage.get(state);
+
+    if (!stored.multiple) {
+      await storage.set(settings_1.SMART_KEY, state);
+      params.delete("state");
+      debug("Removed state parameter from the url.");
+    }
+  } // If the browser does not support the replaceState method for the History
+  // Web API, the "code" parameter cannot be removed. As a consequence, the
+  // page will (re)authorize on every load. The workaround is to reload the
+  // page to new location without those parameters (as we do for servers).
+
+
+  if (_1.isBrowser() && window.history.replaceState) {
+    window.history.replaceState({}, "", url.href);
+  } else {
+    // console.log("redirect from", from, "to", url.href)
+    return adapter.redirect(url.href);
+  }
+}
+
+async function getAccessToken(adapter, code, state) {
+  _1.assert(code, "'code' parameter is required");
+
+  _1.assert(state, "'state' parameter is required");
+
+  const storage = adapter.getStorage();
+  let stored = await storage.get(state);
+  debug("Preparing to exchange the code for access token...");
+  const requestOptions = buildTokenRequest(code, stored);
+  debug("Token request options: %O", requestOptions);
+
+  _1.assert(stored.tokenUri, "No tokenUri found for this server"); // @ts-ignore The EHR authorization server SHALL return a JSON
+  // structure that includes an access token or a message indicating
+  // that the authorization request has been denied.
+
+
+  const tokenResponse = await _1.request(stored.tokenUri, requestOptions);
+  debug("Token response: %O", tokenResponse);
+
+  _1.assert(tokenResponse.access_token, "Failed to obtain access token.");
+
+  return tokenResponse;
+}
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
+
 
 async function completeAuth(env) {
   var _a, _b;
@@ -3521,14 +3462,10 @@ async function completeAuth(env) {
   const url = env.getUrl();
   const Storage = env.getStorage();
   const params = url.searchParams;
-  let key = params.get("state");
   const code = params.get("code");
   const authError = params.get("error");
   const authErrorDescription = params.get("error_description");
-
-  if (!key) {
-    key = await Storage.get(settings_1.SMART_KEY);
-  } // Start by checking the url for `error` and `error_description` parameters.
+  const key = params.get("state"); // Start by checking the url for `error` and `error_description` parameters.
   // This happens when the auth server rejects our authorization attempt. In
   // this case it has no other way to tell us what the error was, other than
   // appending these parameters to the redirect url.
@@ -3538,23 +3475,18 @@ async function completeAuth(env) {
   // that the url comes from the auth server (otherwise the app won't work
   // anyway).
 
+  _1.assert(!(authError || authErrorDescription), [authError, authErrorDescription].filter(Boolean).join(": "));
 
-  if (authError || authErrorDescription) {
-    throw new Error([authError, authErrorDescription].filter(Boolean).join(": "));
-  }
+  debug("key: %s, code: %s", key, code); // key is coming from the page url so it might be empty or missing
 
-  debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
-
-  if (!key) {
-    throw new Error("No 'state' parameter found. Please (re)launch the app.");
-  } // Check if we have a previous state
+  _1.assert(key, "No 'state' parameter found. Please launch this as SMART app."); // Check if we have a previous state
 
 
-  let state = await Storage.get(key);
-  const fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
+  let state = await Storage.get(key); // console.log(state)
+  // If we are in a popup window or an iframe and the authorization is
   // complete, send the location back to our opener and exit.
 
-  if (lib_1.isBrowser() && state && !state.completeInTarget) {
+  if (_1.isBrowser() && state && !state.completeInTarget) {
     const inFrame = isInFrame();
     const inPopUp = isInPopUp(); // we are about to return to the opener/parent where completeAuth will
     // be called again. In rare cases the opener or parent might also be
@@ -3589,45 +3521,9 @@ async function completeAuth(env) {
     }
   }
 
-  url.searchParams.delete("complete"); // Do we have to remove the `code` and `state` params from the URL?
+  url.searchParams.delete("complete"); // If the state does not exist, it means the page has been loaded directly.
 
-  const hasState = params.has("state");
-
-  if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
-    // `code` is the flag that tell us to request an access token.
-    // We have to remove it, otherwise the page will authorize on
-    // every load!
-    if (code) {
-      params.delete("code");
-      debug("Removed code parameter from the url.");
-    } // If we have `fullSessionStorageSupport` it means we no longer
-    // need the `state` key. It will be stored to a well know
-    // location - sessionStorage[SMART_KEY]. However, no
-    // fullSessionStorageSupport means that this "well know location"
-    // might be shared between windows and tabs. In this case we
-    // MUST keep the `state` url parameter.
-
-
-    if (hasState && fullSessionStorageSupport) {
-      params.delete("state");
-      debug("Removed state parameter from the url.");
-    } // If the browser does not support the replaceState method for the
-    // History Web API, the "code" parameter cannot be removed. As a
-    // consequence, the page will (re)authorize on every load. The
-    // workaround is to reload the page to new location without those
-    // parameters. If that is not acceptable replaceBrowserHistory
-    // should be set to false.
-
-
-    if (window.history.replaceState) {
-      window.history.replaceState({}, "", url.href);
-    }
-  } // If the state does not exist, it means the page has been loaded directly.
-
-
-  if (!state) {
-    throw new Error("No state found! Please (re)launch the app.");
-  } // Assume the client has already completed a token exchange when
+  _1.assert(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
   // there is no code (but we have a state) or access token is found in state
 
 
@@ -3635,25 +3531,11 @@ async function completeAuth(env) {
   // Otherwise, we have to complete the code flow
 
   if (!authorized && state.tokenUri) {
-    if (!code) {
-      throw new Error("'code' url parameter is required");
-    }
+    _1.assert(code, "'code' url parameter is required");
 
-    debug("Preparing to exchange the code for access token...");
-    const requestOptions = buildTokenRequest(code, state);
-    debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
-    // includes an access token or a message indicating that the
-    // authorization request has been denied.
+    const tokenResponse = await getAccessToken(env, code, key); // Now we need to determine when is this authorization going to expire
 
-    const tokenResponse = await lib_1.request(state.tokenUri, requestOptions);
-    debug("Token response: %O", tokenResponse);
-
-    if (!tokenResponse.access_token) {
-      throw new Error("Failed to obtain access token.");
-    } // Now we need to determine when is this authorization going to expire
-
-
-    state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
+    state.expiresAt = _1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
     // every page reload
 
     state = { ...state,
@@ -3665,15 +3547,8 @@ async function completeAuth(env) {
     debug(((_b = state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
   }
 
-  if (fullSessionStorageSupport) {
-    await Storage.set(settings_1.SMART_KEY, key);
-  }
-
-  const client = new Client_1.Client(state, {
-    save: state => Storage.set(key + "", state)
-  });
-  debug("Created client instance: %O", client);
-  return client;
+  await cleanUpUrl(env);
+  return getClient(env, key);
 }
 
 exports.completeAuth = completeAuth;
@@ -3690,17 +3565,11 @@ function buildTokenRequest(code, state) {
     clientId
   } = state;
 
-  if (!redirectUri) {
-    throw new Error("Missing state.redirectUri");
-  }
+  _1.assert(redirectUri, "Missing state.redirectUri");
 
-  if (!tokenUri) {
-    throw new Error("Missing state.tokenUri");
-  }
+  _1.assert(tokenUri, "Missing state.tokenUri");
 
-  if (!clientId) {
-    throw new Error("Missing state.clientId");
-  }
+  _1.assert(clientId, "Missing state.clientId");
 
   const requestOptions = {
     method: "POST",
@@ -3717,7 +3586,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.authorization = "Basic " + _1.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -3728,14 +3597,41 @@ function buildTokenRequest(code, state) {
 }
 
 exports.buildTokenRequest = buildTokenRequest;
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
+
+async function getClient(adapter, key) {
+  const storage = adapter.getStorage();
+  const stored = await storage.get(key);
+
+  _1.assert(stored, "No state found in storage. Please (re)launch the SMART app");
+
+  return new Client_1.Client(stored, {
+    save: state => storage.set(key, state)
+  });
+}
+
+exports.getClient = getClient;
 
 async function ready(env, onSuccess, onError) {
-  let task = completeAuth(env);
+  let task;
+  const url = env.getUrl();
+  const params = url.searchParams;
+  const code = params.get("code");
+  const state = params.get("state"); // Coming back from the auth server. Must complete the auth flow
+
+  if (code) {
+    task = completeAuth(env);
+  } // Revive an app in multiple mode
+  else if (state) {
+      task = getClient(env, state);
+    } // Revive singular app
+    else {
+        const key = await env.getStorage().get(settings_1.SMART_KEY);
+
+        if (!key) {// console.log(env.getStorage())
+        }
+
+        task = getClient(env, key);
+      }
 
   if (onSuccess) {
     task = task.then(onSuccess);
@@ -3819,10 +3715,10 @@ exports.init = init;
 
 /***/ }),
 
-/***/ "./src/storage/BrowserStorage.ts":
-/*!***************************************!*\
-  !*** ./src/storage/BrowserStorage.ts ***!
-  \***************************************/
+/***/ "./src/lib/storage/BrowserStorage.ts":
+/*!*******************************************!*\
+  !*** ./src/lib/storage/BrowserStorage.ts ***!
+  \*******************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3904,31 +3800,14 @@ exports.default = Storage;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.makeArray = exports.byCodes = exports.byCode = void 0;
 
-var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib/index.ts");
 
-Object.defineProperty(exports, "byCode", {
-  enumerable: true,
-  get: function () {
-    return lib_1.byCode;
-  }
-});
-Object.defineProperty(exports, "byCodes", {
-  enumerable: true,
-  get: function () {
-    return lib_1.byCodes;
-  }
-});
 Object.defineProperty(exports, "getPath", {
   enumerable: true,
   get: function () {
     return lib_1.getPath;
-  }
-});
-Object.defineProperty(exports, "makeArray", {
-  enumerable: true,
-  get: function () {
-    return lib_1.makeArray;
   }
 });
 Object.defineProperty(exports, "setPath", {
@@ -3937,12 +3816,84 @@ Object.defineProperty(exports, "setPath", {
     return lib_1.setPath;
   }
 });
-Object.defineProperty(exports, "jwtDecode", {
-  enumerable: true,
-  get: function () {
-    return lib_1.jwtDecode;
+/**
+ * Groups the observations by code. Returns a map that will look like:
+ * ```js
+ * const map = client.byCodes(observations, "code");
+ * // map = {
+ * //     "55284-4": [ observation1, observation2 ],
+ * //     "6082-2": [ observation3 ]
+ * // }
+ * ```
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
+ */
+
+function byCode(observations, property) {
+  const ret = {};
+
+  function handleCodeableConcept(concept, observation) {
+    if (concept && Array.isArray(concept.coding)) {
+      concept.coding.forEach(({
+        code
+      }) => {
+        if (code) {
+          ret[code] = ret[code] || [];
+          ret[code].push(observation);
+        }
+      });
+    }
   }
-});
+
+  makeArray(observations).forEach(o => {
+    if (o.resourceType === "Observation" && o[property]) {
+      if (Array.isArray(o[property])) {
+        o[property].forEach(concept => handleCodeableConcept(concept, o));
+      } else {
+        handleCodeableConcept(o[property], o);
+      }
+    }
+  });
+  return ret;
+}
+
+exports.byCode = byCode;
+/**
+ * First groups the observations by code using `byCode`. Then returns a function
+ * that accepts codes as arguments and will return a flat array of observations
+ * having that codes. Example:
+ * ```js
+ * const filter = client.byCodes(observations, "category");
+ * filter("laboratory") // => [ observation1, observation2 ]
+ * filter("vital-signs") // => [ observation3 ]
+ * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
+ * ```
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
+ */
+
+function byCodes(observations, property) {
+  const bank = byCode(observations, property);
+  return (...codes) => codes.filter(code => code + "" in bank).reduce((prev, code) => prev.concat(bank[code + ""]), []);
+}
+
+exports.byCodes = byCodes;
+/**
+ * If the argument is an array returns it as is. Otherwise puts it in an array
+ * (`[arg]`) and returns the result
+ * @param arg The element to test and possibly convert to array
+ * @category Utility
+ */
+
+function makeArray(arg) {
+  if (Array.isArray(arg)) {
+    return arg;
+  }
+
+  return [arg];
+}
+
+exports.makeArray = makeArray;
 
 /***/ })
 

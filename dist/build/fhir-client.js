@@ -82,7 +82,7 @@ window["FHIR"] =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/entry/browser.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/browser.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -2387,28 +2387,6 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/define-well-known-symbol.js":
-/*!********************************************************************!*\
-  !*** ./node_modules/core-js/internals/define-well-known-symbol.js ***!
-  \********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var path = __webpack_require__(/*! ../internals/path */ "./node_modules/core-js/internals/path.js");
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var wrappedWellKnownSymbolModule = __webpack_require__(/*! ../internals/well-known-symbol-wrapped */ "./node_modules/core-js/internals/well-known-symbol-wrapped.js");
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
-
-module.exports = function (NAME) {
-  var Symbol = path.Symbol || (path.Symbol = {});
-  if (!has(Symbol, NAME)) defineProperty(Symbol, NAME, {
-    value: wrappedWellKnownSymbolModule.f(NAME)
-  });
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/descriptors.js":
 /*!*******************************************************!*\
   !*** ./node_modules/core-js/internals/descriptors.js ***!
@@ -3879,39 +3857,6 @@ exports.f = DESCRIPTORS ? nativeGetOwnPropertyDescriptor : function getOwnProper
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/object-get-own-property-names-external.js":
-/*!**********************************************************************************!*\
-  !*** ./node_modules/core-js/internals/object-get-own-property-names-external.js ***!
-  \**********************************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "./node_modules/core-js/internals/to-indexed-object.js");
-var nativeGetOwnPropertyNames = __webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js").f;
-
-var toString = {}.toString;
-
-var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
-  ? Object.getOwnPropertyNames(window) : [];
-
-var getWindowNames = function (it) {
-  try {
-    return nativeGetOwnPropertyNames(it);
-  } catch (error) {
-    return windowNames.slice();
-  }
-};
-
-// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
-module.exports.f = function getOwnPropertyNames(it) {
-  return windowNames && toString.call(it) == '[object Window]'
-    ? getWindowNames(it)
-    : nativeGetOwnPropertyNames(toIndexedObject(it));
-};
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/object-get-own-property-names.js":
 /*!*************************************************************************!*\
   !*** ./node_modules/core-js/internals/object-get-own-property-names.js ***!
@@ -5204,20 +5149,6 @@ module.exports = NATIVE_SYMBOL
 
 /***/ }),
 
-/***/ "./node_modules/core-js/internals/well-known-symbol-wrapped.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/core-js/internals/well-known-symbol-wrapped.js ***!
-  \*********************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-
-exports.f = wellKnownSymbol;
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/internals/well-known-symbol.js":
 /*!*************************************************************!*\
   !*** ./node_modules/core-js/internals/well-known-symbol.js ***!
@@ -5446,30 +5377,6 @@ var forEach = __webpack_require__(/*! ../internals/array-for-each */ "./node_mod
 // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
 $({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
   forEach: forEach
-});
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.array.from.js":
-/*!*******************************************************!*\
-  !*** ./node_modules/core-js/modules/es.array.from.js ***!
-  \*******************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var from = __webpack_require__(/*! ../internals/array-from */ "./node_modules/core-js/internals/array-from.js");
-var checkCorrectnessOfIteration = __webpack_require__(/*! ../internals/check-correctness-of-iteration */ "./node_modules/core-js/internals/check-correctness-of-iteration.js");
-
-var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
-  Array.from(iterable);
-});
-
-// `Array.from` method
-// https://tc39.github.io/ecma262/#sec-array.from
-$({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
-  from: from
 });
 
 
@@ -7036,407 +6943,6 @@ $({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
 
 /***/ }),
 
-/***/ "./node_modules/core-js/modules/es.symbol.description.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/core-js/modules/es.symbol.description.js ***!
-  \***************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-// `Symbol.prototype.description` getter
-// https://tc39.github.io/ecma262/#sec-symbol.prototype.description
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
-var defineProperty = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js").f;
-var copyConstructorProperties = __webpack_require__(/*! ../internals/copy-constructor-properties */ "./node_modules/core-js/internals/copy-constructor-properties.js");
-
-var NativeSymbol = global.Symbol;
-
-if (DESCRIPTORS && typeof NativeSymbol == 'function' && (!('description' in NativeSymbol.prototype) ||
-  // Safari 12 bug
-  NativeSymbol().description !== undefined
-)) {
-  var EmptyStringDescriptionStore = {};
-  // wrap Symbol constructor for correct work with undefined description
-  var SymbolWrapper = function Symbol() {
-    var description = arguments.length < 1 || arguments[0] === undefined ? undefined : String(arguments[0]);
-    var result = this instanceof SymbolWrapper
-      ? new NativeSymbol(description)
-      // in Edge 13, String(Symbol(undefined)) === 'Symbol(undefined)'
-      : description === undefined ? NativeSymbol() : NativeSymbol(description);
-    if (description === '') EmptyStringDescriptionStore[result] = true;
-    return result;
-  };
-  copyConstructorProperties(SymbolWrapper, NativeSymbol);
-  var symbolPrototype = SymbolWrapper.prototype = NativeSymbol.prototype;
-  symbolPrototype.constructor = SymbolWrapper;
-
-  var symbolToString = symbolPrototype.toString;
-  var native = String(NativeSymbol('test')) == 'Symbol(test)';
-  var regexp = /^Symbol\((.*)\)[^)]+$/;
-  defineProperty(symbolPrototype, 'description', {
-    configurable: true,
-    get: function description() {
-      var symbol = isObject(this) ? this.valueOf() : this;
-      var string = symbolToString.call(symbol);
-      if (has(EmptyStringDescriptionStore, symbol)) return '';
-      var desc = native ? string.slice(7, -1) : string.replace(regexp, '$1');
-      return desc === '' ? undefined : desc;
-    }
-  });
-
-  $({ global: true, forced: true }, {
-    Symbol: SymbolWrapper
-  });
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.symbol.iterator.js":
-/*!************************************************************!*\
-  !*** ./node_modules/core-js/modules/es.symbol.iterator.js ***!
-  \************************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-var defineWellKnownSymbol = __webpack_require__(/*! ../internals/define-well-known-symbol */ "./node_modules/core-js/internals/define-well-known-symbol.js");
-
-// `Symbol.iterator` well-known symbol
-// https://tc39.github.io/ecma262/#sec-symbol.iterator
-defineWellKnownSymbol('iterator');
-
-
-/***/ }),
-
-/***/ "./node_modules/core-js/modules/es.symbol.js":
-/*!***************************************************!*\
-  !*** ./node_modules/core-js/modules/es.symbol.js ***!
-  \***************************************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
-var global = __webpack_require__(/*! ../internals/global */ "./node_modules/core-js/internals/global.js");
-var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "./node_modules/core-js/internals/get-built-in.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "./node_modules/core-js/internals/is-pure.js");
-var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "./node_modules/core-js/internals/descriptors.js");
-var NATIVE_SYMBOL = __webpack_require__(/*! ../internals/native-symbol */ "./node_modules/core-js/internals/native-symbol.js");
-var USE_SYMBOL_AS_UID = __webpack_require__(/*! ../internals/use-symbol-as-uid */ "./node_modules/core-js/internals/use-symbol-as-uid.js");
-var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
-var has = __webpack_require__(/*! ../internals/has */ "./node_modules/core-js/internals/has.js");
-var isArray = __webpack_require__(/*! ../internals/is-array */ "./node_modules/core-js/internals/is-array.js");
-var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
-var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
-var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
-var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "./node_modules/core-js/internals/to-indexed-object.js");
-var toPrimitive = __webpack_require__(/*! ../internals/to-primitive */ "./node_modules/core-js/internals/to-primitive.js");
-var createPropertyDescriptor = __webpack_require__(/*! ../internals/create-property-descriptor */ "./node_modules/core-js/internals/create-property-descriptor.js");
-var nativeObjectCreate = __webpack_require__(/*! ../internals/object-create */ "./node_modules/core-js/internals/object-create.js");
-var objectKeys = __webpack_require__(/*! ../internals/object-keys */ "./node_modules/core-js/internals/object-keys.js");
-var getOwnPropertyNamesModule = __webpack_require__(/*! ../internals/object-get-own-property-names */ "./node_modules/core-js/internals/object-get-own-property-names.js");
-var getOwnPropertyNamesExternal = __webpack_require__(/*! ../internals/object-get-own-property-names-external */ "./node_modules/core-js/internals/object-get-own-property-names-external.js");
-var getOwnPropertySymbolsModule = __webpack_require__(/*! ../internals/object-get-own-property-symbols */ "./node_modules/core-js/internals/object-get-own-property-symbols.js");
-var getOwnPropertyDescriptorModule = __webpack_require__(/*! ../internals/object-get-own-property-descriptor */ "./node_modules/core-js/internals/object-get-own-property-descriptor.js");
-var definePropertyModule = __webpack_require__(/*! ../internals/object-define-property */ "./node_modules/core-js/internals/object-define-property.js");
-var propertyIsEnumerableModule = __webpack_require__(/*! ../internals/object-property-is-enumerable */ "./node_modules/core-js/internals/object-property-is-enumerable.js");
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "./node_modules/core-js/internals/create-non-enumerable-property.js");
-var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
-var shared = __webpack_require__(/*! ../internals/shared */ "./node_modules/core-js/internals/shared.js");
-var sharedKey = __webpack_require__(/*! ../internals/shared-key */ "./node_modules/core-js/internals/shared-key.js");
-var hiddenKeys = __webpack_require__(/*! ../internals/hidden-keys */ "./node_modules/core-js/internals/hidden-keys.js");
-var uid = __webpack_require__(/*! ../internals/uid */ "./node_modules/core-js/internals/uid.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
-var wrappedWellKnownSymbolModule = __webpack_require__(/*! ../internals/well-known-symbol-wrapped */ "./node_modules/core-js/internals/well-known-symbol-wrapped.js");
-var defineWellKnownSymbol = __webpack_require__(/*! ../internals/define-well-known-symbol */ "./node_modules/core-js/internals/define-well-known-symbol.js");
-var setToStringTag = __webpack_require__(/*! ../internals/set-to-string-tag */ "./node_modules/core-js/internals/set-to-string-tag.js");
-var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ "./node_modules/core-js/internals/internal-state.js");
-var $forEach = __webpack_require__(/*! ../internals/array-iteration */ "./node_modules/core-js/internals/array-iteration.js").forEach;
-
-var HIDDEN = sharedKey('hidden');
-var SYMBOL = 'Symbol';
-var PROTOTYPE = 'prototype';
-var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
-var setInternalState = InternalStateModule.set;
-var getInternalState = InternalStateModule.getterFor(SYMBOL);
-var ObjectPrototype = Object[PROTOTYPE];
-var $Symbol = global.Symbol;
-var $stringify = getBuiltIn('JSON', 'stringify');
-var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-var nativeDefineProperty = definePropertyModule.f;
-var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
-var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
-var AllSymbols = shared('symbols');
-var ObjectPrototypeSymbols = shared('op-symbols');
-var StringToSymbolRegistry = shared('string-to-symbol-registry');
-var SymbolToStringRegistry = shared('symbol-to-string-registry');
-var WellKnownSymbolsStore = shared('wks');
-var QObject = global.QObject;
-// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
-var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
-
-// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
-var setSymbolDescriptor = DESCRIPTORS && fails(function () {
-  return nativeObjectCreate(nativeDefineProperty({}, 'a', {
-    get: function () { return nativeDefineProperty(this, 'a', { value: 7 }).a; }
-  })).a != 7;
-}) ? function (O, P, Attributes) {
-  var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor(ObjectPrototype, P);
-  if (ObjectPrototypeDescriptor) delete ObjectPrototype[P];
-  nativeDefineProperty(O, P, Attributes);
-  if (ObjectPrototypeDescriptor && O !== ObjectPrototype) {
-    nativeDefineProperty(ObjectPrototype, P, ObjectPrototypeDescriptor);
-  }
-} : nativeDefineProperty;
-
-var wrap = function (tag, description) {
-  var symbol = AllSymbols[tag] = nativeObjectCreate($Symbol[PROTOTYPE]);
-  setInternalState(symbol, {
-    type: SYMBOL,
-    tag: tag,
-    description: description
-  });
-  if (!DESCRIPTORS) symbol.description = description;
-  return symbol;
-};
-
-var isSymbol = USE_SYMBOL_AS_UID ? function (it) {
-  return typeof it == 'symbol';
-} : function (it) {
-  return Object(it) instanceof $Symbol;
-};
-
-var $defineProperty = function defineProperty(O, P, Attributes) {
-  if (O === ObjectPrototype) $defineProperty(ObjectPrototypeSymbols, P, Attributes);
-  anObject(O);
-  var key = toPrimitive(P, true);
-  anObject(Attributes);
-  if (has(AllSymbols, key)) {
-    if (!Attributes.enumerable) {
-      if (!has(O, HIDDEN)) nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
-      O[HIDDEN][key] = true;
-    } else {
-      if (has(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
-      Attributes = nativeObjectCreate(Attributes, { enumerable: createPropertyDescriptor(0, false) });
-    } return setSymbolDescriptor(O, key, Attributes);
-  } return nativeDefineProperty(O, key, Attributes);
-};
-
-var $defineProperties = function defineProperties(O, Properties) {
-  anObject(O);
-  var properties = toIndexedObject(Properties);
-  var keys = objectKeys(properties).concat($getOwnPropertySymbols(properties));
-  $forEach(keys, function (key) {
-    if (!DESCRIPTORS || $propertyIsEnumerable.call(properties, key)) $defineProperty(O, key, properties[key]);
-  });
-  return O;
-};
-
-var $create = function create(O, Properties) {
-  return Properties === undefined ? nativeObjectCreate(O) : $defineProperties(nativeObjectCreate(O), Properties);
-};
-
-var $propertyIsEnumerable = function propertyIsEnumerable(V) {
-  var P = toPrimitive(V, true);
-  var enumerable = nativePropertyIsEnumerable.call(this, P);
-  if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P)) return false;
-  return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
-};
-
-var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
-  var it = toIndexedObject(O);
-  var key = toPrimitive(P, true);
-  if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key)) return;
-  var descriptor = nativeGetOwnPropertyDescriptor(it, key);
-  if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
-    descriptor.enumerable = true;
-  }
-  return descriptor;
-};
-
-var $getOwnPropertyNames = function getOwnPropertyNames(O) {
-  var names = nativeGetOwnPropertyNames(toIndexedObject(O));
-  var result = [];
-  $forEach(names, function (key) {
-    if (!has(AllSymbols, key) && !has(hiddenKeys, key)) result.push(key);
-  });
-  return result;
-};
-
-var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
-  var IS_OBJECT_PROTOTYPE = O === ObjectPrototype;
-  var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject(O));
-  var result = [];
-  $forEach(names, function (key) {
-    if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
-      result.push(AllSymbols[key]);
-    }
-  });
-  return result;
-};
-
-// `Symbol` constructor
-// https://tc39.github.io/ecma262/#sec-symbol-constructor
-if (!NATIVE_SYMBOL) {
-  $Symbol = function Symbol() {
-    if (this instanceof $Symbol) throw TypeError('Symbol is not a constructor');
-    var description = !arguments.length || arguments[0] === undefined ? undefined : String(arguments[0]);
-    var tag = uid(description);
-    var setter = function (value) {
-      if (this === ObjectPrototype) setter.call(ObjectPrototypeSymbols, value);
-      if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
-      setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
-    };
-    if (DESCRIPTORS && USE_SETTER) setSymbolDescriptor(ObjectPrototype, tag, { configurable: true, set: setter });
-    return wrap(tag, description);
-  };
-
-  redefine($Symbol[PROTOTYPE], 'toString', function toString() {
-    return getInternalState(this).tag;
-  });
-
-  redefine($Symbol, 'withoutSetter', function (description) {
-    return wrap(uid(description), description);
-  });
-
-  propertyIsEnumerableModule.f = $propertyIsEnumerable;
-  definePropertyModule.f = $defineProperty;
-  getOwnPropertyDescriptorModule.f = $getOwnPropertyDescriptor;
-  getOwnPropertyNamesModule.f = getOwnPropertyNamesExternal.f = $getOwnPropertyNames;
-  getOwnPropertySymbolsModule.f = $getOwnPropertySymbols;
-
-  wrappedWellKnownSymbolModule.f = function (name) {
-    return wrap(wellKnownSymbol(name), name);
-  };
-
-  if (DESCRIPTORS) {
-    // https://github.com/tc39/proposal-Symbol-description
-    nativeDefineProperty($Symbol[PROTOTYPE], 'description', {
-      configurable: true,
-      get: function description() {
-        return getInternalState(this).description;
-      }
-    });
-    if (!IS_PURE) {
-      redefine(ObjectPrototype, 'propertyIsEnumerable', $propertyIsEnumerable, { unsafe: true });
-    }
-  }
-}
-
-$({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
-  Symbol: $Symbol
-});
-
-$forEach(objectKeys(WellKnownSymbolsStore), function (name) {
-  defineWellKnownSymbol(name);
-});
-
-$({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
-  // `Symbol.for` method
-  // https://tc39.github.io/ecma262/#sec-symbol.for
-  'for': function (key) {
-    var string = String(key);
-    if (has(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
-    var symbol = $Symbol(string);
-    StringToSymbolRegistry[string] = symbol;
-    SymbolToStringRegistry[symbol] = string;
-    return symbol;
-  },
-  // `Symbol.keyFor` method
-  // https://tc39.github.io/ecma262/#sec-symbol.keyfor
-  keyFor: function keyFor(sym) {
-    if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol');
-    if (has(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
-  },
-  useSetter: function () { USE_SETTER = true; },
-  useSimple: function () { USE_SETTER = false; }
-});
-
-$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS }, {
-  // `Object.create` method
-  // https://tc39.github.io/ecma262/#sec-object.create
-  create: $create,
-  // `Object.defineProperty` method
-  // https://tc39.github.io/ecma262/#sec-object.defineproperty
-  defineProperty: $defineProperty,
-  // `Object.defineProperties` method
-  // https://tc39.github.io/ecma262/#sec-object.defineproperties
-  defineProperties: $defineProperties,
-  // `Object.getOwnPropertyDescriptor` method
-  // https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptors
-  getOwnPropertyDescriptor: $getOwnPropertyDescriptor
-});
-
-$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL }, {
-  // `Object.getOwnPropertyNames` method
-  // https://tc39.github.io/ecma262/#sec-object.getownpropertynames
-  getOwnPropertyNames: $getOwnPropertyNames,
-  // `Object.getOwnPropertySymbols` method
-  // https://tc39.github.io/ecma262/#sec-object.getownpropertysymbols
-  getOwnPropertySymbols: $getOwnPropertySymbols
-});
-
-// Chrome 38 and 39 `Object.getOwnPropertySymbols` fails on primitives
-// https://bugs.chromium.org/p/v8/issues/detail?id=3443
-$({ target: 'Object', stat: true, forced: fails(function () { getOwnPropertySymbolsModule.f(1); }) }, {
-  getOwnPropertySymbols: function getOwnPropertySymbols(it) {
-    return getOwnPropertySymbolsModule.f(toObject(it));
-  }
-});
-
-// `JSON.stringify` method behavior with symbols
-// https://tc39.github.io/ecma262/#sec-json.stringify
-if ($stringify) {
-  var FORCED_JSON_STRINGIFY = !NATIVE_SYMBOL || fails(function () {
-    var symbol = $Symbol();
-    // MS Edge converts symbol values to JSON as {}
-    return $stringify([symbol]) != '[null]'
-      // WebKit converts symbol values to JSON as null
-      || $stringify({ a: symbol }) != '{}'
-      // V8 throws on boxed symbols
-      || $stringify(Object(symbol)) != '{}';
-  });
-
-  $({ target: 'JSON', stat: true, forced: FORCED_JSON_STRINGIFY }, {
-    // eslint-disable-next-line no-unused-vars
-    stringify: function stringify(it, replacer, space) {
-      var args = [it];
-      var index = 1;
-      var $replacer;
-      while (arguments.length > index) args.push(arguments[index++]);
-      $replacer = replacer;
-      if (!isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
-      if (!isArray(replacer)) replacer = function (key, value) {
-        if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
-        if (!isSymbol(value)) return value;
-      };
-      args[1] = replacer;
-      return $stringify.apply(null, args);
-    }
-  });
-}
-
-// `Symbol.prototype[@@toPrimitive]` method
-// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@toprimitive
-if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
-  createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
-}
-// `Symbol.prototype[@@toStringTag]` property
-// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@tostringtag
-setToStringTag($Symbol, SYMBOL);
-
-hiddenKeys[HIDDEN] = true;
-
-
-/***/ }),
-
 /***/ "./node_modules/core-js/modules/web.dom-collections.for-each.js":
 /*!**********************************************************************!*\
   !*** ./node_modules/core-js/modules/web.dom-collections.for-each.js ***!
@@ -8914,17 +8420,19 @@ $({ target: 'URL', proto: true, enumerable: true }, {
 /*! all exports used */
 /***/ (function(module, exports) {
 
-var __self__ = (function (root) {
+var global = typeof self !== 'undefined' ? self : this;
+var __self__ = (function () {
 function F() {
 this.fetch = false;
-this.DOMException = root.DOMException
+this.DOMException = global.DOMException
 }
-F.prototype = root;
+F.prototype = global;
 return new F();
-})(typeof self !== 'undefined' ? self : this);
+})();
 (function(self) {
 
 var irrelevant = (function (exports) {
+
   var support = {
     searchParams: 'URLSearchParams' in self,
     iterable: 'Symbol' in self && 'iterator' in Symbol,
@@ -9447,17 +8955,24 @@ var irrelevant = (function (exports) {
   exports.Response = Response;
   exports.fetch = fetch;
 
+  Object.defineProperty(exports, '__esModule', { value: true });
+
   return exports;
 
 }({}));
 })(__self__);
-delete __self__.fetch.polyfill
-exports = __self__.fetch // To enable: import fetch from 'cross-fetch'
-exports.default = __self__.fetch // For TypeScript consumers without esModuleInterop.
-exports.fetch = __self__.fetch // To enable: import {fetch} from 'cross-fetch'
-exports.Headers = __self__.Headers
-exports.Request = __self__.Request
-exports.Response = __self__.Response
+__self__.fetch.ponyfill = true;
+// Remove "polyfill" property added by whatwg-fetch
+delete __self__.fetch.polyfill;
+// Choose between native implementation (global) or custom implementation (__self__)
+// var ctx = global.fetch ? global : __self__;
+var ctx = __self__; // this line disable service worker support temporarily
+exports = ctx.fetch // To enable: import fetch from 'cross-fetch'
+exports.default = ctx.fetch // For TypeScript consumers without esModuleInterop.
+exports.fetch = ctx.fetch // To enable: import {fetch} from 'cross-fetch'
+exports.Headers = ctx.Headers
+exports.Request = ctx.Request
+exports.Response = ctx.Response
 module.exports = exports
 
 
@@ -11140,10 +10655,75 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/Client.ts":
-/*!***********************!*\
-  !*** ./src/Client.ts ***!
-  \***********************/
+/***/ "./src/browser.ts":
+/*!************************!*\
+  !*** ./src/browser.ts ***!
+  \************************/
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+
+__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
+
+var Client_1 = __webpack_require__(/*! ./lib/Client */ "./src/lib/Client.ts");
+
+var util = __webpack_require__(/*! ./util */ "./src/util.ts");
+
+var smart = __webpack_require__(/*! ./lib/smart */ "./src/lib/smart.ts"); // In Browsers we create an adapter, get the SMART api from it and build the
+// global FHIR object
+
+
+var BrowserAdapter_1 = __webpack_require__(/*! ./lib/adapters/BrowserAdapter */ "./src/lib/adapters/BrowserAdapter.ts");
+
+var adapter = new BrowserAdapter_1.default(); // const { options } = adapter.getSmartApi();
+// We have two kinds of browser builds - "pure" for new browsers and "legacy"
+// for old ones. In pure builds we assume that the browser supports everything
+// we need. In legacy mode, the library also acts as a polyfill. Babel will
+// automatically polyfill everything except "fetch", which we have to handle
+// manually.
+// @ts-ignore
+
+if (typeof FHIRCLIENT_PURE == "undefined") {
+  var fetch = __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
+
+  __webpack_require__(/*! abortcontroller-polyfill/dist/abortcontroller-polyfill-only */ "./node_modules/abortcontroller-polyfill/dist/abortcontroller-polyfill-only.js");
+
+  if (!window.fetch) {
+    window.fetch = fetch.default;
+    window.Headers = fetch.Headers;
+    window.Request = fetch.Request;
+    window.Response = fetch.Response;
+  }
+} // $lab:coverage:off$
+
+
+var FHIR = {
+  Client: Client_1.Client,
+  SMART: {
+    authorize: function authorize(options) {
+      return smart.authorize(adapter, options);
+    },
+    ready: function ready(onSuccess, onError) {
+      return smart.ready(adapter, onSuccess, onError);
+    },
+    init: function init(options) {
+      return smart.init(adapter, options);
+    }
+  },
+  util: util
+};
+module.exports = FHIR; // $lab:coverage:on$
+
+/***/ }),
+
+/***/ "./src/lib/Client.ts":
+/*!***************************!*\
+  !*** ./src/lib/Client.ts ***!
+  \***************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11151,12 +10731,6 @@ module.exports = g;
 
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.symbol */ "./node_modules/core-js/modules/es.symbol.js");
-
-__webpack_require__(/*! core-js/modules/es.symbol.description */ "./node_modules/core-js/modules/es.symbol.description.js");
-
-__webpack_require__(/*! core-js/modules/es.symbol.iterator */ "./node_modules/core-js/modules/es.symbol.iterator.js");
 
 __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 
@@ -11167,8 +10741,6 @@ __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js
 __webpack_require__(/*! core-js/modules/es.array.flat */ "./node_modules/core-js/modules/es.array.flat.js");
 
 __webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
-
-__webpack_require__(/*! core-js/modules/es.array.from */ "./node_modules/core-js/modules/es.array.from.js");
 
 __webpack_require__(/*! core-js/modules/es.array.index-of */ "./node_modules/core-js/modules/es.array.index-of.js");
 
@@ -11182,8 +10754,6 @@ __webpack_require__(/*! core-js/modules/es.array.slice */ "./node_modules/core-j
 
 __webpack_require__(/*! core-js/modules/es.array.unscopables.flat */ "./node_modules/core-js/modules/es.array.unscopables.flat.js");
 
-__webpack_require__(/*! core-js/modules/es.function.name */ "./node_modules/core-js/modules/es.function.name.js");
-
 __webpack_require__(/*! core-js/modules/es.object.assign */ "./node_modules/core-js/modules/es.object.assign.js");
 
 __webpack_require__(/*! core-js/modules/es.object.keys */ "./node_modules/core-js/modules/es.object.keys.js");
@@ -11195,8 +10765,6 @@ __webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/mo
 __webpack_require__(/*! core-js/modules/es.promise.finally */ "./node_modules/core-js/modules/es.promise.finally.js");
 
 __webpack_require__(/*! core-js/modules/es.regexp.exec */ "./node_modules/core-js/modules/es.regexp.exec.js");
-
-__webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
 
 __webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
 
@@ -11222,7 +10790,7 @@ __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerat
 
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 
-function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } it = o[Symbol.iterator](); return it.next.bind(it); }
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -11233,9 +10801,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Client = exports.msg = void 0;
 
-var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+var _1 = __webpack_require__(/*! . */ "./src/lib/index.ts");
 
-var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
+var util_1 = __webpack_require__(/*! ../util */ "./src/util.ts");
+
+var settings_1 = __webpack_require__(/*! ./settings */ "./src/lib/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
 
 
@@ -11243,7 +10813,7 @@ var _ref = typeof FHIRCLIENT_PURE !== "undefined" ? window : __webpack_require__
     Response = _ref.Response; // $lab:coverage:on$
 
 
-var debug = lib_1.debug.extend("client");
+var debug = _1.debug.extend("client");
 /**
  * Adds patient context to requestOptions object to be used with [[Client.request]]
  * @param requestOptions Can be a string URL (relative to the serviceUrl), or an
@@ -11251,6 +10821,7 @@ var debug = lib_1.debug.extend("client");
  * @param client Current FHIR client object containing patient context
  * @return requestOptions object contextualized to current patient
  */
+
 
 function contextualize(_x, _x2) {
   return _contextualize.apply(this, arguments);
@@ -11283,34 +10854,22 @@ function _contextualize() {
                       case 0:
                         resourceType = _url.pathname.split("/").pop();
 
-                        if (resourceType) {
-                          _context7.next = 3;
-                          break;
-                        }
+                        _1.assert(resourceType, "Invalid url \"" + _url + "\"");
 
-                        throw new Error("Invalid url \"" + _url + "\"");
+                        _1.assert(settings_1.patientCompartment.indexOf(resourceType) > -1, "Cannot filter \"" + resourceType + "\" resources by patient");
 
-                      case 3:
-                        if (!(settings_1.patientCompartment.indexOf(resourceType) == -1)) {
-                          _context7.next = 5;
-                          break;
-                        }
-
-                        throw new Error("Cannot filter \"" + resourceType + "\" resources by patient");
+                        _context7.next = 5;
+                        return _1.fetchConformanceStatement(client.state.serverUrl);
 
                       case 5:
-                        _context7.next = 7;
-                        return lib_1.fetchConformanceStatement(client.state.serverUrl);
-
-                      case 7:
                         conformance = _context7.sent;
-                        searchParam = lib_1.getPatientParam(conformance, resourceType);
+                        searchParam = _1.getPatientParam(conformance, resourceType);
 
                         _url.searchParams.set(searchParam, client.patient.id);
 
                         return _context7.abrupt("return", _url.href);
 
-                      case 11:
+                      case 9:
                       case "end":
                         return _context7.stop();
                     }
@@ -11324,7 +10883,7 @@ function _contextualize() {
               return _contextualURL.apply(this, arguments);
             };
 
-            base = lib_1.absolute("/", client.state.serverUrl);
+            base = _1.absolute("/", client.state.serverUrl);
 
             if (!(typeof requestOptions == "string" || requestOptions instanceof URL)) {
               _context8.next = 8;
@@ -11384,11 +10943,11 @@ function getRef(refId, cache, client, signal) {
 
 
 function resolveRef(obj, path, graph, cache, client, signal) {
-  var node = lib_1.getPath(obj, path);
+  var node = _1.getPath(obj, path);
 
   if (node) {
     var isArray = Array.isArray(node);
-    return Promise.all(lib_1.makeArray(node).filter(Boolean).map(function (item, i) {
+    return Promise.all(util_1.makeArray(node).filter(Boolean).map(function (item, i) {
       var ref = item.reference;
 
       if (ref) {
@@ -11396,12 +10955,12 @@ function resolveRef(obj, path, graph, cache, client, signal) {
           if (graph) {
             if (isArray) {
               if (path.indexOf("..") > -1) {
-                lib_1.setPath(obj, "" + path.replace("..", "." + i + "."), sub);
+                _1.setPath(obj, "" + path.replace("..", "." + i + "."), sub);
               } else {
-                lib_1.setPath(obj, path + "." + i, sub);
+                _1.setPath(obj, path + "." + i, sub);
               }
             } else {
-              lib_1.setPath(obj, path, sub);
+              _1.setPath(obj, path, sub);
             }
           }
         }).catch(function (ex) {
@@ -11426,7 +10985,7 @@ function resolveRef(obj, path, graph, cache, client, signal) {
 
 function resolveRefs(obj, fhirOptions, cache, client, signal) {
   // 1. Sanitize paths, remove any invalid ones
-  var paths = lib_1.makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
+  var paths = util_1.makeArray(fhirOptions.resolveReferences).filter(Boolean) // No false, 0, null, undefined or ""
   .map(function (path) {
     return String(path).trim();
   }).filter(Boolean); // No space-only strings
@@ -11527,8 +11086,6 @@ var Client = /*#__PURE__*/function () {
       options = {};
     }
 
-    var _a, _b;
-
     this.options = {
       refreshWithCredentials: "same-origin"
     };
@@ -11542,7 +11099,7 @@ var Client = /*#__PURE__*/function () {
      * @category Utility
      */
 
-    this.units = lib_1.units;
+    this.units = _1.units;
 
     if (typeof state == "string") {
       state = {
@@ -11551,9 +11108,7 @@ var Client = /*#__PURE__*/function () {
     } // Valid serverUrl is required!
 
 
-    if (!state.serverUrl || !state.serverUrl.match(/https?:\/\/.+/)) {
-      throw new Error("A \"serverUrl\" option is required and must begin with \"http(s)\"");
-    }
+    _1.assert(state.serverUrl && state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
 
     Object.assign(this.options, options);
     this.state = state;
@@ -11637,14 +11192,14 @@ var Client = /*#__PURE__*/function () {
     }; // fhir.js api (attached automatically in browser)
     // ---------------------------------------------------------------------
 
-    if (lib_1.isBrowser()) {
+    if (_1.isBrowser()) {
       // @ts-ignore
       this.connect(window.fhir);
     }
 
     this.checkScopes();
 
-    if (!this.state.expiresAt && this.state.tokenUri && ((_a = this.state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token) && ((_b = this.state.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token) && (this.hasGrantedScope("offline_access") || this.hasGrantedScope("online_access"))) {
+    if (!this.state.expiresAt && this.state.tokenUri && this.state.tokenResponse && this.state.tokenResponse.access_token && this.state.tokenResponse.refresh_token && (this.hasGrantedScope("offline_access") || this.hasGrantedScope("online_access"))) {
       console.warn(exports.msg.noExpiresAt);
     }
   }
@@ -11706,16 +11261,15 @@ var Client = /*#__PURE__*/function () {
 
     var scopes = String(((_a = this.state.tokenResponse) === null || _a === void 0 ? void 0 : _a.scope) || "").trim().split(/\s+/);
     return scopes.indexOf(scope) > -1;
-  }
-  /**
-   * Checks if the given scope has been requested
-   */
-  ;
+  } // /**
+  //  * Checks if the given scope has been requested
+  //  */
+  // hasRequestedScope(scope: string): boolean
+  // {
+  //     const scopes = String(this.state.scope || "").trim().split(/\s+/);
+  //     return scopes.indexOf(scope) > -1;
+  // }
 
-  _proto.hasRequestedScope = function hasRequestedScope(scope) {
-    var scopes = String(this.state.scope || "").trim().split(/\s+/);
-    return scopes.indexOf(scope) > -1;
-  }
   /**
    * Compares the requested scopes (from `state.scope`) with the granted
    * scopes (from `state.tokenResponse.scope`). Emits a warning if any of
@@ -11808,7 +11362,7 @@ var Client = /*#__PURE__*/function () {
         return null;
       }
 
-      return lib_1.jwtDecode(idToken);
+      return _1.jwtDecode(idToken);
     }
 
     console.warn(this.state.authorizeUri ? exports.msg.noUserBeforeAuth : exports.msg.noUserFromOpenServer);
@@ -11825,7 +11379,13 @@ var Client = /*#__PURE__*/function () {
     var idToken = this.getIdToken();
 
     if (idToken) {
-      return idToken.fhirUser || idToken.profile;
+      // Epic may return a full url like
+      // @see https://github.com/smart-on-fhir/client-js/issues/105
+      if (idToken.fhirUser) {
+        return idToken.fhirUser.split("/").slice(-2).join("/");
+      }
+
+      return idToken.profile;
     }
 
     return null;
@@ -11877,7 +11437,7 @@ var Client = /*#__PURE__*/function () {
         password = _this$state2.password;
 
     if (username && password) {
-      return "Basic " + lib_1.btoa(username + ":" + password);
+      return "Basic " + _1.btoa(username + ":" + password);
     }
 
     return null;
@@ -12016,16 +11576,11 @@ var Client = /*#__PURE__*/function () {
                 _resolvedRefs = {};
               }
 
-              debugRequest = lib_1.debug.extend("client:request");
+              debugRequest = _1.debug.extend("client:request");
 
-              if (requestOptions) {
-                _context6.next = 5;
-                break;
-              }
+              _1.assert(requestOptions, exports.msg.requestNeedsArgs); // url -----------------------------------------------------------------
 
-              throw new Error(exports.msg.requestNeedsArgs);
 
-            case 5:
               if (typeof requestOptions == "string" || requestOptions instanceof URL) {
                 url = String(requestOptions);
                 requestOptions = {};
@@ -12033,7 +11588,7 @@ var Client = /*#__PURE__*/function () {
                 url = String(requestOptions.url);
               }
 
-              url = lib_1.absolute(url, this.state.serverUrl);
+              url = _1.absolute(url, this.state.serverUrl);
               options = {
                 graph: fhirOptions.graph !== false,
                 flat: !!fhirOptions.flat,
@@ -12051,7 +11606,9 @@ var Client = /*#__PURE__*/function () {
               }) : Promise.resolve(requestOptions);
               return _context6.abrupt("return", job // Add the Authorization header now, after the access token might
               // have been updated
-              .then(function (requestOptions) {
+              . // Add the Authorization header now, after the access token might
+              // have been updated
+              then(function (requestOptions) {
                 var authHeader = _this2.getAuthorizationHeader();
 
                 if (authHeader) {
@@ -12062,9 +11619,10 @@ var Client = /*#__PURE__*/function () {
 
                 return requestOptions;
               }) // Make the request
-              .then(function (requestOptions) {
+              . // Make the request
+              then(function (requestOptions) {
                 debugRequest("%s, options: %O, fhirOptions: %O", url, requestOptions, options);
-                return lib_1.request(url, requestOptions).then(function (result) {
+                return _1.request(url, requestOptions).then(function (result) {
                   if (requestOptions.includeResponse) {
                     response = result.response;
                     return result.body;
@@ -12073,7 +11631,8 @@ var Client = /*#__PURE__*/function () {
                   return result;
                 });
               }) // Handle 401 ------------------------------------------------------
-              .catch( /*#__PURE__*/function () {
+              . // Handle 401 ------------------------------------------------------
+              catch( /*#__PURE__*/function () {
                 var _ref3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(error) {
                   return _regenerator.default.wrap(function _callee3$(_context3) {
                     while (1) {
@@ -12137,7 +11696,8 @@ var Client = /*#__PURE__*/function () {
                   return _ref3.apply(this, arguments);
                 };
               }()) // Handle 403 ------------------------------------------------------
-              .catch(function (error) {
+              . // Handle 403 ------------------------------------------------------
+              catch(function (error) {
                 if (error.status == 403) {
                   debugRequest(exports.msg.requestGot403);
                 }
@@ -12148,8 +11708,10 @@ var Client = /*#__PURE__*/function () {
                 // We might gen an empty or falsy result. If so return it as is
                 if (!data) return data; // Handle raw responses
 
+                // Handle raw responses
                 if (typeof data == "string" || data instanceof Response) return data; // Resolve References ------------------------------------------
 
+                // Resolve References ------------------------------------------
                 return function () {
                   var _ref4 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(_data) {
                     return _regenerator.default.wrap(function _callee4$(_context4) {
@@ -12189,7 +11751,8 @@ var Client = /*#__PURE__*/function () {
                     return _ref4.apply(this, arguments);
                   };
                 }()(data) // Pagination ----------------------------------------------
-                .then( /*#__PURE__*/function () {
+                . // Pagination ----------------------------------------------
+                then( /*#__PURE__*/function () {
                   var _ref5 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(_data) {
                     var links, next, nextPage;
                     return _regenerator.default.wrap(function _callee5$(_context5) {
@@ -12226,7 +11789,7 @@ var Client = /*#__PURE__*/function () {
                             next = links.find(function (l) {
                               return l.relation == "next";
                             });
-                            _data = lib_1.makeArray(_data);
+                            _data = util_1.makeArray(_data);
 
                             if (!(next && next.url)) {
                               _context5.next = 19;
@@ -12260,10 +11823,10 @@ var Client = /*#__PURE__*/function () {
                             }
 
                             Object.assign(_resolvedRefs, nextPage.references);
-                            return _context5.abrupt("return", _data.concat(lib_1.makeArray(nextPage.data || nextPage)));
+                            return _context5.abrupt("return", _data.concat(util_1.makeArray(nextPage.data || nextPage)));
 
                           case 18:
-                            return _context5.abrupt("return", _data.concat(lib_1.makeArray(nextPage)));
+                            return _context5.abrupt("return", _data.concat(util_1.makeArray(nextPage)));
 
                           case 19:
                             return _context5.abrupt("return", _data);
@@ -12280,7 +11843,8 @@ var Client = /*#__PURE__*/function () {
                     return _ref5.apply(this, arguments);
                   };
                 }()) // Finalize ------------------------------------------------
-                .then(function (_data) {
+                . // Finalize ------------------------------------------------
+                then(function (_data) {
                   if (options.graph) {
                     _resolvedRefs = {};
                   } else if (!options.onPage && options.resolveReferences.length) {
@@ -12303,7 +11867,7 @@ var Client = /*#__PURE__*/function () {
                 });
               }));
 
-            case 11:
+            case 10:
             case "end":
               return _context6.stop();
           }
@@ -12367,7 +11931,8 @@ var Client = /*#__PURE__*/function () {
 
     var _a, _b;
 
-    var debugRefresh = lib_1.debug.extend("client:refresh");
+    var debugRefresh = _1.debug.extend("client:refresh");
+
     debugRefresh("Attempting to refresh with refresh_token...");
     var refreshToken = (_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.tokenResponse) === null || _b === void 0 ? void 0 : _b.refresh_token;
 
@@ -12406,7 +11971,7 @@ var Client = /*#__PURE__*/function () {
 
       if (clientSecret) {
         // @ts-ignore
-        refreshRequestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+        refreshRequestOptions.headers.authorization = "Basic " + _1.btoa(clientId + ":" + clientSecret);
       }
     } // This method is typically called internally from `request` if certain
     // request fails with 401. However, clients will often run multiple
@@ -12415,14 +11980,12 @@ var Client = /*#__PURE__*/function () {
 
 
     if (!this._refreshTask) {
-      this._refreshTask = lib_1.request(tokenUri, refreshRequestOptions).then(function (data) {
-        if (!data.access_token) {
-          throw new Error(exports.msg.gotNoAccessToken);
-        }
+      this._refreshTask = _1.request(tokenUri, refreshRequestOptions).then(function (data) {
+        _1.assert(data.access_token, exports.msg.gotNoAccessToken);
 
         debugRefresh("Received new access token response %O", data);
         Object.assign(_this3.state.tokenResponse, data);
-        _this3.state.expiresAt = lib_1.getAccessTokenExpiration(data);
+        _this3.state.expiresAt = _1.getAccessTokenExpiration(data);
 
         _this3.checkScopes();
 
@@ -12468,7 +12031,7 @@ var Client = /*#__PURE__*/function () {
   ;
 
   _proto.byCode = function byCode(observations, property) {
-    return lib_1.byCode(observations, property);
+    return util_1.byCode(observations, property);
   }
   /**
    * First groups the observations by code using `byCode`. Then returns a function
@@ -12490,7 +12053,7 @@ var Client = /*#__PURE__*/function () {
   ;
 
   _proto.byCodes = function byCodes(observations, property) {
-    return lib_1.byCodes(observations, property);
+    return util_1.byCodes(observations, property);
   }
   /**
    * Walks through an object (or array) and returns the value found at the
@@ -12512,7 +12075,7 @@ var Client = /*#__PURE__*/function () {
       path = "";
     }
 
-    return lib_1.getPath(obj, path);
+    return _1.getPath(obj, path);
   }
   /**
    * Returns a copy of the client state. Accepts a dot-separated path argument
@@ -12533,7 +12096,7 @@ var Client = /*#__PURE__*/function () {
       path = "";
     }
 
-    return lib_1.getPath(Object.assign({}, this.state), path);
+    return _1.getPath(Object.assign({}, this.state), path);
   }
   /**
    * Returns a promise that will be resolved with the fhir version as defined
@@ -12542,7 +12105,7 @@ var Client = /*#__PURE__*/function () {
   ;
 
   _proto.getFhirVersion = function getFhirVersion() {
-    return lib_1.fetchConformanceStatement(this.state.serverUrl).then(function (metadata) {
+    return _1.fetchConformanceStatement(this.state.serverUrl).then(function (metadata) {
       return metadata.fhirVersion;
     });
   }
@@ -12568,10 +12131,10 @@ exports.Client = Client;
 
 /***/ }),
 
-/***/ "./src/HttpError.ts":
-/*!**************************!*\
-  !*** ./src/HttpError.ts ***!
-  \**************************/
+/***/ "./src/lib/HttpError.ts":
+/*!******************************!*\
+  !*** ./src/lib/HttpError.ts ***!
+  \******************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12621,8 +12184,7 @@ var HttpError = /*#__PURE__*/function (_Error) {
 
   _proto.parse = /*#__PURE__*/function () {
     var _parse = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-      var type, body, _body;
-
+      var type;
       return _regenerator.default.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -12644,16 +12206,16 @@ var HttpError = /*#__PURE__*/function (_Error) {
               return this.response.json();
 
             case 6:
-              body = _context.sent;
+              this.body = _context.sent;
 
-              if (body.error) {
-                this.message += "\n" + body.error;
+              if (this.body.error) {
+                this.message += "\n" + this.body.error;
 
-                if (body.error_description) {
-                  this.message += ": " + body.error_description;
+                if (this.body.error_description) {
+                  this.message += ": " + this.body.error_description;
                 }
               } else {
-                this.message += "\n\n" + JSON.stringify(body, null, 4);
+                this.message += "\n\n" + JSON.stringify(this.body, null, 4);
               }
 
               _context.next = 15;
@@ -12669,10 +12231,10 @@ var HttpError = /*#__PURE__*/function (_Error) {
               return this.response.text();
 
             case 13:
-              _body = _context.sent;
+              this.body = _context.sent;
 
-              if (_body) {
-                this.message += "\n\n" + _body;
+              if (this.body) {
+                this.message += "\n\n" + this.body;
               }
 
             case 15:
@@ -12718,10 +12280,10 @@ exports.default = HttpError;
 
 /***/ }),
 
-/***/ "./src/adapters/BrowserAdapter.ts":
-/*!****************************************!*\
-  !*** ./src/adapters/BrowserAdapter.ts ***!
-  \****************************************/
+/***/ "./src/lib/adapters/BrowserAdapter.ts":
+/*!********************************************!*\
+  !*** ./src/lib/adapters/BrowserAdapter.ts ***!
+  \********************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12729,8 +12291,6 @@ exports.default = HttpError;
 
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-__webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
 
 __webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
 
@@ -12750,11 +12310,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
-
-var Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
-
-var BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
+var BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/lib/storage/BrowserStorage.ts");
 /**
  * Browser Adapter
  */
@@ -12782,16 +12338,6 @@ var BrowserAdapter = /*#__PURE__*/function () {
       // Replaces the browser's current URL
       // using window.history.replaceState API or by reloading.
       replaceBrowserHistory: true,
-      // When set to true, this variable will fully utilize
-      // HTML5 sessionStorage API.
-      // This variable can be overridden to false by setting
-      // FHIR.oauth2.settings.fullSessionStorageSupport = false.
-      // When set to false, the sessionStorage will be keyed
-      // by a state variable. This is to allow the embedded IE browser
-      // instances instantiated on a single thread to continue to
-      // function without having sessionStorage data shared
-      // across the embedded IE instances.
-      fullSessionStorageSupport: true,
       // Do we want to send cookies while making a request to the token
       // endpoint in order to obtain new access token using existing
       // refresh token. In rare cases the auth server might require the
@@ -12866,47 +12412,6 @@ var BrowserAdapter = /*#__PURE__*/function () {
 
   _proto.getAbortController = function getAbortController() {
     return AbortController;
-  }
-  /**
-   * Creates and returns adapter-aware SMART api. Not that while the shape of
-   * the returned object is well known, the arguments to this function are not.
-   * Those who override this method are free to require any environment-specific
-   * arguments. For example in node we will need a request, a response and
-   * optionally a storage or storage factory function.
-   */
-  ;
-
-  _proto.getSmartApi = function getSmartApi() {
-    var _this = this;
-
-    return {
-      ready: function ready() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-
-        return smart_1.ready.apply(smart_1, [_this].concat(args));
-      },
-      authorize: function authorize(options) {
-        return smart_1.authorize(_this, options);
-      },
-      init: function init(options) {
-        return smart_1.init(_this, options);
-      },
-      client: function client(state) {
-        if (typeof state === "string") {
-          state = {
-            serverUrl: state
-          };
-        }
-
-        var client = new Client_1.Client(state, {
-          refreshWithCredentials: _this.options.refreshTokenWithCredentials
-        });
-        return client;
-      },
-      options: this.options
-    };
   };
 
   (0, _createClass2.default)(BrowserAdapter, [{
@@ -12923,74 +12428,10 @@ exports.default = BrowserAdapter;
 
 /***/ }),
 
-/***/ "./src/entry/browser.ts":
-/*!******************************!*\
-  !*** ./src/entry/browser.ts ***!
-  \******************************/
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-__webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
-
-__webpack_require__(/*! core-js/modules/es.promise */ "./node_modules/core-js/modules/es.promise.js");
-
-var util = __webpack_require__(/*! ../util */ "./src/util.ts"); // In Browsers we create an adapter, get the SMART api from it and build the
-// global FHIR object
-
-
-var BrowserAdapter_1 = __webpack_require__(/*! ../adapters/BrowserAdapter */ "./src/adapters/BrowserAdapter.ts");
-
-var adapter = new BrowserAdapter_1.default();
-
-var _adapter$getSmartApi = adapter.getSmartApi(),
-    ready = _adapter$getSmartApi.ready,
-    authorize = _adapter$getSmartApi.authorize,
-    init = _adapter$getSmartApi.init,
-    client = _adapter$getSmartApi.client,
-    options = _adapter$getSmartApi.options; // We have two kinds of browser builds - "pure" for new browsers and "legacy"
-// for old ones. In pure builds we assume that the browser supports everything
-// we need. In legacy mode, the library also acts as a polyfill. Babel will
-// automatically polyfill everything except "fetch", which we have to handle
-// manually.
-// @ts-ignore
-
-
-if (typeof FHIRCLIENT_PURE == "undefined") {
-  var fetch = __webpack_require__(/*! cross-fetch */ "./node_modules/cross-fetch/dist/browser-ponyfill.js");
-
-  __webpack_require__(/*! abortcontroller-polyfill/dist/abortcontroller-polyfill-only */ "./node_modules/abortcontroller-polyfill/dist/abortcontroller-polyfill-only.js");
-
-  if (!window.fetch) {
-    window.fetch = fetch.default;
-    window.Headers = fetch.Headers;
-    window.Request = fetch.Request;
-    window.Response = fetch.Response;
-  }
-} // $lab:coverage:off$
-
-
-var FHIR = {
-  AbortController: window.AbortController,
-  client: client,
-  oauth2: {
-    settings: options,
-    ready: ready,
-    authorize: authorize,
-    init: init
-  },
-  util: util
-};
-module.exports = FHIR; // $lab:coverage:on$
-
-/***/ }),
-
-/***/ "./src/lib.ts":
-/*!********************!*\
-  !*** ./src/lib.ts ***!
-  \********************/
+/***/ "./src/lib/index.ts":
+/*!**************************!*\
+  !*** ./src/lib/index.ts ***!
+  \**************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13003,13 +12444,7 @@ module.exports = FHIR; // $lab:coverage:on$
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "./node_modules/@babel/runtime/helpers/interopRequireDefault.js");
 
-__webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
-
-__webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
-
 __webpack_require__(/*! core-js/modules/es.array.find */ "./node_modules/core-js/modules/es.array.find.js");
-
-__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
 
 __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
 
@@ -13037,8 +12472,6 @@ __webpack_require__(/*! core-js/modules/es.string.split */ "./node_modules/core-
 
 __webpack_require__(/*! core-js/modules/es.string.trim */ "./node_modules/core-js/modules/es.string.trim.js");
 
-__webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
-
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
 
 __webpack_require__(/*! regenerator-runtime/runtime */ "./node_modules/regenerator-runtime/runtime.js");
@@ -13050,11 +12483,11 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getTargetWindow = exports.getPatientParam = exports.byCodes = exports.byCode = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.makeArray = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
+exports.assert = exports.getTargetWindow = exports.getPatientParam = exports.getAccessTokenExpiration = exports.jwtDecode = exports.btoa = exports.atob = exports.isBrowser = exports.randomString = exports.absolute = exports.setPath = exports.getPath = exports.fetchConformanceStatement = exports.getAndCache = exports.request = exports.responseToJSON = exports.checkResponse = exports.units = exports.debug = void 0;
 
-var HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/HttpError.ts");
+var HttpError_1 = __webpack_require__(/*! ./HttpError */ "./src/lib/HttpError.ts");
 
-var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+var settings_1 = __webpack_require__(/*! ./settings */ "./src/lib/settings.ts");
 
 var debug = __webpack_require__(/*! debug */ "./node_modules/debug/src/browser.js"); // $lab:coverage:off$
 // @ts-ignore
@@ -13379,22 +12812,6 @@ function setPath(obj, path, value, createEmpty) {
 
 exports.setPath = setPath;
 /**
- * If the argument is an array returns it as is. Otherwise puts it in an array
- * (`[arg]`) and returns the result
- * @param arg The element to test and possibly convert to array
- * @category Utility
- */
-
-function makeArray(arg) {
-  if (Array.isArray(arg)) {
-    return arg;
-  }
-
-  return [arg];
-}
-
-exports.makeArray = makeArray;
-/**
  * Given a path, converts it to absolute url based on the `baseUrl`. If baseUrl
  * is not provided, the result would be a rooted path (one that starts with `/`).
  * @param path The path to convert
@@ -13509,80 +12926,6 @@ function getAccessTokenExpiration(tokenResponse) {
 }
 
 exports.getAccessTokenExpiration = getAccessTokenExpiration;
-/**
- * Groups the observations by code. Returns a map that will look like:
- * ```js
- * const map = client.byCodes(observations, "code");
- * // map = {
- * //     "55284-4": [ observation1, observation2 ],
- * //     "6082-2": [ observation3 ]
- * // }
- * ```
- * @param observations Array of observations
- * @param property The name of a CodeableConcept property to group by
- */
-
-function byCode(observations, property) {
-  var ret = {};
-
-  function handleCodeableConcept(concept, observation) {
-    if (concept && Array.isArray(concept.coding)) {
-      concept.coding.forEach(function (_ref6) {
-        var code = _ref6.code;
-
-        if (code) {
-          ret[code] = ret[code] || [];
-          ret[code].push(observation);
-        }
-      });
-    }
-  }
-
-  makeArray(observations).forEach(function (o) {
-    if (o.resourceType === "Observation" && o[property]) {
-      if (Array.isArray(o[property])) {
-        o[property].forEach(function (concept) {
-          return handleCodeableConcept(concept, o);
-        });
-      } else {
-        handleCodeableConcept(o[property], o);
-      }
-    }
-  });
-  return ret;
-}
-
-exports.byCode = byCode;
-/**
- * First groups the observations by code using `byCode`. Then returns a function
- * that accepts codes as arguments and will return a flat array of observations
- * having that codes. Example:
- * ```js
- * const filter = client.byCodes(observations, "category");
- * filter("laboratory") // => [ observation1, observation2 ]
- * filter("vital-signs") // => [ observation3 ]
- * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
- * ```
- * @param observations Array of observations
- * @param property The name of a CodeableConcept property to group by
- */
-
-function byCodes(observations, property) {
-  var bank = byCode(observations, property);
-  return function () {
-    for (var _len = arguments.length, codes = new Array(_len), _key = 0; _key < _len; _key++) {
-      codes[_key] = arguments[_key];
-    }
-
-    return codes.filter(function (code) {
-      return code + "" in bank;
-    }).reduce(function (prev, code) {
-      return prev.concat(bank[code + ""]);
-    }, []);
-  };
-}
-
-exports.byCodes = byCodes;
 /**
  * Given a conformance statement and a resource type, returns the name of the
  * URL parameter that can be used to scope the resource type by patient ID.
@@ -13814,14 +13157,22 @@ function _getTargetWindow() {
 }
 
 exports.getTargetWindow = getTargetWindow;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+exports.assert = assert;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
-/***/ "./src/settings.ts":
-/*!*************************!*\
-  !*** ./src/settings.ts ***!
-  \*************************/
+/***/ "./src/lib/settings.ts":
+/*!*****************************!*\
+  !*** ./src/lib/settings.ts ***!
+  \*****************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13872,10 +13223,10 @@ exports.SMART_KEY = "SMART_KEY";
 
 /***/ }),
 
-/***/ "./src/smart.ts":
-/*!**********************!*\
-  !*** ./src/smart.ts ***!
-  \**********************/
+/***/ "./src/lib/smart.ts":
+/*!**************************!*\
+  !*** ./src/lib/smart.ts ***!
+  \**************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13931,14 +13282,14 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
+exports.init = exports.ready = exports.getClient = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
 /* global window */
 
-var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+var _1 = __webpack_require__(/*! . */ "./src/lib/index.ts");
 
-var Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
+var Client_1 = __webpack_require__(/*! ./Client */ "./src/lib/Client.ts");
 
-var settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
+var settings_1 = __webpack_require__(/*! ./settings */ "./src/lib/settings.ts");
 
 Object.defineProperty(exports, "KEY", {
   enumerable: true,
@@ -13946,7 +13297,8 @@ Object.defineProperty(exports, "KEY", {
     return settings_1.SMART_KEY;
   }
 });
-var debug = lib_1.debug.extend("oauth2");
+
+var debug = _1.debug.extend("oauth2");
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -13954,13 +13306,14 @@ var debug = lib_1.debug.extend("oauth2");
  * @param baseUrl The base URL of the FHIR server
  */
 
+
 function fetchWellKnownJson(baseUrl, requestOptions) {
   if (baseUrl === void 0) {
     baseUrl = "/";
   }
 
   var url = String(baseUrl).replace(/\/*$/, "/") + ".well-known/smart-configuration";
-  return lib_1.getAndCache(url, requestOptions).catch(function (ex) {
+  return _1.getAndCache(url, requestOptions).catch(function (ex) {
     throw new Error("Failed to fetch the well-known json \"" + url + "\". " + ex.message);
   });
 }
@@ -13976,9 +13329,7 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl, requestOptions) {
   }
 
   return fetchWellKnownJson(baseUrl, requestOptions).then(function (meta) {
-    if (!meta.authorization_endpoint || !meta.token_endpoint) {
-      throw new Error("Invalid wellKnownJson");
-    }
+    _1.assert(meta.authorization_endpoint && meta.token_endpoint, "Invalid wellKnownJson");
 
     return {
       registrationUri: meta.registration_endpoint || "",
@@ -13997,9 +13348,9 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl, requestOptions) 
     baseUrl = "/";
   }
 
-  return lib_1.fetchConformanceStatement(baseUrl, requestOptions).then(function (meta) {
+  return _1.fetchConformanceStatement(baseUrl, requestOptions).then(function (meta) {
     var nsUri = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
-    var extensions = (lib_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(function (e) {
+    var extensions = (_1.getPath(meta || {}, "rest.0.security.extension") || []).filter(function (e) {
       return e.url === nsUri;
     }).map(function (o) {
       return o.extension;
@@ -14121,7 +13472,7 @@ function authorize(_x, _x2) {
 
 function _authorize() {
   _authorize = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(env, params) {
-    var url, urlISS, cfg, _params, redirect_uri, clientSecret, fakeTokenResponse, patientId, encounterId, client_id, noRedirect, target, width, height, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, completeInTarget, storage, serverUrl, inFrame, inPopUp, oldKey, stateKey, state, fullSessionStorageSupport, redirectUrl, extensions, redirectParams, win;
+    var url, urlISS, cfg, _params, clientSecret, fakeTokenResponse, patientId, encounterId, noRedirect, target, width, height, multiple, _params2, iss, launch, fhirServiceUrl, redirectUri, _params2$scope, scope, clientId, completeInTarget, storage, serverUrl, inFrame, inPopUp, stateKey, state, redirectUrl, extensions, redirectParams, win;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -14134,21 +13485,15 @@ function _authorize() {
             url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
             if (!Array.isArray(params)) {
-              _context.next = 12;
+              _context.next = 10;
               break;
             }
 
             urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
 
-            if (urlISS) {
-              _context.next = 6;
-              break;
-            }
+            _1.assert(urlISS, 'Passing in an "iss" url parameter is required if authorize uses multiple configurations'); // pick the right config
 
-            throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
 
-          case 6:
-            // pick the right config
             cfg = params.find(function (x) {
               if (x.issMatch) {
                 if (typeof x.issMatch === "function") {
@@ -14167,38 +13512,24 @@ function _authorize() {
               return false;
             });
 
-            if (cfg) {
-              _context.next = 9;
-              break;
-            }
+            _1.assert(cfg, "No configuration found matching the current \"iss\" parameter \"" + urlISS + "\"");
 
-            throw new Error("No configuration found matching the current \"iss\" parameter \"" + urlISS + "\"");
-
-          case 9:
-            _context.next = 11;
+            _context.next = 9;
             return authorize(env, cfg);
 
-          case 11:
+          case 9:
             return _context.abrupt("return", _context.sent);
 
-          case 12:
+          case 10:
             // ------------------------------------------------------------------------
             // Obtain input
-            _params = params, redirect_uri = _params.redirect_uri, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, client_id = _params.client_id, noRedirect = _params.noRedirect, target = _params.target, width = _params.width, height = _params.height;
+            _params = params, clientSecret = _params.clientSecret, fakeTokenResponse = _params.fakeTokenResponse, patientId = _params.patientId, encounterId = _params.encounterId, noRedirect = _params.noRedirect, target = _params.target, width = _params.width, height = _params.height, multiple = _params.multiple;
             _params2 = params, iss = _params2.iss, launch = _params2.launch, fhirServiceUrl = _params2.fhirServiceUrl, redirectUri = _params2.redirectUri, _params2$scope = _params2.scope, scope = _params2$scope === void 0 ? "" : _params2$scope, clientId = _params2.clientId, completeInTarget = _params2.completeInTarget;
             storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
             iss = url.searchParams.get("iss") || iss;
             fhirServiceUrl = url.searchParams.get("fhirServiceUrl") || fhirServiceUrl;
             launch = url.searchParams.get("launch") || launch;
-
-            if (!clientId) {
-              clientId = client_id;
-            }
-
-            if (!redirectUri) {
-              redirectUri = redirect_uri;
-            }
 
             if (!redirectUri) {
               redirectUri = env.relative(".");
@@ -14208,24 +13539,18 @@ function _authorize() {
 
             serverUrl = String(iss || fhirServiceUrl || ""); // Validate input
 
-            if (serverUrl) {
-              _context.next = 24;
-              break;
-            }
+            _1.assert(serverUrl, 'No server url found. It must be specified as "iss" or as "fhirServiceUrl" parameter');
 
-            throw new Error("No server url found. It must be specified as `iss` or as " + "`fhirServiceUrl` parameter");
-
-          case 24:
             if (iss) {
               debug("Making %s launch...", launch ? "EHR" : "standalone");
             } // append launch scope if needed
 
 
             if (launch && !scope.match(/launch/)) {
-              scope += " launch";
+              scope = scope ? scope + " launch" : "launch";
             }
 
-            if (lib_1.isBrowser()) {
+            if (_1.isBrowser()) {
               inFrame = isInFrame();
               inPopUp = isInPopUp();
 
@@ -14241,19 +13566,12 @@ function _authorize() {
               }
             } // If `authorize` is called, make sure we clear any previous state (in case
             // this is a re-authorize)
-
-
-            _context.next = 29;
-            return storage.get(settings_1.SMART_KEY);
-
-          case 29:
-            oldKey = _context.sent;
-            _context.next = 32;
-            return storage.unset(oldKey);
-
-          case 32:
+            // const oldKey = await storage.get(SMART_KEY);
+            // await storage.unset(oldKey);
             // create initial state
-            stateKey = lib_1.randomString(16);
+
+
+            stateKey = _1.randomString(16);
             state = {
               clientId: clientId,
               scope: scope,
@@ -14262,19 +13580,19 @@ function _authorize() {
               clientSecret: clientSecret,
               tokenResponse: {},
               // key: stateKey,
+              multiple: multiple,
               completeInTarget: completeInTarget
             };
-            fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
-            if (!fullSessionStorageSupport) {
-              _context.next = 38;
+            if (multiple) {
+              _context.next = 27;
               break;
             }
 
-            _context.next = 38;
+            _context.next = 27;
             return storage.set(settings_1.SMART_KEY, stateKey);
 
-          case 38:
+          case 27:
             // fakeTokenResponse to override stuff (useful in development)
             if (fakeTokenResponse) {
               Object.assign(state.tokenResponse, fakeTokenResponse);
@@ -14297,60 +13615,60 @@ function _authorize() {
             redirectUrl = redirectUri + "?state=" + encodeURIComponent(stateKey); // bypass oauth if fhirServiceUrl is used (but iss takes precedence)
 
             if (!(fhirServiceUrl && !iss)) {
-              _context.next = 51;
+              _context.next = 40;
               break;
             }
 
-            debug("Making fake launch...");
+            console.log("Making fake launch...");
+            _context.next = 35;
+            return storage.set(stateKey, state);
+
+          case 35:
+            if (!noRedirect) {
+              _context.next = 37;
+              break;
+            }
+
+            return _context.abrupt("return", redirectUrl);
+
+          case 37:
+            _context.next = 39;
+            return env.redirect(redirectUrl);
+
+          case 39:
+            return _context.abrupt("return", _context.sent);
+
+          case 40:
+            _context.next = 42;
+            return getSecurityExtensions(env, serverUrl);
+
+          case 42:
+            extensions = _context.sent;
+            Object.assign(state, extensions);
             _context.next = 46;
             return storage.set(stateKey, state);
 
           case 46:
+            if (state.authorizeUri) {
+              _context.next = 52;
+              break;
+            }
+
             if (!noRedirect) {
-              _context.next = 48;
+              _context.next = 49;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 48:
-            _context.next = 50;
+          case 49:
+            _context.next = 51;
             return env.redirect(redirectUrl);
-
-          case 50:
-            return _context.abrupt("return", _context.sent);
 
           case 51:
-            _context.next = 53;
-            return getSecurityExtensions(env, serverUrl);
-
-          case 53:
-            extensions = _context.sent;
-            Object.assign(state, extensions);
-            _context.next = 57;
-            return storage.set(stateKey, state);
-
-          case 57:
-            if (state.authorizeUri) {
-              _context.next = 63;
-              break;
-            }
-
-            if (!noRedirect) {
-              _context.next = 60;
-              break;
-            }
-
-            return _context.abrupt("return", redirectUrl);
-
-          case 60:
-            _context.next = 62;
-            return env.redirect(redirectUrl);
-
-          case 62:
             return _context.abrupt("return", _context.sent);
 
-          case 63:
+          case 52:
             // build the redirect uri
             redirectParams = ["response_type=code", "client_id=" + encodeURIComponent(clientId || ""), "scope=" + encodeURIComponent(scope), "redirect_uri=" + encodeURIComponent(redirectUri), "aud=" + encodeURIComponent(serverUrl), "state=" + encodeURIComponent(stateKey)]; // also pass this in case of EHR launch
 
@@ -14361,32 +13679,33 @@ function _authorize() {
             redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
 
             if (!noRedirect) {
-              _context.next = 68;
+              _context.next = 57;
               break;
             }
 
             return _context.abrupt("return", redirectUrl);
 
-          case 68:
-            if (!(target && lib_1.isBrowser())) {
-              _context.next = 77;
+          case 57:
+            if (!(target && _1.isBrowser())) {
+              _context.next = 66;
               break;
             }
 
-            _context.next = 71;
-            return lib_1.getTargetWindow(target, width, height);
+            _context.next = 60;
+            return _1.getTargetWindow(target, width, height);
 
-          case 71:
+          case 60:
             win = _context.sent;
 
             if (win !== self) {
               try {
                 // Also remove any old state from the target window and then
                 // transfer the current state there
-                win.sessionStorage.removeItem(oldKey);
+                // win.sessionStorage.removeItem(oldKey);
                 win.sessionStorage.setItem(stateKey, JSON.stringify(state));
               } catch (ex) {
-                lib_1.debug("Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+                _1.debug("Failed to modify window.sessionStorage. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+
                 win = self;
               }
             }
@@ -14396,7 +13715,8 @@ function _authorize() {
                 win.location.href = redirectUrl;
                 self.addEventListener("message", onMessage);
               } catch (ex) {
-                lib_1.debug("Failed to modify window.location. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+                _1.debug("Failed to modify window.location. Perhaps it is from different origin?. Failing back to \"_self\". %s", ex);
+
                 self.location.href = redirectUrl;
               }
             } else {
@@ -14405,14 +13725,14 @@ function _authorize() {
 
             return _context.abrupt("return");
 
-          case 77:
-            _context.next = 79;
+          case 66:
+            _context.next = 68;
             return env.redirect(redirectUrl);
 
-          case 79:
+          case 68:
             return _context.abrupt("return", _context.sent);
 
-          case 80:
+          case 69:
           case "end":
             return _context.stop();
         }
@@ -14470,72 +13790,179 @@ function onMessage(e) {
 }
 
 exports.onMessage = onMessage;
+
+function cleanUpUrl(_x3) {
+  return _cleanUpUrl.apply(this, arguments);
+}
+
+function _cleanUpUrl() {
+  _cleanUpUrl = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(adapter) {
+    var url, storage, params, code, state, from, stored;
+    return _regenerator.default.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            url = adapter.getUrl();
+            storage = adapter.getStorage();
+            params = url.searchParams;
+            code = params.get("code");
+            state = params.get("state");
+            from = url.href; // `code` is the flag that tells us to request an access token. We have to
+            // remove it, otherwise the page will authorize on every load!
+
+            if (code) {
+              params.delete("code");
+              debug("Removed code parameter from the url.");
+            } // Unless we are in "multiple" mode, we no longer need the `state` key. It
+            // will be stored to a well known location at `sessionStorage[SMART_KEY]`.
+
+
+            if (!state) {
+              _context2.next = 16;
+              break;
+            }
+
+            _context2.next = 10;
+            return storage.get(state);
+
+          case 10:
+            stored = _context2.sent;
+
+            if (stored.multiple) {
+              _context2.next = 16;
+              break;
+            }
+
+            _context2.next = 14;
+            return storage.set(settings_1.SMART_KEY, state);
+
+          case 14:
+            params.delete("state");
+            debug("Removed state parameter from the url.");
+
+          case 16:
+            if (!(_1.isBrowser() && window.history.replaceState)) {
+              _context2.next = 20;
+              break;
+            }
+
+            window.history.replaceState({}, "", url.href);
+            _context2.next = 21;
+            break;
+
+          case 20:
+            return _context2.abrupt("return", adapter.redirect(url.href));
+
+          case 21:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _cleanUpUrl.apply(this, arguments);
+}
+
+function getAccessToken(_x4, _x5, _x6) {
+  return _getAccessToken.apply(this, arguments);
+}
 /**
  * The completeAuth function should only be called on the page that represents
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
 
-function completeAuth(_x3) {
+
+function _getAccessToken() {
+  _getAccessToken = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(adapter, code, state) {
+    var storage, stored, requestOptions, tokenResponse;
+    return _regenerator.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _1.assert(code, "'code' parameter is required");
+
+            _1.assert(state, "'state' parameter is required");
+
+            storage = adapter.getStorage();
+            _context3.next = 5;
+            return storage.get(state);
+
+          case 5:
+            stored = _context3.sent;
+            debug("Preparing to exchange the code for access token...");
+            requestOptions = buildTokenRequest(code, stored);
+            debug("Token request options: %O", requestOptions);
+
+            _1.assert(stored.tokenUri, "No tokenUri found for this server"); // @ts-ignore The EHR authorization server SHALL return a JSON
+            // structure that includes an access token or a message indicating
+            // that the authorization request has been denied.
+
+
+            _context3.next = 12;
+            return _1.request(stored.tokenUri, requestOptions);
+
+          case 12:
+            tokenResponse = _context3.sent;
+            debug("Token response: %O", tokenResponse);
+
+            _1.assert(tokenResponse.access_token, "Failed to obtain access token.");
+
+            return _context3.abrupt("return", tokenResponse);
+
+          case 16:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _getAccessToken.apply(this, arguments);
+}
+
+function completeAuth(_x7) {
   return _completeAuth.apply(this, arguments);
 }
 
 function _completeAuth() {
-  _completeAuth = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(env) {
-    var _a, _b, url, Storage, params, key, code, authError, authErrorDescription, state, fullSessionStorageSupport, inFrame, inPopUp, href, origin, hasState, authorized, requestOptions, tokenResponse, client;
+  _completeAuth = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(env) {
+    var _a, _b, url, Storage, params, code, authError, authErrorDescription, key, state, inFrame, inPopUp, href, origin, authorized, tokenResponse;
 
-    return _regenerator.default.wrap(function _callee2$(_context2) {
+    return _regenerator.default.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context2.prev = _context2.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             url = env.getUrl();
             Storage = env.getStorage();
             params = url.searchParams;
-            key = params.get("state");
             code = params.get("code");
             authError = params.get("error");
             authErrorDescription = params.get("error_description");
+            key = params.get("state"); // Start by checking the url for `error` and `error_description` parameters.
+            // This happens when the auth server rejects our authorization attempt. In
+            // this case it has no other way to tell us what the error was, other than
+            // appending these parameters to the redirect url.
+            // From client's point of view, this is not very reliable (because we can't
+            // know how we have landed on this page - was it a redirect or was it loaded
+            // manually). However, if `completeAuth()` is being called, we can assume
+            // that the url comes from the auth server (otherwise the app won't work
+            // anyway).
 
-            if (key) {
-              _context2.next = 11;
-              break;
-            }
+            _1.assert(!(authError || authErrorDescription), [authError, authErrorDescription].filter(Boolean).join(": "));
 
-            _context2.next = 10;
-            return Storage.get(settings_1.SMART_KEY);
+            debug("key: %s, code: %s", key, code); // key is coming from the page url so it might be empty or missing
 
-          case 10:
-            key = _context2.sent;
+            _1.assert(key, "No 'state' parameter found. Please launch this as SMART app."); // Check if we have a previous state
 
-          case 11:
-            if (!(authError || authErrorDescription)) {
-              _context2.next = 13;
-              break;
-            }
 
-            throw new Error([authError, authErrorDescription].filter(Boolean).join(": "));
-
-          case 13:
-            debug("key: %s, code: %s", key, code); // key might be coming from the page url so it might be empty or missing
-
-            if (key) {
-              _context2.next = 16;
-              break;
-            }
-
-            throw new Error("No 'state' parameter found. Please (re)launch the app.");
-
-          case 16:
-            _context2.next = 18;
+            _context4.next = 12;
             return Storage.get(key);
 
-          case 18:
-            state = _context2.sent;
-            fullSessionStorageSupport = lib_1.isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true; // If we are in a popup window or an iframe and the authorization is
-            // complete, send the location back to our opener and exit.
+          case 12:
+            state = _context4.sent;
 
-            if (!(lib_1.isBrowser() && state && !state.completeInTarget)) {
-              _context2.next = 29;
+            if (!(_1.isBrowser() && state && !state.completeInTarget)) {
+              _context4.next = 22;
               break;
             }
 
@@ -14548,7 +13975,7 @@ function _completeAuth() {
             // remove.
 
             if (!((inFrame || inPopUp) && !url.searchParams.get("complete"))) {
-              _context2.next = 29;
+              _context4.next = 22;
               break;
             }
 
@@ -14570,134 +13997,61 @@ function _completeAuth() {
               window.close();
             }
 
-            return _context2.abrupt("return", new Promise(function () {}));
+            return _context4.abrupt("return", new Promise(function () {}));
 
-          case 29:
-            url.searchParams.delete("complete"); // Do we have to remove the `code` and `state` params from the URL?
+          case 22:
+            url.searchParams.delete("complete"); // If the state does not exist, it means the page has been loaded directly.
 
-            hasState = params.has("state");
-
-            if (lib_1.isBrowser() && lib_1.getPath(env, "options.replaceBrowserHistory") && (code || hasState)) {
-              // `code` is the flag that tell us to request an access token.
-              // We have to remove it, otherwise the page will authorize on
-              // every load!
-              if (code) {
-                params.delete("code");
-                debug("Removed code parameter from the url.");
-              } // If we have `fullSessionStorageSupport` it means we no longer
-              // need the `state` key. It will be stored to a well know
-              // location - sessionStorage[SMART_KEY]. However, no
-              // fullSessionStorageSupport means that this "well know location"
-              // might be shared between windows and tabs. In this case we
-              // MUST keep the `state` url parameter.
-
-
-              if (hasState && fullSessionStorageSupport) {
-                params.delete("state");
-                debug("Removed state parameter from the url.");
-              } // If the browser does not support the replaceState method for the
-              // History Web API, the "code" parameter cannot be removed. As a
-              // consequence, the page will (re)authorize on every load. The
-              // workaround is to reload the page to new location without those
-              // parameters. If that is not acceptable replaceBrowserHistory
-              // should be set to false.
-
-
-              if (window.history.replaceState) {
-                window.history.replaceState({}, "", url.href);
-              }
-            } // If the state does not exist, it means the page has been loaded directly.
-
-
-            if (state) {
-              _context2.next = 34;
-              break;
-            }
-
-            throw new Error("No state found! Please (re)launch the app.");
-
-          case 34:
-            // Assume the client has already completed a token exchange when
+            _1.assert(state, "No state found! Please (re)launch the app."); // Assume the client has already completed a token exchange when
             // there is no code (but we have a state) or access token is found in state
+
+
             authorized = !code || ((_a = state.tokenResponse) === null || _a === void 0 ? void 0 : _a.access_token); // If we are authorized already, then this is just a reload.
             // Otherwise, we have to complete the code flow
 
             if (!(!authorized && state.tokenUri)) {
-              _context2.next = 54;
+              _context4.next = 37;
               break;
             }
 
-            if (code) {
-              _context2.next = 38;
-              break;
-            }
+            _1.assert(code, "'code' url parameter is required");
 
-            throw new Error("'code' url parameter is required");
+            _context4.next = 29;
+            return getAccessToken(env, code, key);
 
-          case 38:
-            debug("Preparing to exchange the code for access token...");
-            requestOptions = buildTokenRequest(code, state);
-            debug("Token request options: %O", requestOptions); // The EHR authorization server SHALL return a JSON structure that
-            // includes an access token or a message indicating that the
-            // authorization request has been denied.
-
-            _context2.next = 43;
-            return lib_1.request(state.tokenUri, requestOptions);
-
-          case 43:
-            tokenResponse = _context2.sent;
-            debug("Token response: %O", tokenResponse);
-
-            if (tokenResponse.access_token) {
-              _context2.next = 47;
-              break;
-            }
-
-            throw new Error("Failed to obtain access token.");
-
-          case 47:
+          case 29:
+            tokenResponse = _context4.sent;
             // Now we need to determine when is this authorization going to expire
-            state.expiresAt = lib_1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
+            state.expiresAt = _1.getAccessTokenExpiration(tokenResponse); // save the tokenResponse so that we don't have to re-authorize on
             // every page reload
 
             state = Object.assign({}, state, {
               tokenResponse: tokenResponse
             });
-            _context2.next = 51;
+            _context4.next = 34;
             return Storage.set(key, state);
 
-          case 51:
+          case 34:
             debug("Authorization successful!");
-            _context2.next = 55;
+            _context4.next = 38;
             break;
 
-          case 54:
+          case 37:
             debug(((_b = state.tokenResponse) === null || _b === void 0 ? void 0 : _b.access_token) ? "Already authorized" : "No authorization needed");
 
-          case 55:
-            if (!fullSessionStorageSupport) {
-              _context2.next = 58;
-              break;
-            }
+          case 38:
+            _context4.next = 40;
+            return cleanUpUrl(env);
 
-            _context2.next = 58;
-            return Storage.set(settings_1.SMART_KEY, key);
+          case 40:
+            return _context4.abrupt("return", getClient(env, key));
 
-          case 58:
-            client = new Client_1.Client(state, {
-              save: function save(state) {
-                return Storage.set(key + "", state);
-              }
-            });
-            debug("Created client instance: %O", client);
-            return _context2.abrupt("return", client);
-
-          case 61:
+          case 41:
           case "end":
-            return _context2.stop();
+            return _context4.stop();
         }
       }
-    }, _callee2);
+    }, _callee4);
   }));
   return _completeAuth.apply(this, arguments);
 }
@@ -14714,17 +14068,11 @@ function buildTokenRequest(code, state) {
       tokenUri = state.tokenUri,
       clientId = state.clientId;
 
-  if (!redirectUri) {
-    throw new Error("Missing state.redirectUri");
-  }
+  _1.assert(redirectUri, "Missing state.redirectUri");
 
-  if (!tokenUri) {
-    throw new Error("Missing state.tokenUri");
-  }
+  _1.assert(tokenUri, "Missing state.tokenUri");
 
-  if (!clientId) {
-    throw new Error("Missing state.clientId");
-  }
+  _1.assert(clientId, "Missing state.clientId");
 
   var requestOptions = {
     method: "POST",
@@ -14741,7 +14089,7 @@ function buildTokenRequest(code, state) {
   // client_id and the password is the app’s client_secret (see example).
 
   if (clientSecret) {
-    requestOptions.headers.authorization = "Basic " + lib_1.btoa(clientId + ":" + clientSecret);
+    requestOptions.headers.authorization = "Basic " + _1.btoa(clientId + ":" + clientSecret);
     debug("Using state.clientSecret to construct the authorization header: %s", requestOptions.headers.Authorization);
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
@@ -14752,25 +14100,93 @@ function buildTokenRequest(code, state) {
 }
 
 exports.buildTokenRequest = buildTokenRequest;
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
 
-function ready(_x4, _x5, _x6) {
+function getClient(_x8, _x9) {
+  return _getClient.apply(this, arguments);
+}
+
+function _getClient() {
+  _getClient = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(adapter, key) {
+    var storage, stored;
+    return _regenerator.default.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            storage = adapter.getStorage();
+            _context5.next = 3;
+            return storage.get(key);
+
+          case 3:
+            stored = _context5.sent;
+
+            _1.assert(stored, "No state found in storage. Please (re)launch the SMART app");
+
+            return _context5.abrupt("return", new Client_1.Client(stored, {
+              save: function save(state) {
+                return storage.set(key, state);
+              }
+            }));
+
+          case 6:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  }));
+  return _getClient.apply(this, arguments);
+}
+
+exports.getClient = getClient;
+
+function ready(_x10, _x11, _x12) {
   return _ready.apply(this, arguments);
 }
 
 function _ready() {
-  _ready = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(env, onSuccess, onError) {
-    var task;
-    return _regenerator.default.wrap(function _callee3$(_context3) {
+  _ready = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(env, onSuccess, onError) {
+    var task, url, params, code, state, key;
+    return _regenerator.default.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
-            task = completeAuth(env);
+            url = env.getUrl();
+            params = url.searchParams;
+            code = params.get("code");
+            state = params.get("state"); // Coming back from the auth server. Must complete the auth flow
 
+            if (!code) {
+              _context6.next = 8;
+              break;
+            }
+
+            task = completeAuth(env);
+            _context6.next = 17;
+            break;
+
+          case 8:
+            if (!state) {
+              _context6.next = 12;
+              break;
+            }
+
+            task = getClient(env, state);
+            _context6.next = 17;
+            break;
+
+          case 12:
+            _context6.next = 14;
+            return env.getStorage().get(settings_1.SMART_KEY);
+
+          case 14:
+            key = _context6.sent;
+
+            if (!key) {// console.log(env.getStorage())
+            }
+
+            task = getClient(env, key);
+
+          case 17:
             if (onSuccess) {
               task = task.then(onSuccess);
             }
@@ -14779,14 +14195,14 @@ function _ready() {
               task = task.catch(onError);
             }
 
-            return _context3.abrupt("return", task);
+            return _context6.abrupt("return", task);
 
-          case 4:
+          case 20:
           case "end":
-            return _context3.stop();
+            return _context6.stop();
         }
       }
-    }, _callee3);
+    }, _callee6);
   }));
   return _ready.apply(this, arguments);
 }
@@ -14823,67 +14239,67 @@ exports.ready = ready;
  * @param options The authorize options
  */
 
-function init(_x7, _x8) {
+function init(_x13, _x14) {
   return _init.apply(this, arguments);
 }
 
 function _init() {
-  _init = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(env, options) {
+  _init = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7(env, options) {
     var url, code, state, storage, key, cached;
-    return _regenerator.default.wrap(function _callee4$(_context4) {
+    return _regenerator.default.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             url = env.getUrl();
             code = url.searchParams.get("code");
             state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
             if (!(code && state)) {
-              _context4.next = 5;
+              _context7.next = 5;
               break;
             }
 
-            return _context4.abrupt("return", completeAuth(env));
+            return _context7.abrupt("return", completeAuth(env));
 
           case 5:
             // Check for existing client state. If state is found, it means a client
             // instance have already been created in this session and we should try to
             // "revive" it.
             storage = env.getStorage();
-            _context4.t0 = state;
+            _context7.t0 = state;
 
-            if (_context4.t0) {
-              _context4.next = 11;
+            if (_context7.t0) {
+              _context7.next = 11;
               break;
             }
 
-            _context4.next = 10;
+            _context7.next = 10;
             return storage.get(settings_1.SMART_KEY);
 
           case 10:
-            _context4.t0 = _context4.sent;
+            _context7.t0 = _context7.sent;
 
           case 11:
-            key = _context4.t0;
-            _context4.next = 14;
+            key = _context7.t0;
+            _context7.next = 14;
             return storage.get(key);
 
           case 14:
-            cached = _context4.sent;
+            cached = _context7.sent;
 
             if (!cached) {
-              _context4.next = 17;
+              _context7.next = 17;
               break;
             }
 
-            return _context4.abrupt("return", new Client_1.Client(cached, {
+            return _context7.abrupt("return", new Client_1.Client(cached, {
               save: function save(state) {
                 return storage.set(key, state);
               }
             }));
 
           case 17:
-            return _context4.abrupt("return", authorize(env, options).then(function () {
+            return _context7.abrupt("return", authorize(env, options).then(function () {
               // `init` promises a Client but that cannot happen in this case. The
               // browser will be redirected (unload the page and be redirected back
               // to it later and the same init function will be called again). On
@@ -14896,10 +14312,10 @@ function _init() {
 
           case 18:
           case "end":
-            return _context4.stop();
+            return _context7.stop();
         }
       }
-    }, _callee4);
+    }, _callee7);
   }));
   return _init.apply(this, arguments);
 }
@@ -14908,10 +14324,10 @@ exports.init = init;
 
 /***/ }),
 
-/***/ "./src/storage/BrowserStorage.ts":
-/*!***************************************!*\
-  !*** ./src/storage/BrowserStorage.ts ***!
-  \***************************************/
+/***/ "./src/lib/storage/BrowserStorage.ts":
+/*!*******************************************!*\
+  !*** ./src/lib/storage/BrowserStorage.ts ***!
+  \*******************************************/
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15131,34 +14547,27 @@ exports.default = Storage;
 "use strict";
 
 
+__webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
+
+__webpack_require__(/*! core-js/modules/es.array.filter */ "./node_modules/core-js/modules/es.array.filter.js");
+
+__webpack_require__(/*! core-js/modules/es.array.for-each */ "./node_modules/core-js/modules/es.array.for-each.js");
+
+__webpack_require__(/*! core-js/modules/es.array.reduce */ "./node_modules/core-js/modules/es.array.reduce.js");
+
+__webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.makeArray = exports.byCodes = exports.byCode = void 0;
 
-var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
+var lib_1 = __webpack_require__(/*! ./lib */ "./src/lib/index.ts");
 
-Object.defineProperty(exports, "byCode", {
-  enumerable: true,
-  get: function get() {
-    return lib_1.byCode;
-  }
-});
-Object.defineProperty(exports, "byCodes", {
-  enumerable: true,
-  get: function get() {
-    return lib_1.byCodes;
-  }
-});
 Object.defineProperty(exports, "getPath", {
   enumerable: true,
   get: function get() {
     return lib_1.getPath;
-  }
-});
-Object.defineProperty(exports, "makeArray", {
-  enumerable: true,
-  get: function get() {
-    return lib_1.makeArray;
   }
 });
 Object.defineProperty(exports, "setPath", {
@@ -15167,12 +14576,96 @@ Object.defineProperty(exports, "setPath", {
     return lib_1.setPath;
   }
 });
-Object.defineProperty(exports, "jwtDecode", {
-  enumerable: true,
-  get: function get() {
-    return lib_1.jwtDecode;
+/**
+ * Groups the observations by code. Returns a map that will look like:
+ * ```js
+ * const map = client.byCodes(observations, "code");
+ * // map = {
+ * //     "55284-4": [ observation1, observation2 ],
+ * //     "6082-2": [ observation3 ]
+ * // }
+ * ```
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
+ */
+
+function byCode(observations, property) {
+  var ret = {};
+
+  function handleCodeableConcept(concept, observation) {
+    if (concept && Array.isArray(concept.coding)) {
+      concept.coding.forEach(function (_ref) {
+        var code = _ref.code;
+
+        if (code) {
+          ret[code] = ret[code] || [];
+          ret[code].push(observation);
+        }
+      });
+    }
   }
-});
+
+  makeArray(observations).forEach(function (o) {
+    if (o.resourceType === "Observation" && o[property]) {
+      if (Array.isArray(o[property])) {
+        o[property].forEach(function (concept) {
+          return handleCodeableConcept(concept, o);
+        });
+      } else {
+        handleCodeableConcept(o[property], o);
+      }
+    }
+  });
+  return ret;
+}
+
+exports.byCode = byCode;
+/**
+ * First groups the observations by code using `byCode`. Then returns a function
+ * that accepts codes as arguments and will return a flat array of observations
+ * having that codes. Example:
+ * ```js
+ * const filter = client.byCodes(observations, "category");
+ * filter("laboratory") // => [ observation1, observation2 ]
+ * filter("vital-signs") // => [ observation3 ]
+ * filter("laboratory", "vital-signs") // => [ observation1, observation2, observation3 ]
+ * ```
+ * @param observations Array of observations
+ * @param property The name of a CodeableConcept property to group by
+ */
+
+function byCodes(observations, property) {
+  var bank = byCode(observations, property);
+  return function () {
+    for (var _len = arguments.length, codes = new Array(_len), _key = 0; _key < _len; _key++) {
+      codes[_key] = arguments[_key];
+    }
+
+    return codes.filter(function (code) {
+      return code + "" in bank;
+    }).reduce(function (prev, code) {
+      return prev.concat(bank[code + ""]);
+    }, []);
+  };
+}
+
+exports.byCodes = byCodes;
+/**
+ * If the argument is an array returns it as is. Otherwise puts it in an array
+ * (`[arg]`) and returns the result
+ * @param arg The element to test and possibly convert to array
+ * @category Utility
+ */
+
+function makeArray(arg) {
+  if (Array.isArray(arg)) {
+    return arg;
+  }
+
+  return [arg];
+}
+
+exports.makeArray = makeArray;
 
 /***/ })
 

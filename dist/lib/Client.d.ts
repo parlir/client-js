@@ -1,4 +1,4 @@
-import { fhirclient } from "./types";
+import { fhirclient } from "../types";
 export declare const msg: {
     noPatientBeforeAuth: string;
     noPatientFromOpenServer: string;
@@ -60,6 +60,7 @@ export declare class Client {
          * If there is no patient context, it will reject with an error.
          * @param {fhirclient.FetchOptions} [requestOptions] Any options to pass to the `fetch` call.
          * @category Request
+         * @method
          */
         read: fhirclient.RequestFunction<fhirclient.FHIR.Patient>;
         /**
@@ -78,6 +79,7 @@ export declare class Client {
          * to handle even binary responses. Can also be a [[CombinedFetchResult]]
          * object if the `requestOptions.includeResponse`s has been set to true.
          * @category Request
+         * @method
          */
         request: <R = fhirclient.FetchResult>(requestOptions: string | URL | fhirclient.RequestOptions, fhirOptions?: fhirclient.FhirOptions) => Promise<R>;
         /**
@@ -170,10 +172,6 @@ export declare class Client {
      * Checks if the given scope has been granted
      */
     hasGrantedScope(scope: string): boolean;
-    /**
-     * Checks if the given scope has been requested
-     */
-    hasRequestedScope(scope: string): boolean;
     /**
      * Compares the requested scopes (from `state.scope`) with the granted
      * scopes (from `state.tokenResponse.scope`). Emits a warning if any of

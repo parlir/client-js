@@ -1,141 +1,87 @@
 "use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-const smart_1 = require("../smart");
-
-const Client_1 = require("../Client");
-
+Object.defineProperty(exports, "__esModule", { value: true });
 const ServerStorage_1 = require("../storage/ServerStorage");
-
 const cjs_ponyfill_1 = require("abortcontroller-polyfill/dist/cjs-ponyfill");
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
-
-
 class NodeAdapter {
-  /**
-   * @param options Environment-specific options
-   */
-  constructor(options) {
     /**
-     * Holds the Storage instance associated with this instance
+     * @param options Environment-specific options
      */
-    this._storage = null;
-    this.options = Object.assign({}, options);
-  }
-  /**
-   * Given a relative path, returns an absolute url using the instance base URL
-   */
-
-
-  relative(path) {
-    return new URL(path, this.getUrl().href).href;
-  }
-  /**
-   * Returns the protocol of the current request ("http" or "https")
-   */
-
-
-  getProtocol() {
-    const req = this.options.request;
-    const proto = req.socket.encrypted ? "https" : "http";
-    return req.headers["x-forwarded-proto"] || proto;
-  }
-  /**
-   * Given the current environment, this method must return the current url
-   * as URL instance. In Node we might be behind a proxy!
-   */
-
-
-  getUrl() {
-    const req = this.options.request;
-    let host = req.headers.host;
-
-    if (req.headers["x-forwarded-host"]) {
-      host = req.headers["x-forwarded-host"];
-
-      if (req.headers["x-forwarded-port"]) {
-        host += ":" + req.headers["x-forwarded-port"];
-      }
+    constructor(options) {
+        /**
+         * Holds the Storage instance associated with this instance
+         */
+        this._storage = null;
+        this.options = { ...options };
     }
-
-    const protocol = this.getProtocol();
-    const orig = String(req.headers["x-original-uri"] || req.url);
-    return new URL(orig, protocol + "://" + host);
-  }
-  /**
-   * Given the current environment, this method must redirect to the given
-   * path
-   * @param location The path to redirect to
-   */
-
-
-  redirect(location) {
-    this.options.response.writeHead(302, {
-      location
-    });
-    this.options.response.end();
-  }
-  /**
-   * Returns a ServerStorage instance
-   */
-
-
-  getStorage() {
-    if (!this._storage) {
-      if (this.options.storage) {
-        if (typeof this.options.storage == "function") {
-          this._storage = this.options.storage(this.options);
-        } else {
-          this._storage = this.options.storage;
-        }
-      } else {
-        this._storage = new ServerStorage_1.default(this.options.request);
-      }
+    /**
+     * Given a relative path, returns an absolute url using the instance base URL
+     */
+    relative(path) {
+        return new URL(path, this.getUrl().href).href;
     }
-
-    return this._storage;
-  }
-  /**
-   * Returns a reference to the AbortController constructor. In browsers,
-   * AbortController will always be available as global (native or polyfilled)
-   */
-
-
-  getAbortController() {
-    return cjs_ponyfill_1.AbortController;
-  }
-  /**
-   * Creates and returns adapter-aware SMART api. Not that while the shape of
-   * the returned object is well known, the arguments to this function are not.
-   * Those who override this method are free to require any environment-specific
-   * arguments. For example in node we will need a request, a response and
-   * optionally a storage or storage factory function.
-   */
-
-
-  getSmartApi() {
-    return {
-      ready: (...args) => smart_1.ready(this, ...args),
-      authorize: options => smart_1.authorize(this, options),
-      init: options => smart_1.init(this, options),
-      client: state => {
-        if (typeof state === "string") {
-          state = {
-            serverUrl: state
-          };
+    /**
+     * Returns the protocol of the current request ("http" or "https")
+     */
+    getProtocol() {
+        const req = this.options.request;
+        const proto = req.socket.encrypted ? "https" : "http";
+        return req.headers["x-forwarded-proto"] || proto;
+    }
+    /**
+     * Given the current environment, this method must return the current url
+     * as URL instance. In Node we might be behind a proxy!
+     */
+    getUrl() {
+        const req = this.options.request;
+        let host = req.headers.host;
+        if (req.headers["x-forwarded-host"]) {
+            host = req.headers["x-forwarded-host"];
+            if (req.headers["x-forwarded-port"]) {
+                host += ":" + req.headers["x-forwarded-port"];
+            }
         }
-
-        return new Client_1.Client(state);
-      },
-      options: this.options
-    };
-  }
-
+        const protocol = this.getProtocol();
+        // @ts-ignore
+        const orig = String(req.headers["x-original-uri"] || req.originalUrl || req.url);
+        return new URL(orig, protocol + "://" + host);
+    }
+    /**
+     * Given the current environment, this method must redirect to the given
+     * path
+     * @param location The path to redirect to
+     */
+    redirect(location) {
+        this.options.response.writeHead(302, { location });
+        this.options.response.end();
+    }
+    /**
+     * Returns a ServerStorage instance
+     */
+    getStorage() {
+        if (!this._storage) {
+            if (this.options.storage) {
+                if (typeof this.options.storage == "function") {
+                    this._storage = this.options.storage(this.options);
+                }
+                else {
+                    this._storage = this.options.storage;
+                }
+            }
+            else {
+                this._storage = new ServerStorage_1.default(this.options.request);
+            }
+        }
+        return this._storage;
+    }
+    /**
+     * Returns a reference to the AbortController constructor. In browsers,
+     * AbortController will always be available as global (native or polyfilled)
+     */
+    getAbortController() {
+        return cjs_ponyfill_1.AbortController;
+    }
 }
-
 exports.default = NodeAdapter;

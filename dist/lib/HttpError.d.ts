@@ -13,6 +13,7 @@ export default class HttpError extends Error {
      * The HTTP status text corresponding to this error
      */
     statusText: string;
+    body?: any;
     /**
      * Reference to the HTTP Response object
      */

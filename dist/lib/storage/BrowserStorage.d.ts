@@ -1,4 +1,4 @@
-import { fhirclient } from "../types";
+import { fhirclient } from "../../types";
 export default class Storage {
     /**
      * Gets the value at `key`. Returns a promise that will be resolved

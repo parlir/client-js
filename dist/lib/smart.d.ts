@@ -1,6 +1,6 @@
 import { Client } from "./Client";
 import { SMART_KEY } from "./settings";
-import { fhirclient } from "./types";
+import { fhirclient } from "../types";
 export { SMART_KEY as KEY };
 /**
  * Fetches the well-known json file from the given base URL.
@@ -55,17 +55,13 @@ export declare function onMessage(e: MessageEvent): void;
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export declare function completeAuth(env: fhirclient.Adapter): Promise<Client>;
+export declare function completeAuth(env: fhirclient.Adapter): Promise<any>;
 /**
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
  */
 export declare function buildTokenRequest(code: string, state: fhirclient.SMARTState): RequestInit;
-/**
- * @param env
- * @param [onSuccess]
- * @param [onError]
- */
+export declare function getClient(adapter: fhirclient.Adapter, key: string): Promise<Client>;
 export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>;
 /**
  * This function can be used when you want to handle everything in one page

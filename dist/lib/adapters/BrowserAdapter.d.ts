@@ -1,5 +1,5 @@
 import BrowserStorage from "../storage/BrowserStorage";
-import { fhirclient } from "../types";
+import { fhirclient } from "../../types";
 /**
  * Browser Adapter
  */
@@ -53,12 +53,4 @@ export default class BrowserAdapter implements fhirclient.Adapter {
         new (): AbortController;
         prototype: AbortController;
     };
-    /**
-     * Creates and returns adapter-aware SMART api. Not that while the shape of
-     * the returned object is well known, the arguments to this function are not.
-     * Those who override this method are free to require any environment-specific
-     * arguments. For example in node we will need a request, a response and
-     * optionally a storage or storage factory function.
-     */
-    getSmartApi(): fhirclient.SMART;
 }
