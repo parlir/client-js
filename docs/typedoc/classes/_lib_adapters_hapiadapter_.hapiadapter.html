@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>BrowserAdapter | fhirclient</title>
+	<title>HapiAdapter | fhirclient</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -54,31 +54,29 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_adapters_browseradapter_.html">&quot;adapters/BrowserAdapter&quot;</a>
+					<a href="../modules/_lib_adapters_hapiadapter_.html">&quot;lib/adapters/HapiAdapter&quot;</a>
 				</li>
 				<li>
-					<a href="_adapters_browseradapter_.browseradapter.html">BrowserAdapter</a>
+					<a href="_lib_adapters_hapiadapter_.hapiadapter.html">HapiAdapter</a>
 				</li>
 			</ul>
-			<h1>Class BrowserAdapter</h1>
+			<h1>Class HapiAdapter</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Browser Adapter</p>
-					</div>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">BrowserAdapter</span>
+						<a href="_lib_adapters_nodeadapter_.nodeadapter.html" class="tsd-signature-type">NodeAdapter</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">HapiAdapter</span>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</section>
@@ -95,32 +93,27 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_adapters_browseradapter_.browseradapter.html#_storage" class="tsd-kind-icon">_storage</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_adapters_browseradapter_.browseradapter.html#_url" class="tsd-kind-icon">_url</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#options" class="tsd-kind-icon">options</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Accessors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#fhir" class="tsd-kind-icon">fhir</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#_request" class="tsd-kind-icon">_request</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#_responsetoolkit" class="tsd-kind-icon">_response<wbr>Toolkit</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#_storage" class="tsd-kind-icon">_storage</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#options" class="tsd-kind-icon">options</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#getabortcontroller" class="tsd-kind-icon">get<wbr>Abort<wbr>Controller</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#getsmartapi" class="tsd-kind-icon">get<wbr>Smart<wbr>Api</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#getstorage" class="tsd-kind-icon">get<wbr>Storage</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#geturl" class="tsd-kind-icon">get<wbr>Url</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#redirect" class="tsd-kind-icon">redirect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_adapters_browseradapter_.browseradapter.html#relative" class="tsd-kind-icon">relative</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#getabortcontroller" class="tsd-kind-icon">get<wbr>Abort<wbr>Controller</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#getprotocol" class="tsd-kind-icon">get<wbr>Protocol</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#getstorage" class="tsd-kind-icon">get<wbr>Storage</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#geturl" class="tsd-kind-icon">get<wbr>Url</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#redirect" class="tsd-kind-icon">redirect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_lib_adapters_hapiadapter_.hapiadapter.html#relative" class="tsd-kind-icon">relative</a></li>
 							</ul>
 						</section>
 					</div>
@@ -128,17 +121,18 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Browser<wbr>Adapter<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.browserfhirsettings.html" class="tsd-signature-type">BrowserFHIRSettings</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_adapters_browseradapter_.browseradapter.html" class="tsd-signature-type">BrowserAdapter</a></li>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Hapi<wbr>Adapter<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_lib_adapters_hapiadapter_.hapiadapteroptions.html" class="tsd-signature-type">HapiAdapterOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_lib_adapters_hapiadapter_.hapiadapter.html" class="tsd-signature-type">HapiAdapter</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Overrides <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L24">src/adapters/BrowserAdapter.ts:24</a></li>
+									<li>Defined in src/lib/adapters/HapiAdapter.ts:21</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -146,7 +140,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_types_d_.fhirclient.browserfhirsettings.html" class="tsd-signature-type">BrowserFHIRSettings</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<h5>options: <a href="../interfaces/_lib_adapters_hapiadapter_.hapiadapteroptions.html" class="tsd-signature-type">HapiAdapterOptions</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
 											<p>Environment-specific options</p>
@@ -154,7 +148,7 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_adapters_browseradapter_.browseradapter.html" class="tsd-signature-type">BrowserAdapter</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_lib_adapters_hapiadapter_.hapiadapter.html" class="tsd-signature-type">HapiAdapter</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -162,12 +156,33 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="_storage" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _storage</h3>
-					<div class="tsd-signature tsd-kind-icon">_storage<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
+					<a name="_request" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _request</h3>
+					<div class="tsd-signature tsd-kind-icon">_request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L19">src/adapters/BrowserAdapter.ts:19</a></li>
+							<li>Defined in src/lib/adapters/HapiAdapter.ts:16</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_responsetoolkit" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _response<wbr>Toolkit</h3>
+					<div class="tsd-signature tsd-kind-icon">_response<wbr>Toolkit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ResponseToolkit</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in src/lib/adapters/HapiAdapter.ts:14</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+					<a name="_storage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> _storage</h3>
+					<div class="tsd-signature tsd-kind-icon">_storage<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
+					<aside class="tsd-sources">
+						<p>Overrides <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#_storage">_storage</a></p>
+						<ul>
+							<li>Defined in src/lib/adapters/HapiAdapter.ts:21</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -176,29 +191,15 @@
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="_url" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _url</h3>
-					<div class="tsd-signature tsd-kind-icon">_url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L14">src/adapters/BrowserAdapter.ts:14</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Stores the URL instance associated with this adapter</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="options" class="tsd-anchor"></a>
 					<h3>options</h3>
-					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.browserfhirsettings.html" class="tsd-signature-type">BrowserFHIRSettings</a></div>
+					<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_lib_adapters_nodeadapter_.nodeadapteroptions.html" class="tsd-signature-type">NodeAdapterOptions</a></div>
 					<aside class="tsd-sources">
 						<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#options">options</a></p>
+						<p>Inherited from <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#options">options</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L24">src/adapters/BrowserAdapter.ts:24</a></li>
+							<li>Defined in src/lib/adapters/NodeAdapter.ts:27</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -209,46 +210,20 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Accessors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
-					<a name="fhir" class="tsd-anchor"></a>
-					<h3>fhir</h3>
-					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> fhir<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L79">src/adapters/BrowserAdapter.ts:79</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>In browsers we need to be able to (dynamically) check if fhir.js is
-										included in the page. If it is, it should have created a &quot;fhir&quot; variable
-									in the global scope.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
-						</li>
-					</ul>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="getabortcontroller" class="tsd-anchor"></a>
 					<h3>get<wbr>Abort<wbr>Controller</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Abort<wbr>Controller<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Abort<wbr>Controller<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#getabortcontroller">getAbortController</a></p>
+								<p>Inherited from <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#getabortcontroller">getAbortController</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L122">src/adapters/BrowserAdapter.ts:122</a></li>
+									<li>Defined in src/lib/adapters/NodeAdapter.ts:111</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -257,117 +232,95 @@
 									AbortController will always be available as global (native or polyfilled)</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">object</span></h4>
-							<ul class="tsd-parameters">
-								<li class="tsd-parameter">
-									<h5>constructor<span class="tsd-signature-symbol">: </span>function</h5>
-									<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-type-literal tsd-is-not-exported">
-										<li class="tsd-signature tsd-kind-icon">new __type<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AbortController</span></li>
-									</ul>
-									<ul class="tsd-descriptions">
-										<li class="tsd-description">
-											<aside class="tsd-sources">
-												<ul>
-													<li>Defined in node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:1893</li>
-												</ul>
-											</aside>
-											<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AbortController</span></h4>
-										</li>
-								</ul>        </li>
-								<li class="tsd-parameter">
-									<h5>prototype<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AbortController</span></h5>
-								</li>
-							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getsmartapi" class="tsd-anchor"></a>
-					<h3>get<wbr>Smart<wbr>Api</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Smart<wbr>Api<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.smart.html" class="tsd-signature-type">SMART</a></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="getprotocol" class="tsd-anchor"></a>
+					<h3>get<wbr>Protocol</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Protocol<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#getsmartapi">getSmartApi</a></p>
+								<p>Inherited from <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#getprotocol">getProtocol</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L134">src/adapters/BrowserAdapter.ts:134</a></li>
+									<li>Defined in src/lib/adapters/NodeAdapter.ts:48</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Creates and returns adapter-aware SMART api. Not that while the shape of
-										the returned object is well known, the arguments to this function are not.
-										Those who override this method are free to require any environment-specific
-										arguments. For example in node we will need a request, a response and
-									optionally a storage or storage factory function.</p>
+									<p>Returns the protocol of the current request (&quot;http&quot; or &quot;https&quot;)</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_types_d_.fhirclient.smart.html" class="tsd-signature-type">SMART</a></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 					<a name="getstorage" class="tsd-anchor"></a>
 					<h3>get<wbr>Storage</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Storage<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BrowserStorage</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Storage<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#getstorage">getStorage</a></p>
+								<p>Overrides <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#getstorage">getStorage</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L110">src/adapters/BrowserAdapter.ts:110</a></li>
+									<li>Defined in src/lib/adapters/HapiAdapter.ts:41</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns a BrowserStorage object which is just a wrapper around
-									sessionStorage</p>
+									<p>Returns a ServerStorage instance</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">BrowserStorage</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="geturl" class="tsd-anchor"></a>
 					<h3>get<wbr>Url</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">get<wbr>Url<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">URL</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#geturl">getUrl</a></p>
+								<p>Inherited from <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#geturl">getUrl</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L89">src/adapters/BrowserAdapter.ts:89</a></li>
+									<li>Defined in src/lib/adapters/NodeAdapter.ts:59</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Given the current environment, this method must return the current url
-									as URL instance</p>
+									as URL instance. In Node we might be behind a proxy!</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">URL</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 					<a name="redirect" class="tsd-anchor"></a>
 					<h3>redirect</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">redirect<span class="tsd-signature-symbol">(</span>to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">redirect<span class="tsd-signature-symbol">(</span>location<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ResponseObject</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#redirect">redirect</a></p>
+								<p>Overrides <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#redirect">redirect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L101">src/adapters/BrowserAdapter.ts:101</a></li>
+									<li>Defined in src/lib/adapters/HapiAdapter.ts:62</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -379,25 +332,29 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>to: <span class="tsd-signature-type">string</span></h5>
+									<h5>location: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The path to redirect to</p>
+									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ResponseObject</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="relative" class="tsd-anchor"></a>
 					<h3>relative</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">relative<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/_types_d_.fhirclient.adapter.html">Adapter</a>.<a href="../interfaces/_types_d_.fhirclient.adapter.html#relative">relative</a></p>
+								<p>Inherited from <a href="_lib_adapters_nodeadapter_.nodeadapter.html">NodeAdapter</a>.<a href="_lib_adapters_nodeadapter_.nodeadapter.html#relative">relative</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/adapters/BrowserAdapter.ts#L69">src/adapters/BrowserAdapter.ts:69</a></li>
+									<li>Defined in src/lib/adapters/NodeAdapter.ts:40</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -424,52 +381,49 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_client_.html">&quot;<wbr>Client&quot;</a>
+						<a href="../modules/_browser_.html">&quot;browser&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_httperror_.html">&quot;<wbr>Http<wbr>Error&quot;</a>
+						<a href="../modules/_express_.html">&quot;express&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_abortcontroller_polyfill_d_.html">&quot;abortcontroller-<wbr>polyfill.d&quot;</a>
+						<a href="../modules/_hapi_.html">&quot;hapi&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_lib_client_.html">&quot;lib/<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_lib_httperror_.html">&quot;lib/<wbr>Http<wbr>Error&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_lib_adapters_browseradapter_.html">&quot;lib/adapters/<wbr>Browser<wbr>Adapter&quot;</a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="../modules/_adapters_browseradapter_.html">&quot;adapters/<wbr>Browser<wbr>Adapter&quot;</a>
+						<a href="../modules/_lib_adapters_hapiadapter_.html">&quot;lib/adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_adapters_hapiadapter_.html">&quot;adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
+						<a href="../modules/_lib_adapters_nodeadapter_.html">&quot;lib/adapters/<wbr>Node<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_adapters_nodeadapter_.html">&quot;adapters/<wbr>Node<wbr>Adapter&quot;</a>
+						<a href="../modules/_lib_index_.html">&quot;lib/index&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_entry_browser_.html">&quot;entry/browser&quot;</a>
+						<a href="../modules/_lib_settings_.html">&quot;lib/settings&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_entry_hapi_.html">&quot;entry/hapi&quot;</a>
+						<a href="../modules/_lib_smart_.html">&quot;lib/smart&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_entry_node_.html">&quot;entry/node&quot;</a>
+						<a href="../modules/_lib_storage_browserstorage_.html">&quot;lib/storage/<wbr>Browser<wbr>Storage&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_lib_.html">&quot;lib&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_middleware_.html">&quot;middleware&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_settings_.html">&quot;settings&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_smart_.html">&quot;smart&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_storage_browserstorage_.html">&quot;storage/<wbr>Browser<wbr>Storage&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_storage_serverstorage_.html">&quot;storage/<wbr>Server<wbr>Storage&quot;</a>
+						<a href="../modules/_lib_storage_serverstorage_.html">&quot;lib/storage/<wbr>Server<wbr>Storage&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_types_d_.html">&quot;types.d&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_util_.html">&quot;util&quot;</a>
 					</li>
 				</ul>
 			</nav>
@@ -478,45 +432,48 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_adapters_browseradapter_.browseradapter.html" class="tsd-kind-icon">Browser<wbr>Adapter</a>
+						<a href="_lib_adapters_hapiadapter_.hapiadapter.html" class="tsd-kind-icon">Hapi<wbr>Adapter</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#constructor" class="tsd-kind-icon">constructor</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="_adapters_browseradapter_.browseradapter.html#_storage" class="tsd-kind-icon">_storage</a>
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#_request" class="tsd-kind-icon">_request</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="_adapters_browseradapter_.browseradapter.html#_url" class="tsd-kind-icon">_url</a>
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#_responsetoolkit" class="tsd-kind-icon">_response<wbr>Toolkit</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#options" class="tsd-kind-icon">options</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-protected">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#_storage" class="tsd-kind-icon">_storage</a>
 							</li>
-							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#fhir" class="tsd-kind-icon">fhir</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#options" class="tsd-kind-icon">options</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#getabortcontroller" class="tsd-kind-icon">get<wbr>Abort<wbr>Controller</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#getabortcontroller" class="tsd-kind-icon">get<wbr>Abort<wbr>Controller</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#getsmartapi" class="tsd-kind-icon">get<wbr>Smart<wbr>Api</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#getprotocol" class="tsd-kind-icon">get<wbr>Protocol</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#getstorage" class="tsd-kind-icon">get<wbr>Storage</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#getstorage" class="tsd-kind-icon">get<wbr>Storage</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#geturl" class="tsd-kind-icon">get<wbr>Url</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#geturl" class="tsd-kind-icon">get<wbr>Url</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#redirect" class="tsd-kind-icon">redirect</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#redirect" class="tsd-kind-icon">redirect</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_adapters_browseradapter_.browseradapter.html#relative" class="tsd-kind-icon">relative</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_lib_adapters_hapiadapter_.hapiadapter.html#relative" class="tsd-kind-icon">relative</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../interfaces/_lib_adapters_hapiadapter_.hapiadapteroptions.html" class="tsd-kind-icon">Hapi<wbr>Adapter<wbr>Options</a>
+					</li>
 				</ul>
 			</nav>
 		</div>

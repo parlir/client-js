@@ -73,7 +73,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Additional options that can be passed to <code>client.request</code> to control its
+						<p>Additional options that can be passed to <code>[client.request]</code> to control its
 						behavior</p>
 					</div>
 				</div>
@@ -112,7 +112,7 @@
 					<div class="tsd-signature tsd-kind-icon">flat<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/types.d.ts#L630">src/types.d.ts:630</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/76e22c0/src/types.d.ts#L635">src/types.d.ts:635</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -145,7 +145,7 @@
 					<div class="tsd-signature tsd-kind-icon">graph<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/types.d.ts#L637">src/types.d.ts:637</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/76e22c0/src/types.d.ts#L652">src/types.d.ts:652</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -154,6 +154,16 @@
 								references will not be &quot;mounted&quot; in the result tree, but will be returned
 							as separate map object instead. <strong>Defaults to <code>true</code></strong>.</p>
 						</div>
+						<dl class="tsd-comment-tags">
+							<dt>example</dt>
+							<dd><p><strong>Fetch references in a separate object</strong></p>
+								<pre><code class="language-js"><span class="hljs-comment">// Resolves with Object ({ data, references }) or rejects with an Error</span>
+client.request(<span class="hljs-string">"Encounter/518a522a-4b10-47db-9daf-53b726d32607"</span>, {
+    <span class="hljs-attr">resolveReferences</span>: [ <span class="hljs-string">"serviceProvider"</span> ],
+    <span class="hljs-attr">graph</span>: <span class="hljs-literal">false</span>
+});</code></pre>
+							</dd>
+						</dl>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
@@ -162,7 +172,7 @@
 					<div class="tsd-signature tsd-kind-icon">on<wbr>Page<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/types.d.ts#L609">src/types.d.ts:609</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/76e22c0/src/types.d.ts#L614">src/types.d.ts:614</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -203,7 +213,7 @@
 					<div class="tsd-signature tsd-kind-icon">page<wbr>Limit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/types.d.ts#L586">src/types.d.ts:586</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/76e22c0/src/types.d.ts#L591">src/types.d.ts:591</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -226,7 +236,7 @@
 					<div class="tsd-signature tsd-kind-icon">resolve<wbr>References<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/types.d.ts#L658">src/types.d.ts:658</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/76e22c0/src/types.d.ts#L699">src/types.d.ts:699</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -235,9 +245,12 @@
 								string or as an array of one string. Multiple items must be specified as
 							array.</p>
 							<ul>
-								<li>Each item is a dot-separated path to the desired reference within the
-									result object, excluding the &quot;reference&quot; property. For example
-								<code>context.serviceProvider</code> will look for <code>{Response}.context.serviceProvider.reference</code>.</li>
+								<li>The paths are relative to the current resource. For example, use
+								<code>subject</code> instead of <code>entry.resource.subject</code>.</li>
+								<li>Path can have arbitrary depth but should not include the last
+									<code>reference</code> segment. For example the path <code>a.b.c</code> will resolve
+									<code>{current resource}.a.b.c.reference</code> but will mount the result at
+								<code>{current resource}.a.b.c</code>.</li>
 								<li>If the target is an array of references (E.g.
 									<a href="http://hl7.org/fhir/R4/patient-definitions.html#Patient.generalPractitioner">Patient.generalPractitioner</a>), you can request one or more of them by index (E.g. <code>generalPractitioner.0</code>).
 									If the index is not specified, all the references in the array will be
@@ -251,6 +264,28 @@
 								resolved&quot; anyway).</li>
 							</ul>
 						</div>
+						<dl class="tsd-comment-tags">
+							<dt>example</dt>
+							<dd><p><strong>Resolve serviceProvider references</strong></p>
+								<pre><code class="language-js"><span class="hljs-comment">// Resolves with augmented Encounter or rejects with an Error</span>
+client.request(<span class="hljs-string">"Encounter/id"</span>, {
+    <span class="hljs-attr">resolveReferences</span>: [ <span class="hljs-string">"serviceProvider"</span> ]
+});</code></pre>
+							</dd>
+							<dt>example</dt>
+							<dd><p><strong>Extracting multiple related resources from single Observation</strong></p>
+								<pre><code class="language-js"><span class="hljs-comment">// Resolves with Object (augmented Observation) or rejects with an Error</span>
+client.request(<span class="hljs-string">"Observation/smart-691-bmi"</span>, {
+   <span class="hljs-attr">resolveReferences</span>: [
+       <span class="hljs-string">"context"</span>,                 <span class="hljs-comment">// The Encounter (STU-3)</span>
+       <span class="hljs-string">"context.serviceProvider"</span>, <span class="hljs-comment">// The Organization (hospital, STU-3)</span>
+       <span class="hljs-string">"performer.0"</span>,             <span class="hljs-comment">// The Practitioner (the first "performer")</span>
+       <span class="hljs-string">"subject"</span>,                 <span class="hljs-comment">// The Patient</span>
+       <span class="hljs-string">"identifier..assigner"</span>     <span class="hljs-comment">// All identifier assigners</span>
+   ]
+});</code></pre>
+							</dd>
+						</dl>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
@@ -259,7 +294,7 @@
 					<div class="tsd-signature tsd-kind-icon">use<wbr>Refresh<wbr>Token<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/types.d.ts#L673">src/types.d.ts:673</a></li>
+							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/76e22c0/src/types.d.ts#L714">src/types.d.ts:714</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -289,49 +324,43 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_client_.html">&quot;<wbr>Client&quot;</a>
+						<a href="../modules/_browser_.html">&quot;browser&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_httperror_.html">&quot;<wbr>Http<wbr>Error&quot;</a>
+						<a href="../modules/_express_.html">&quot;express&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_abortcontroller_polyfill_d_.html">&quot;abortcontroller-<wbr>polyfill.d&quot;</a>
+						<a href="../modules/_hapi_.html">&quot;hapi&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_adapters_browseradapter_.html">&quot;adapters/<wbr>Browser<wbr>Adapter&quot;</a>
+						<a href="../modules/_lib_client_.html">&quot;lib/<wbr>Client&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_adapters_hapiadapter_.html">&quot;adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
+						<a href="../modules/_lib_httperror_.html">&quot;lib/<wbr>Http<wbr>Error&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_adapters_nodeadapter_.html">&quot;adapters/<wbr>Node<wbr>Adapter&quot;</a>
+						<a href="../modules/_lib_adapters_browseradapter_.html">&quot;lib/adapters/<wbr>Browser<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_entry_browser_.html">&quot;entry/browser&quot;</a>
+						<a href="../modules/_lib_adapters_hapiadapter_.html">&quot;lib/adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_entry_hapi_.html">&quot;entry/hapi&quot;</a>
+						<a href="../modules/_lib_adapters_nodeadapter_.html">&quot;lib/adapters/<wbr>Node<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_entry_node_.html">&quot;entry/node&quot;</a>
+						<a href="../modules/_lib_index_.html">&quot;lib/index&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_lib_.html">&quot;lib&quot;</a>
+						<a href="../modules/_lib_settings_.html">&quot;lib/settings&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_middleware_.html">&quot;middleware&quot;</a>
+						<a href="../modules/_lib_smart_.html">&quot;lib/smart&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_settings_.html">&quot;settings&quot;</a>
+						<a href="../modules/_lib_storage_browserstorage_.html">&quot;lib/storage/<wbr>Browser<wbr>Storage&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_smart_.html">&quot;smart&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_storage_browserstorage_.html">&quot;storage/<wbr>Browser<wbr>Storage&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_storage_serverstorage_.html">&quot;storage/<wbr>Server<wbr>Storage&quot;</a>
+						<a href="../modules/_lib_storage_serverstorage_.html">&quot;lib/storage/<wbr>Server<wbr>Storage&quot;</a>
 					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="../modules/_types_d_.html">&quot;types.d&quot;</a>
@@ -345,6 +374,9 @@
 								</ul>
 							</li>
 						</ul>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_util_.html">&quot;util&quot;</a>
 					</li>
 				</ul>
 			</nav>

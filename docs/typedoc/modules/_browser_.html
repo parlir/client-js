@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>__global | fhirclient</title>
+	<title>&quot;browser&quot; | fhirclient</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -54,13 +54,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_middleware_.html">&quot;middleware&quot;</a>
-				</li>
-				<li>
-					<a href="_middleware_.__global.html">__global</a>
+					<a href="_browser_.html">&quot;browser&quot;</a>
 				</li>
 			</ul>
-			<h1>Module __global</h1>
+			<h1>External module &quot;browser&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -72,12 +69,74 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Modules</h3>
+							<h3>Variables</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-module tsd-parent-kind-module tsd-is-not-exported"><a href="_middleware_.__global.express.html" class="tsd-kind-icon">Express</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_browser_.html#adapter" class="tsd-kind-icon">adapter</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Object literals</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-object-literal tsd-parent-kind-external-module"><a href="_browser_.html#fhir" class="tsd-kind-icon">FHIR</a></li>
 							</ul>
 						</section>
 					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="adapter" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> adapter</h3>
+					<div class="tsd-signature tsd-kind-icon">adapter<span class="tsd-signature-symbol">:</span> <a href="../classes/_lib_adapters_browseradapter_.browseradapter.html" class="tsd-signature-type">BrowserAdapter</a><span class="tsd-signature-symbol"> =&nbsp;new BrowserAdapter()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in src/browser.ts:14</li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Object literals</h2>
+				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-external-module">
+					<a name="fhir" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> <span class="tsd-flag ts-flagExport assignment">Export assignment</span> FHIR</h3>
+					<div class="tsd-signature tsd-kind-icon">FHIR<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in src/browser.ts:37</li>
+						</ul>
+					</aside>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
+						<a name="fhir.client" class="tsd-anchor"></a>
+						<h3>Client</h3>
+						<div class="tsd-signature tsd-kind-icon">Client<span class="tsd-signature-symbol">:</span> <a href="../classes/_lib_client_.client.html" class="tsd-signature-type">Client</a></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/browser.ts:38</li>
+							</ul>
+						</aside>
+					</section>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
+						<a name="fhir.smart" class="tsd-anchor"></a>
+						<h3>SMART</h3>
+						<div class="tsd-signature tsd-kind-icon">SMART<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_d_.fhirclient.smart.html" class="tsd-signature-type">SMART</a><span class="tsd-signature-symbol"> =&nbsp;{authorize(options: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]) {return smart.authorize(adapter, options)},ready(onSuccess?: (client: Client) &#x3D;&gt; any, onError?: (error: Error) &#x3D;&gt; any) {return smart.ready(adapter, onSuccess, onError)},init(options: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]) {return smart.init(adapter, options)}} as fhirclient.SMART</span></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/browser.ts:39</li>
+							</ul>
+						</aside>
+					</section>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
+						<a name="fhir.util" class="tsd-anchor"></a>
+						<h3>util</h3>
+						<div class="tsd-signature tsd-kind-icon">util<span class="tsd-signature-symbol">:</span> <a href="_util_.html" class="tsd-signature-type">&quot;util&quot;</a></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/browser.ts:50</li>
+							</ul>
+						</aside>
+					</section>
 				</section>
 			</section>
 		</div>
@@ -87,68 +146,61 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_client_.html">&quot;<wbr>Client&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_httperror_.html">&quot;<wbr>Http<wbr>Error&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_abortcontroller_polyfill_d_.html">&quot;abortcontroller-<wbr>polyfill.d&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_adapters_browseradapter_.html">&quot;adapters/<wbr>Browser<wbr>Adapter&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_adapters_hapiadapter_.html">&quot;adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_adapters_nodeadapter_.html">&quot;adapters/<wbr>Node<wbr>Adapter&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_entry_browser_.html">&quot;entry/browser&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_entry_hapi_.html">&quot;entry/hapi&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_entry_node_.html">&quot;entry/node&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_lib_.html">&quot;lib&quot;</a>
-					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_middleware_.html">&quot;middleware&quot;</a>
-						<ul>
-							<li class="current tsd-kind-module tsd-parent-kind-external-module tsd-is-not-exported">
-								<a href="_middleware_.__global.html">__global</a>
-								<ul>
-									<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-not-exported">
-										<a href="_middleware_.__global.express.html">Express</a>
-									</li>
-								</ul>
-							</li>
-						</ul>
+						<a href="_browser_.html">&quot;browser&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_settings_.html">&quot;settings&quot;</a>
+						<a href="_express_.html">&quot;express&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_smart_.html">&quot;smart&quot;</a>
+						<a href="_hapi_.html">&quot;hapi&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_storage_browserstorage_.html">&quot;storage/<wbr>Browser<wbr>Storage&quot;</a>
+						<a href="_lib_client_.html">&quot;lib/<wbr>Client&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_storage_serverstorage_.html">&quot;storage/<wbr>Server<wbr>Storage&quot;</a>
+						<a href="_lib_httperror_.html">&quot;lib/<wbr>Http<wbr>Error&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_adapters_browseradapter_.html">&quot;lib/adapters/<wbr>Browser<wbr>Adapter&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_adapters_hapiadapter_.html">&quot;lib/adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_adapters_nodeadapter_.html">&quot;lib/adapters/<wbr>Node<wbr>Adapter&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_index_.html">&quot;lib/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_settings_.html">&quot;lib/settings&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_smart_.html">&quot;lib/smart&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_storage_browserstorage_.html">&quot;lib/storage/<wbr>Browser<wbr>Storage&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_storage_serverstorage_.html">&quot;lib/storage/<wbr>Server<wbr>Storage&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_types_d_.html">&quot;types.d&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_util_.html">&quot;util&quot;</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_browser_.html#adapter" class="tsd-kind-icon">adapter</a>
+					</li>
+					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module">
+						<a href="_browser_.html#fhir" class="tsd-kind-icon">FHIR</a>
+					</li>
 				</ul>
 			</nav>
 		</div>

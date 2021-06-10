@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;entry/node&quot; | fhirclient</title>
+	<title>&quot;lib/storage/ServerStorage&quot; | fhirclient</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -54,10 +54,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_entry_node_.html">&quot;entry/node&quot;</a>
+					<a href="_lib_storage_serverstorage_.html">&quot;lib/storage/ServerStorage&quot;</a>
 				</li>
 			</ul>
-			<h1>External module &quot;entry/node&quot;</h1>
+			<h1>External module &quot;lib/storage/ServerStorage&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -68,85 +68,13 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Type aliases</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported"><a href="_entry_node_.html#storagefactory" class="tsd-kind-icon">storage<wbr>Factory</a></li>
-							</ul>
-						</section>
 						<section class="tsd-index-section ">
-							<h3>Functions</h3>
+							<h3>Classes</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_entry_node_.html#smart" class="tsd-kind-icon">smart</a></li>
+								<li class="tsd-kind-class tsd-parent-kind-external-module"><a href="../classes/_lib_storage_serverstorage_.serverstorage.html" class="tsd-kind-icon">Server<wbr>Storage</a></li>
 							</ul>
 						</section>
 					</div>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Type aliases</h2>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="storagefactory" class="tsd-anchor"></a>
-					<h3>storage<wbr>Factory</h3>
-					<div class="tsd-signature tsd-kind-icon">storage<wbr>Factory<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/entry/node.ts#L6">src/entry/node.ts:6</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a></li>
-								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <a href="../interfaces/_types_d_.fhirclient.jsonobject.html" class="tsd-signature-type">JsonObject</a></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="smart" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagExport assignment">Export assignment</span> smart</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">smart<span class="tsd-signature-symbol">(</span>request<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span>, response<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ServerResponse</span>, storage<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a><span class="tsd-signature-symbol"> | </span><a href="_entry_node_.html#storagefactory" class="tsd-signature-type">storageFactory</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_d_.fhirclient.smart.html" class="tsd-signature-type">SMART</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/smart-on-fhir/client-js/blob/73f7d3b/src/entry/node.ts#L8">src/entry/node.ts:8</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>request: <span class="tsd-signature-type">IncomingMessage</span></h5>
-								</li>
-								<li>
-									<h5>response: <span class="tsd-signature-type">ServerResponse</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> storage: <a href="../interfaces/_types_d_.fhirclient.storage.html" class="tsd-signature-type">Storage</a><span class="tsd-signature-symbol"> | </span><a href="_entry_node_.html#storagefactory" class="tsd-signature-type">storageFactory</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_types_d_.fhirclient.smart.html" class="tsd-signature-type">SMART</a></h4>
-						</li>
-					</ul>
 				</section>
 			</section>
 		</div>
@@ -157,62 +85,56 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_client_.html">&quot;<wbr>Client&quot;</a>
+						<a href="_browser_.html">&quot;browser&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_httperror_.html">&quot;<wbr>Http<wbr>Error&quot;</a>
+						<a href="_express_.html">&quot;express&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_abortcontroller_polyfill_d_.html">&quot;abortcontroller-<wbr>polyfill.d&quot;</a>
+						<a href="_hapi_.html">&quot;hapi&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_adapters_browseradapter_.html">&quot;adapters/<wbr>Browser<wbr>Adapter&quot;</a>
+						<a href="_lib_client_.html">&quot;lib/<wbr>Client&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_adapters_hapiadapter_.html">&quot;adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
+						<a href="_lib_httperror_.html">&quot;lib/<wbr>Http<wbr>Error&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_adapters_nodeadapter_.html">&quot;adapters/<wbr>Node<wbr>Adapter&quot;</a>
+						<a href="_lib_adapters_browseradapter_.html">&quot;lib/adapters/<wbr>Browser<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_entry_browser_.html">&quot;entry/browser&quot;</a>
+						<a href="_lib_adapters_hapiadapter_.html">&quot;lib/adapters/<wbr>Hapi<wbr>Adapter&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_entry_hapi_.html">&quot;entry/hapi&quot;</a>
+						<a href="_lib_adapters_nodeadapter_.html">&quot;lib/adapters/<wbr>Node<wbr>Adapter&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_index_.html">&quot;lib/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_settings_.html">&quot;lib/settings&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_smart_.html">&quot;lib/smart&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_lib_storage_browserstorage_.html">&quot;lib/storage/<wbr>Browser<wbr>Storage&quot;</a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_entry_node_.html">&quot;entry/node&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_lib_.html">&quot;lib&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_middleware_.html">&quot;middleware&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_settings_.html">&quot;settings&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_smart_.html">&quot;smart&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_storage_browserstorage_.html">&quot;storage/<wbr>Browser<wbr>Storage&quot;</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_storage_serverstorage_.html">&quot;storage/<wbr>Server<wbr>Storage&quot;</a>
+						<a href="_lib_storage_serverstorage_.html">&quot;lib/storage/<wbr>Server<wbr>Storage&quot;</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_types_d_.html">&quot;types.d&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_util_.html">&quot;util&quot;</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_entry_node_.html#storagefactory" class="tsd-kind-icon">storage<wbr>Factory</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_entry_node_.html#smart" class="tsd-kind-icon">smart</a>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="../classes/_lib_storage_serverstorage_.serverstorage.html" class="tsd-kind-icon">Server<wbr>Storage</a>
 					</li>
 				</ul>
 			</nav>
