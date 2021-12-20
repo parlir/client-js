@@ -9,6 +9,8 @@ const smart_1 = require("../smart");
 const Client_1 = require("../Client");
 
 const BrowserStorage_1 = require("../storage/BrowserStorage");
+
+const settings_1 = require("../settings");
 /**
  * Browser Adapter
  */
@@ -136,6 +138,44 @@ class BrowserAdapter {
 
   btoa(str) {
     return window.btoa(str);
+  }
+  /**
+   * Implements *base64url-encode* (RFC 4648 § 5) without padding, which is NOT
+   * the same as regular base64 encoding.
+   * @param value string to encode
+   */
+
+
+  base64urlEncode(value) {
+    let base64 = this.btoa(value);
+    base64 = base64.replace(/\+/g, "-");
+    base64 = base64.replace(/\//g, "_");
+    base64 = base64.replace(/=/g, "");
+    return base64;
+  }
+  /**
+   * Generates a code_verifier and code_challenge, as specified in rfc7636.
+   */
+
+
+  async generatePKCECodes() {
+    const output = new Uint32Array(settings_1.RECOMMENDED_CODE_VERIFIER_LENGTH);
+    crypto.getRandomValues(output);
+    const codeVerifier = this.base64urlEncode(Array.from(output).map(num => settings_1.PKCE_CHARSET[num % settings_1.PKCE_CHARSET.length]).join(""));
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(codeVerifier)).then(buffer => {
+      const hash = new Uint8Array(buffer);
+      const hashLength = hash.byteLength;
+      let binary = "";
+
+      for (let i = 0; i < hashLength; i++) {
+        binary += String.fromCharCode(hash[i]);
+      }
+
+      return binary;
+    }).then(val => this.base64urlEncode(val)).then(codeChallenge => ({
+      codeChallenge,
+      codeVerifier
+    }));
   }
   /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of

@@ -17,7 +17,8 @@ Object.defineProperty(exports, "KEY", {
   get: function () {
     return settings_1.SMART_KEY;
   }
-});
+}); // const jose = require("node-jose");
+
 const debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -52,7 +53,8 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
     return {
       registrationUri: meta.registration_endpoint || "",
       authorizeUri: meta.authorization_endpoint,
-      tokenUri: meta.token_endpoint
+      tokenUri: meta.token_endpoint,
+      codeChallengeMethods: meta.code_challenge_methods_supported || []
     };
   });
 }
@@ -68,7 +70,8 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
     const out = {
       registrationUri: "",
       authorizeUri: "",
-      tokenUri: ""
+      tokenUri: "",
+      codeChallengeMethods: []
     };
 
     if (extensions) {
@@ -175,7 +178,7 @@ async function authorize(env, params = {}) {
     const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
 
     if (!urlISS) {
-      throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
+      throw new Error("Passing in an \"iss\" url parameter is required if authorize " + "uses multiple configurations");
     } // pick the right config
 
 
@@ -211,17 +214,20 @@ async function authorize(env, params = {}) {
     client_id,
     target,
     width,
-    height
+    height,
+    pkceMode
   } = params;
   let {
     iss,
     launch,
     fhirServiceUrl,
     redirectUri,
-    noRedirect,
     scope = "",
     clientId,
     completeInTarget
+  } = params;
+  const {
+    noRedirect
   } = params;
   const storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
@@ -267,10 +273,10 @@ async function authorize(env, params = {}) {
       // within an iframe. This is to avoid issues when the entire app
       // happens to be rendered in an iframe (including in some EHRs),
       // even though that was not how the app developer's intention.
-      completeInTarget = inFrame; // In this case we can't always make the best decision so ask devs
-      // to be explicit in their configuration.
+      completeInTarget = inFrame; // In this case we can't always make the best decision so ask
+      // developers to be explicit in their configuration.
 
-      console.warn('Your app is being authorized from within an iframe or popup ' + 'window. Please be explicit and provide a "completeInTarget" ' + 'option. Use "true" to complete the authorization in the ' + 'same window, or "false" to try to complete it in the parent ' + 'or the opener window. See http://docs.smarthealthit.org/client-js/api.html');
+      console.warn("Your app is being authorized from within an iframe or popup " + "window. Please be explicit and provide a \"completeInTarget\" " + "option. Use \"true\" to complete the authorization in the " + "same window, or \"false\" to try to complete it in the parent " + "or the opener window. See http://docs.smarthealthit.org/client-js/api.html");
     }
   } // If `authorize` is called, make sure we clear any previous state (in case
   // this is a re-authorize)
@@ -346,6 +352,19 @@ async function authorize(env, params = {}) {
 
   if (launch) {
     redirectParams.push("launch=" + encodeURIComponent(launch));
+  }
+
+  if (pkceMode === "required" && !extensions.codeChallengeMethods.includes("S256")) {
+    throw new Error("The server does not support the required PKCE code challenge method (`S256`).");
+  }
+
+  if (pkceMode !== "disabled" && extensions.codeChallengeMethods.includes("S256")) {
+    const codes = await env.generatePKCECodes();
+    Object.assign(state, codes);
+    await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
+
+    redirectParams.push("code_challenge=" + state.codeChallenge);
+    redirectParams.push("code_challenge_method=S256");
   }
 
   redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
@@ -599,7 +618,8 @@ function buildTokenRequest(env, code, state) {
     redirectUri,
     clientSecret,
     tokenUri,
-    clientId
+    clientId,
+    codeVerifier
   } = state;
   lib_1.assert(redirectUri, "Missing state.redirectUri");
   lib_1.assert(tokenUri, "Missing state.tokenUri");
@@ -624,6 +644,12 @@ function buildTokenRequest(env, code, state) {
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
     requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
+  }
+
+  if (codeVerifier) {
+    debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly
+
+    requestOptions.body += "&code_verifier=" + codeVerifier;
   }
 
   return requestOptions;

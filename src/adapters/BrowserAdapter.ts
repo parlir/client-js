@@ -2,6 +2,7 @@ import { ready, authorize, init } from "../smart";
 import Client from "../Client";
 import BrowserStorage from "../storage/BrowserStorage";
 import { fhirclient } from "../types";
+import { PKCE_CHARSET, RECOMMENDED_CODE_VERIFIER_LENGTH } from "../settings";
 
 /**
  * Browser Adapter
@@ -138,6 +139,52 @@ export default class BrowserAdapter implements fhirclient.Adapter
     btoa(str: string): string
     {
         return window.btoa(str);
+    }
+
+    /**
+     * Implements *base64url-encode* (RFC 4648 § 5) without padding, which is NOT
+     * the same as regular base64 encoding.
+     * @param value string to encode
+     */
+    base64urlEncode(value: string) {
+        let base64 = this.btoa(value);
+        base64 = base64.replace(/\+/g, "-");
+        base64 = base64.replace(/\//g, "_");
+        base64 = base64.replace(/=/g, "");
+        return base64;
+    }
+
+    /**
+     * Generates a code_verifier and code_challenge, as specified in rfc7636.
+     */
+    async generatePKCECodes(): Promise<{
+        codeChallenge: string;
+        codeVerifier: string;
+    }>
+    {
+        const output = new Uint32Array(RECOMMENDED_CODE_VERIFIER_LENGTH);
+
+        crypto.getRandomValues(output);
+
+        const codeVerifier = this.base64urlEncode(Array.from(output).map(
+            num => PKCE_CHARSET[num % PKCE_CHARSET.length]
+        ).join(""));
+
+        return crypto.subtle.digest("SHA-256", new TextEncoder().encode(codeVerifier))
+            .then(buffer => {
+                const hash       = new Uint8Array(buffer);
+                const hashLength = hash.byteLength;
+
+                let binary = "";
+
+                for (let i = 0; i < hashLength; i++) {
+                    binary += String.fromCharCode(hash[i]);
+                }
+
+                return binary;
+            })
+            .then(val => this.base64urlEncode(val))
+            .then(codeChallenge => ({ codeChallenge, codeVerifier }));
     }
 
     /**

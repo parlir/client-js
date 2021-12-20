@@ -62,6 +62,19 @@ export default class BrowserAdapter implements fhirclient.Adapter {
      */
     btoa(str: string): string;
     /**
+     * Implements *base64url-encode* (RFC 4648 § 5) without padding, which is NOT
+     * the same as regular base64 encoding.
+     * @param value string to encode
+     */
+    base64urlEncode(value: string): string;
+    /**
+     * Generates a code_verifier and code_challenge, as specified in rfc7636.
+     */
+    generatePKCECodes(): Promise<{
+        codeChallenge: string;
+        codeVerifier: string;
+    }>;
+    /**
      * Creates and returns adapter-aware SMART api. Not that while the shape of
      * the returned object is well known, the arguments to this function are not.
      * Those who override this method are free to require any environment-specific

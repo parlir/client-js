@@ -165,6 +165,14 @@ declare namespace fhirclient {
         getAbortController(): typeof AbortController;
 
         /**
+         * Generates a code_verifier and code_challenge, as specified in rfc7636.
+         */
+        generatePKCECodes(): Promise<{
+            codeChallenge: string;
+            codeVerifier: string;
+        }>;
+
+        /**
          * Creates and returns adapter-aware SMART api. Not that while the shape of
          * the returned object is well known, the arguments to this function are not.
          * Those who override this method are free to require any environment-specific
@@ -205,6 +213,7 @@ declare namespace fhirclient {
     function WindowTargetFunction(): Promise<WindowTargetVariable>;
     type WindowTarget = WindowTargetVariable | typeof WindowTargetFunction;
 
+    type PkceMode = "ifSupported" | "required" | "disabled";
 
     type storageFactory = (options?: Record<string, any>) => Storage;
 
@@ -275,8 +284,8 @@ declare namespace fhirclient {
     }
 
     /**
-     * The three security endpoints that SMART servers might declare in the
-     * conformance statement
+     * The security endpoints and other info that SMART servers might declare in
+     * the conformance statement
      */
     interface OAuthSecurityExtensions {
 
@@ -296,6 +305,11 @@ declare namespace fhirclient {
          * for an access token.
          */
         tokenUri: string;
+
+        /**
+         * Supported PKCE Code challenge methods
+         */
+        codeChallengeMethods: string[];
     }
 
     /**
@@ -389,6 +403,17 @@ declare namespace fhirclient {
          * received from the server.
          */
         expiresAt?: number;
+
+        /**
+         * PKCE code challenge base value.
+         */
+        codeChallenge?: string;
+
+        /**
+         * PKCE code verification, formatted with base64url-encode (RFC 4648 § 5) 
+         * without padding, which is NOT the same as regular base64 encoding.
+         */
+        codeVerifier?: string;
     }
 
     /**
@@ -541,6 +566,15 @@ declare namespace fhirclient {
          * [[authorize]] was called.
          */
         completeInTarget?: boolean;
+
+        /**
+         * Client expectations for PKCE (Proof Key for Code Exchange). Can be
+         * one of:
+         * - `ifSupported` Use if a matching code challenge method is available (**default**)
+         * - `required`    Do not attempt authorization to servers without support
+         * - `disabled`    Do not use PKCE
+         */
+        pkceMode?: PkceMode;
     }
 
     /**
@@ -762,6 +796,8 @@ declare namespace fhirclient {
 
     // Capabilities ------------------------------------------------------------
 
+    type codeChallengeMethod = "S256";
+
     type SMARTAuthenticationMethod = "client_secret_post" | "client_secret_basic";
 
     type launchMode = "launch-ehr" | "launch-standalone";
@@ -812,6 +848,11 @@ declare namespace fhirclient {
          * revoke a token.
          */
         revocation_endpoint?: string;
+
+        /**
+         * RECOMMENDED! PKCE challenge methods the server supports.
+         */
+        code_challenge_methods_supported?: codeChallengeMethod[];
 
         /**
          * Array of client authentication methods supported by the token endpoint.

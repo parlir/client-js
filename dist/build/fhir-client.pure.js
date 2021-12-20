@@ -2120,6 +2120,8 @@ const smart_1 = __webpack_require__(/*! ../smart */ "./src/smart.ts");
 const Client_1 = __webpack_require__(/*! ../Client */ "./src/Client.ts");
 
 const BrowserStorage_1 = __webpack_require__(/*! ../storage/BrowserStorage */ "./src/storage/BrowserStorage.ts");
+
+const settings_1 = __webpack_require__(/*! ../settings */ "./src/settings.ts");
 /**
  * Browser Adapter
  */
@@ -2248,6 +2250,44 @@ class BrowserAdapter {
 
   btoa(str) {
     return window.btoa(str);
+  }
+  /**
+   * Implements *base64url-encode* (RFC 4648 § 5) without padding, which is NOT
+   * the same as regular base64 encoding.
+   * @param value string to encode
+   */
+
+
+  base64urlEncode(value) {
+    let base64 = this.btoa(value);
+    base64 = base64.replace(/\+/g, "-");
+    base64 = base64.replace(/\//g, "_");
+    base64 = base64.replace(/=/g, "");
+    return base64;
+  }
+  /**
+   * Generates a code_verifier and code_challenge, as specified in rfc7636.
+   */
+
+
+  async generatePKCECodes() {
+    const output = new Uint32Array(settings_1.RECOMMENDED_CODE_VERIFIER_LENGTH);
+    crypto.getRandomValues(output);
+    const codeVerifier = this.base64urlEncode(Array.from(output).map(num => settings_1.PKCE_CHARSET[num % settings_1.PKCE_CHARSET.length]).join(""));
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(codeVerifier)).then(buffer => {
+      const hash = new Uint8Array(buffer);
+      const hashLength = hash.byteLength;
+      let binary = "";
+
+      for (let i = 0; i < hashLength; i++) {
+        binary += String.fromCharCode(hash[i]);
+      }
+
+      return binary;
+    }).then(val => this.base64urlEncode(val)).then(codeChallenge => ({
+      codeChallenge,
+      codeVerifier
+    }));
   }
   /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
@@ -2956,7 +2996,7 @@ exports.assertJsonPatch = assertJsonPatch;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.SMART_KEY = exports.patientParams = exports.fhirVersions = exports.patientCompartment = void 0;
+exports.PKCE_CHARSET = exports.RECOMMENDED_CODE_VERIFIER_LENGTH = exports.SMART_KEY = exports.patientParams = exports.fhirVersions = exports.patientCompartment = void 0;
 /**
  * Combined list of FHIR resource types accepting patient parameter in FHIR R2-R4
  */
@@ -2994,6 +3034,20 @@ exports.patientParams = ["patient", "subject", "requester", "member", "actor", "
  */
 
 exports.SMART_KEY = "SMART_KEY";
+/**
+ * The maximum length for a code verifier for the best security we can offer.
+ * Please note the NOTE section of RFC 7636 § 4.1 - the length must be >= 43,
+ * but <= 128, **after** base64 url encoding. This means 32 code verifier bytes
+ * encoded will be 43 bytes, or 96 bytes encoded will be 128 bytes. So 96 bytes
+ * is the highest valid value that can be used.
+ */
+
+exports.RECOMMENDED_CODE_VERIFIER_LENGTH = 96;
+/**
+ * Character set to generate code verifier defined in rfc7636.
+ */
+
+exports.PKCE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
 
 /***/ }),
 
@@ -3024,7 +3078,8 @@ Object.defineProperty(exports, "KEY", {
   get: function () {
     return settings_1.SMART_KEY;
   }
-});
+}); // const jose = require("node-jose");
+
 const debug = lib_1.debug.extend("oauth2");
 
 function isBrowser() {
@@ -3059,7 +3114,8 @@ function getSecurityExtensionsFromWellKnownJson(baseUrl = "/", requestOptions) {
     return {
       registrationUri: meta.registration_endpoint || "",
       authorizeUri: meta.authorization_endpoint,
-      tokenUri: meta.token_endpoint
+      tokenUri: meta.token_endpoint,
+      codeChallengeMethods: meta.code_challenge_methods_supported || []
     };
   });
 }
@@ -3075,7 +3131,8 @@ function getSecurityExtensionsFromConformanceStatement(baseUrl = "/", requestOpt
     const out = {
       registrationUri: "",
       authorizeUri: "",
-      tokenUri: ""
+      tokenUri: "",
+      codeChallengeMethods: []
     };
 
     if (extensions) {
@@ -3182,7 +3239,7 @@ async function authorize(env, params = {}) {
     const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
 
     if (!urlISS) {
-      throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
+      throw new Error("Passing in an \"iss\" url parameter is required if authorize " + "uses multiple configurations");
     } // pick the right config
 
 
@@ -3218,17 +3275,20 @@ async function authorize(env, params = {}) {
     client_id,
     target,
     width,
-    height
+    height,
+    pkceMode
   } = params;
   let {
     iss,
     launch,
     fhirServiceUrl,
     redirectUri,
-    noRedirect,
     scope = "",
     clientId,
     completeInTarget
+  } = params;
+  const {
+    noRedirect
   } = params;
   const storage = env.getStorage(); // For these three an url param takes precedence over inline option
 
@@ -3274,10 +3334,10 @@ async function authorize(env, params = {}) {
       // within an iframe. This is to avoid issues when the entire app
       // happens to be rendered in an iframe (including in some EHRs),
       // even though that was not how the app developer's intention.
-      completeInTarget = inFrame; // In this case we can't always make the best decision so ask devs
-      // to be explicit in their configuration.
+      completeInTarget = inFrame; // In this case we can't always make the best decision so ask
+      // developers to be explicit in their configuration.
 
-      console.warn('Your app is being authorized from within an iframe or popup ' + 'window. Please be explicit and provide a "completeInTarget" ' + 'option. Use "true" to complete the authorization in the ' + 'same window, or "false" to try to complete it in the parent ' + 'or the opener window. See http://docs.smarthealthit.org/client-js/api.html');
+      console.warn("Your app is being authorized from within an iframe or popup " + "window. Please be explicit and provide a \"completeInTarget\" " + "option. Use \"true\" to complete the authorization in the " + "same window, or \"false\" to try to complete it in the parent " + "or the opener window. See http://docs.smarthealthit.org/client-js/api.html");
     }
   } // If `authorize` is called, make sure we clear any previous state (in case
   // this is a re-authorize)
@@ -3353,6 +3413,19 @@ async function authorize(env, params = {}) {
 
   if (launch) {
     redirectParams.push("launch=" + encodeURIComponent(launch));
+  }
+
+  if (pkceMode === "required" && !extensions.codeChallengeMethods.includes("S256")) {
+    throw new Error("The server does not support the required PKCE code challenge method (`S256`).");
+  }
+
+  if (pkceMode !== "disabled" && extensions.codeChallengeMethods.includes("S256")) {
+    const codes = await env.generatePKCECodes();
+    Object.assign(state, codes);
+    await storage.set(stateKey, state); // note that the challenge is ALREADY encoded properly
+
+    redirectParams.push("code_challenge=" + state.codeChallenge);
+    redirectParams.push("code_challenge_method=S256");
   }
 
   redirectUrl = state.authorizeUri + "?" + redirectParams.join("&");
@@ -3606,7 +3679,8 @@ function buildTokenRequest(env, code, state) {
     redirectUri,
     clientSecret,
     tokenUri,
-    clientId
+    clientId,
+    codeVerifier
   } = state;
   lib_1.assert(redirectUri, "Missing state.redirectUri");
   lib_1.assert(tokenUri, "Missing state.tokenUri");
@@ -3631,6 +3705,12 @@ function buildTokenRequest(env, code, state) {
   } else {
     debug("No clientSecret found in state. Adding the clientId to the POST body");
     requestOptions.body += `&client_id=${encodeURIComponent(clientId)}`;
+  }
+
+  if (codeVerifier) {
+    debug("Found state.codeVerifier, adding to the POST body"); // Note that the codeVerifier is ALREADY encoded properly
+
+    requestOptions.body += "&code_verifier=" + codeVerifier;
   }
 
   return requestOptions;

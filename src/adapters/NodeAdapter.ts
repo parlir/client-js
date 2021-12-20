@@ -1,10 +1,12 @@
+import { IncomingMessage, ServerResponse } from "http";
+import { TLSSocket } from "tls";
+import * as jose from "node-jose";
 import { fhirclient } from "../types";
 import { ready, authorize, init } from "../smart";
 import Client from "../Client";
 import ServerStorage from "../storage/ServerStorage";
 import { AbortController } from "abortcontroller-polyfill/dist/cjs-ponyfill";
-import { IncomingMessage, ServerResponse } from "http";
-import { TLSSocket } from "tls";
+import { RECOMMENDED_CODE_VERIFIER_LENGTH } from "../settings";
 
 
 interface NodeAdapterOptions {
@@ -132,6 +134,19 @@ export default class NodeAdapter implements fhirclient.Adapter
     getAbortController()
     {
         return AbortController;
+    }
+
+    /**
+     * Generates a code_verifier and code_challenge, as specified in rfc7636.
+     */
+    generatePKCECodes()
+    {
+        const inputBytes: Buffer = jose.util.randomBytes(RECOMMENDED_CODE_VERIFIER_LENGTH);
+        const codeVerifier: string = jose.util.base64url.encode(inputBytes);
+        return jose.JWA.digest("SHA-256", codeVerifier).then((code: Buffer) => ({
+            codeChallenge: jose.util.base64url.encode(code),
+            codeVerifier
+        }));
     }
 
     /**

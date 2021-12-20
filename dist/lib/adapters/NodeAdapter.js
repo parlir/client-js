@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+const jose = require("node-jose");
+
 const smart_1 = require("../smart");
 
 const Client_1 = require("../Client");
@@ -11,6 +13,8 @@ const Client_1 = require("../Client");
 const ServerStorage_1 = require("../storage/ServerStorage");
 
 const cjs_ponyfill_1 = require("abortcontroller-polyfill/dist/cjs-ponyfill");
+
+const settings_1 = require("../settings");
 /**
  * Node Adapter - works with native NodeJS and with Express
  */
@@ -128,6 +132,20 @@ class NodeAdapter {
 
   getAbortController() {
     return cjs_ponyfill_1.AbortController;
+  }
+  /**
+   * Generates a code_verifier and code_challenge, as specified in rfc7636.
+   */
+
+
+  generatePKCECodes() {
+    const inputBytes = jose.util.randomBytes(settings_1.RECOMMENDED_CODE_VERIFIER_LENGTH);
+    const input = Array.from(inputBytes).map(val => settings_1.PKCE_CHARSET[val % settings_1.PKCE_CHARSET.length]).join("");
+    const codeVerifier = jose.util.base64url.encode(input);
+    return jose.JWA.digest("SHA-256", codeVerifier).then(code => ({
+      codeChallenge: jose.util.base64url.encode(code),
+      codeVerifier
+    }));
   }
   /**
    * Creates and returns adapter-aware SMART api. Not that while the shape of
