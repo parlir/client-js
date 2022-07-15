@@ -1,7 +1,5 @@
 import Client from "./Client";
-import { SMART_KEY } from "./settings";
 import { fhirclient } from "./types";
-export { SMART_KEY as KEY };
 /**
  * Fetches the well-known json file from the given base URL.
  * Note that the result is cached in memory (until the page is reloaded in the
@@ -28,7 +26,7 @@ export declare function getSecurityExtensions(env: fhirclient.Adapter, baseUrl?:
  * @param env
  * @param [params]
  */
-export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]): Promise<string | void>;
+export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[], STORAGE_KEY?: string): Promise<string | void>;
 /**
  * Checks if called within a frame. Only works in browsers!
  * If the current window has a `parent` or `top` properties that refer to
@@ -55,7 +53,7 @@ export declare function onMessage(e: MessageEvent): void;
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export declare function completeAuth(env: fhirclient.Adapter): Promise<Client>;
+export declare function completeAuth(env: fhirclient.Adapter, STORAGE_KEY?: string): Promise<Client>;
 /**
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
@@ -97,4 +95,4 @@ export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Clie
  * @param env The adapter
  * @param options The authorize options
  */
-export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client | never>;
+export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams, STORAGE_KEY?: string): Promise<Client | never>;

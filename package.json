@@ -24,6 +24,7 @@
   },
   "scripts": {
     "test": "lab test/*.test.ts",
+    "prepare": "npm run build",
     "pack": "webpack",
     "build": "npm run build:module && npm run pack",
     "build:dev": "webpack --watch",

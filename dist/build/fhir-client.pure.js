@@ -1028,11 +1028,10 @@ const strings_1 = __webpack_require__(/*! ./strings */ "./src/strings.ts");
 
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts"); // $lab:coverage:off$
 // @ts-ignore
+// const { Response } =
+//   typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch");
+// $lab:coverage:on$
 
-
-const {
-  Response
-} =  true ? window : undefined; // $lab:coverage:on$
 
 const debug = lib_1.debug.extend("client");
 /**
@@ -1155,7 +1154,7 @@ function resolveRefs(obj, fhirOptions, cache, client, signal) {
     const index = paths.indexOf(p, i + 1);
 
     if (index > -1) {
-      debug("Duplicated reference path \"%s\"", p);
+      debug('Duplicated reference path "%s"', p);
       return false;
     }
 
@@ -1207,8 +1206,9 @@ class Client {
   /**
    * Validates the parameters, creates an instance and tries to connect it to
    * FhirJS, if one is available globally.
+   * Adds STORAGE_KEY for multiple clients to avoid confliction.
    */
-  constructor(environment, state) {
+  constructor(environment, state, STORAGE_KEY = settings_1.SMART_KEY) {
     /**
      * @category Utility
      */
@@ -1219,7 +1219,8 @@ class Client {
     } : state; // Valid serverUrl is required!
 
 
-    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
+    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), 'A "serverUrl" option is required and must begin with "http(s)"');
+    this.STORAGE_KEY = STORAGE_KEY;
     this.state = _state;
     this.environment = environment;
     this._refreshTask = null;
@@ -1526,13 +1527,13 @@ class Client {
 
   async _clearState() {
     const storage = this.environment.getStorage();
-    const key = await storage.get(settings_1.SMART_KEY);
+    const key = await storage.get(this.STORAGE_KEY);
 
     if (key) {
       await storage.unset(key);
     }
 
-    await storage.unset(settings_1.SMART_KEY);
+    await storage.unset(this.STORAGE_KEY);
     this.state.tokenResponse = {};
   }
   /**
@@ -1624,7 +1625,7 @@ class Client {
       method: "PATCH",
       body: JSON.stringify(patch),
       headers: {
-        "prefer": "return=presentation",
+        prefer: "return=presentation",
         "content-type": "application/json-patch+json; charset=UTF-8",
         ...requestOptions.headers
       }
@@ -3010,7 +3011,7 @@ exports.SMART_KEY = "SMART_KEY";
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = exports.KEY = void 0;
+exports.init = exports.ready = exports.buildTokenRequest = exports.completeAuth = exports.onMessage = exports.isInPopUp = exports.isInFrame = exports.authorize = exports.getSecurityExtensions = exports.fetchWellKnownJson = void 0;
 /* global window */
 
 const lib_1 = __webpack_require__(/*! ./lib */ "./src/lib.ts");
@@ -3019,13 +3020,7 @@ const Client_1 = __webpack_require__(/*! ./Client */ "./src/Client.ts");
 
 const settings_1 = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 
-Object.defineProperty(exports, "KEY", {
-  enumerable: true,
-  get: function () {
-    return settings_1.SMART_KEY;
-  }
-});
-const debug = lib_1.debug.extend("oauth2");
+const debug = lib_1.debug.extend("oauth2"); // export { SMART_KEY as KEY };
 
 function isBrowser() {
   return typeof window === "object";
@@ -3175,14 +3170,14 @@ exports.getSecurityExtensions = getSecurityExtensions;
  * @param [params]
  */
 
-async function authorize(env, params = {}) {
+async function authorize(env, params = {}, STORAGE_KEY = settings_1.SMART_KEY) {
   const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
   if (Array.isArray(params)) {
     const urlISS = url.searchParams.get("iss") || url.searchParams.get("fhirServiceUrl");
 
     if (!urlISS) {
-      throw new Error('Passing in an "iss" url parameter is required if authorize ' + 'uses multiple configurations');
+      throw new Error('Passing in an "iss" url parameter is required if authorize ' + "uses multiple configurations");
     } // pick the right config
 
 
@@ -3277,13 +3272,13 @@ async function authorize(env, params = {}) {
       completeInTarget = inFrame; // In this case we can't always make the best decision so ask devs
       // to be explicit in their configuration.
 
-      console.warn('Your app is being authorized from within an iframe or popup ' + 'window. Please be explicit and provide a "completeInTarget" ' + 'option. Use "true" to complete the authorization in the ' + 'same window, or "false" to try to complete it in the parent ' + 'or the opener window. See http://docs.smarthealthit.org/client-js/api.html');
+      console.warn("Your app is being authorized from within an iframe or popup " + 'window. Please be explicit and provide a "completeInTarget" ' + 'option. Use "true" to complete the authorization in the ' + 'same window, or "false" to try to complete it in the parent ' + "or the opener window. See http://docs.smarthealthit.org/client-js/api.html");
     }
   } // If `authorize` is called, make sure we clear any previous state (in case
   // this is a re-authorize)
 
 
-  const oldKey = await storage.get(settings_1.SMART_KEY);
+  const oldKey = await storage.get(STORAGE_KEY);
   await storage.unset(oldKey); // create initial state
 
   const stateKey = lib_1.randomString(16);
@@ -3300,7 +3295,7 @@ async function authorize(env, params = {}) {
   const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
   if (fullSessionStorageSupport) {
-    await storage.set(settings_1.SMART_KEY, stateKey);
+    await storage.set(STORAGE_KEY, stateKey);
   } // fakeTokenResponse to override stuff (useful in development)
 
 
@@ -3449,7 +3444,7 @@ exports.onMessage = onMessage;
  * authorization server..
  */
 
-async function completeAuth(env) {
+async function completeAuth(env, STORAGE_KEY = settings_1.SMART_KEY) {
   var _a, _b;
 
   const url = env.getUrl();
@@ -3461,7 +3456,7 @@ async function completeAuth(env) {
   const authErrorDescription = params.get("error_description");
 
   if (!key) {
-    key = await Storage.get(settings_1.SMART_KEY);
+    key = await Storage.get(STORAGE_KEY);
   } // Start by checking the url for `error` and `error_description` parameters.
   // This happens when the auth server rejects our authorization attempt. In
   // this case it has no other way to tell us what the error was, other than
@@ -3516,7 +3511,9 @@ async function completeAuth(env) {
         window.close();
       }
 
-      return new Promise(() => {});
+      return new Promise(() => {
+        /* leave it pending!!! */
+      });
     }
   }
 
@@ -3533,7 +3530,7 @@ async function completeAuth(env) {
       debug("Removed code parameter from the url.");
     } // If we have `fullSessionStorageSupport` it means we no longer
     // need the `state` key. It will be stored to a well know
-    // location - sessionStorage[SMART_KEY]. However, no
+    // location - sessionStorage[STORAGE_KEY]. However, no
     // fullSessionStorageSupport means that this "well know location"
     // might be shared between windows and tabs. In this case we
     // MUST keep the `state` url parameter.
@@ -3587,7 +3584,7 @@ async function completeAuth(env) {
   }
 
   if (fullSessionStorageSupport) {
-    await Storage.set(settings_1.SMART_KEY, key);
+    await Storage.set(STORAGE_KEY, key);
   }
 
   const client = new Client_1.default(env, state);
@@ -3689,20 +3686,20 @@ exports.ready = ready;
  * @param options The authorize options
  */
 
-async function init(env, options) {
+async function init(env, options, STORAGE_KEY = settings_1.SMART_KEY) {
   const url = env.getUrl();
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
   if (code && state) {
-    return completeAuth(env);
+    return completeAuth(env, STORAGE_KEY);
   } // Check for existing client state. If state is found, it means a client
   // instance have already been created in this session and we should try to
   // "revive" it.
 
 
   const storage = env.getStorage();
-  const key = state || (await storage.get(settings_1.SMART_KEY));
+  const key = state || (await storage.get(STORAGE_KEY));
   const cached = await storage.get(key);
 
   if (cached) {
@@ -3710,7 +3707,7 @@ async function init(env, options) {
   } // Otherwise try to launch
 
 
-  return authorize(env, options).then(() => {
+  return authorize(env, options, STORAGE_KEY).then(() => {
     // `init` promises a Client but that cannot happen in this case. The
     // browser will be redirected (unload the page and be redirected back
     // to it later and the same init function will be called again). On
@@ -3718,7 +3715,9 @@ async function init(env, options) {
     // want to return that from this promise chain because it is not a
     // Client instance. At the same time, if authorize fails, we do want to
     // pass the error to those waiting for a client instance.
-    return new Promise(() => {});
+    return new Promise(() => {
+      /* leave it pending!!! */
+    });
   });
 }
 

@@ -14,11 +14,10 @@ const strings_1 = require("./strings");
 
 const settings_1 = require("./settings"); // $lab:coverage:off$
 // @ts-ignore
+// const { Response } =
+//   typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch");
+// $lab:coverage:on$
 
-
-const {
-  Response
-} = typeof FHIRCLIENT_PURE !== "undefined" ? window : require("cross-fetch"); // $lab:coverage:on$
 
 const debug = lib_1.debug.extend("client");
 /**
@@ -141,7 +140,7 @@ function resolveRefs(obj, fhirOptions, cache, client, signal) {
     const index = paths.indexOf(p, i + 1);
 
     if (index > -1) {
-      debug("Duplicated reference path \"%s\"", p);
+      debug('Duplicated reference path "%s"', p);
       return false;
     }
 
@@ -193,8 +192,9 @@ class Client {
   /**
    * Validates the parameters, creates an instance and tries to connect it to
    * FhirJS, if one is available globally.
+   * Adds STORAGE_KEY for multiple clients to avoid confliction.
    */
-  constructor(environment, state) {
+  constructor(environment, state, STORAGE_KEY = settings_1.SMART_KEY) {
     /**
      * @category Utility
      */
@@ -205,7 +205,8 @@ class Client {
     } : state; // Valid serverUrl is required!
 
 
-    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
+    lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), 'A "serverUrl" option is required and must begin with "http(s)"');
+    this.STORAGE_KEY = STORAGE_KEY;
     this.state = _state;
     this.environment = environment;
     this._refreshTask = null;
@@ -512,13 +513,13 @@ class Client {
 
   async _clearState() {
     const storage = this.environment.getStorage();
-    const key = await storage.get(settings_1.SMART_KEY);
+    const key = await storage.get(this.STORAGE_KEY);
 
     if (key) {
       await storage.unset(key);
     }
 
-    await storage.unset(settings_1.SMART_KEY);
+    await storage.unset(this.STORAGE_KEY);
     this.state.tokenResponse = {};
   }
   /**
@@ -608,7 +609,7 @@ class Client {
       method: "PATCH",
       body: JSON.stringify(patch),
       headers: Object.assign({
-        "prefer": "return=presentation",
+        prefer: "return=presentation",
         "content-type": "application/json-patch+json; charset=UTF-8"
       }, requestOptions.headers)
     }));
