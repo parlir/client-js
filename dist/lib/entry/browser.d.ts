@@ -13,7 +13,7 @@ declare const FHIR: {
             (onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
         };
         authorize: (options: fhirclient.AuthorizeParams) => Promise<string | void>;
-        init: (options: fhirclient.AuthorizeParams) => Promise<Client>;
+        init: (options: fhirclient.AuthorizeParams, STORAGE_KEY?: string) => Promise<Client>;
     };
 };
 export = FHIR;

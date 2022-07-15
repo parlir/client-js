@@ -12454,8 +12454,8 @@ var BrowserAdapter = /*#__PURE__*/function () {
       authorize: function authorize(options) {
         return smart_1.authorize(_this, options);
       },
-      init: function init(options) {
-        return smart_1.init(_this, options);
+      init: function init(options, STORAGE_KEY) {
+        return smart_1.init(_this, options, STORAGE_KEY);
       },
       client: function client(state) {
         return new Client_1.default(_this, state);

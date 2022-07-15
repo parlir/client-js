@@ -152,7 +152,7 @@ export default class BrowserAdapter implements fhirclient.Adapter
         return {
             ready    : (...args: any[]) => ready(this, ...args),
             authorize: options => authorize(this, options),
-            init     : options => init(this, options),
+            init     : (options, STORAGE_KEY) => init(this, options, STORAGE_KEY),
             client   : (state: string | fhirclient.ClientState) => new Client(this, state),
             options  : this.options
         };
