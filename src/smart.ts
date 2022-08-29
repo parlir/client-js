@@ -715,7 +715,8 @@ export function buildTokenRequest(
 export async function ready(
   env: fhirclient.Adapter,
   onSuccess?: (client: Client) => any,
-  onError?: (error: Error) => any
+  onError?: (error: Error) => any,
+  STORAGE_KEY: string = SMART_KEY
 ): Promise<Client> {
   let task = completeAuth(env);
   if (onSuccess) {
