@@ -632,7 +632,7 @@ exports.buildTokenRequest = buildTokenRequest;
  * @param [onError]
  */
 
-async function ready(env, onSuccess, onError) {
+async function ready(env, onSuccess, onError, STORAGE_KEY = settings_1.SMART_KEY) {
   let task = completeAuth(env);
 
   if (onSuccess) {

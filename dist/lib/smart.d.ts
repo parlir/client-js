@@ -64,7 +64,7 @@ export declare function buildTokenRequest(env: fhirclient.Adapter, code: string,
  * @param [onSuccess]
  * @param [onError]
  */
-export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>;
+export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any, STORAGE_KEY?: string): Promise<Client>;
 /**
  * This function can be used when you want to handle everything in one page
  * (no launch endpoint needed). You can think of it as if it does:

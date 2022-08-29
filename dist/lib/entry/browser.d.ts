@@ -10,9 +10,9 @@ declare const FHIR: {
         settings: fhirclient.BrowserFHIRSettings;
         ready: {
             (): Promise<Client>;
-            (onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
+            (onSuccess: (client: Client) => any, onError?: (error: Error) => any, STORAGE_KEY?: string): Promise<any>;
         };
-        authorize: (options: fhirclient.AuthorizeParams) => Promise<string | void>;
+        authorize: (options: fhirclient.AuthorizeParams, STORAGE_KEY?: string) => Promise<string | void>;
         init: (options: fhirclient.AuthorizeParams, STORAGE_KEY?: string) => Promise<Client>;
     };
 };

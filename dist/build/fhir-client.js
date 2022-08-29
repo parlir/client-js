@@ -12451,8 +12451,8 @@ var BrowserAdapter = /*#__PURE__*/function () {
 
         return smart_1.ready.apply(smart_1, [_this].concat(args));
       },
-      authorize: function authorize(options) {
-        return smart_1.authorize(_this, options);
+      authorize: function authorize(options, STORAGE_KEY) {
+        return smart_1.authorize(_this, options, STORAGE_KEY);
       },
       init: function init(options, STORAGE_KEY) {
         return smart_1.init(_this, options, STORAGE_KEY);
@@ -14268,17 +14268,21 @@ exports.buildTokenRequest = buildTokenRequest;
  * @param [onError]
  */
 
-function ready(_x6, _x7, _x8) {
+function ready(_x6, _x7, _x8, _x9) {
   return _ready.apply(this, arguments);
 }
 
 function _ready() {
-  _ready = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(env, onSuccess, onError) {
+  _ready = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(env, onSuccess, onError, STORAGE_KEY) {
     var task;
     return _regenerator.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
+            if (STORAGE_KEY === void 0) {
+              STORAGE_KEY = settings_1.SMART_KEY;
+            }
+
             task = completeAuth(env);
 
             if (onSuccess) {
@@ -14291,7 +14295,7 @@ function _ready() {
 
             return _context3.abrupt("return", task);
 
-          case 4:
+          case 5:
           case "end":
             return _context3.stop();
         }
@@ -14333,7 +14337,7 @@ exports.ready = ready;
  * @param options The authorize options
  */
 
-function init(_x9, _x10, _x11) {
+function init(_x10, _x11, _x12) {
   return _init.apply(this, arguments);
 }
 

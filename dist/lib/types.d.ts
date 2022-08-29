@@ -21,7 +21,8 @@ declare namespace fhirclient {
     ready(): Promise<Client>;
     ready(
       onSuccess: (client: Client) => any,
-      onError?: (error: Error) => any
+      onError?: (error: Error) => any,
+      STORAGE_KEY?: string
     ): Promise<any>;
 
     /**
@@ -38,7 +39,7 @@ declare namespace fhirclient {
      * the `iss` option.
      * @param options
      */
-    authorize(options: AuthorizeParams): Promise<string | void>;
+    authorize(options: AuthorizeParams, STORAGE_KEY?: string): Promise<string | void>;
 
     /**
      * This function can be used when you want to handle everything in one
