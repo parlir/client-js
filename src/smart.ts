@@ -655,7 +655,7 @@ export async function completeAuth(
     await Storage.set(STORAGE_KEY, key);
   }
 
-  const client = new Client(env, state);
+  const client = new Client(env, state, STORAGE_KEY);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -779,7 +779,7 @@ export async function init(
   const key = state || (await storage.get(STORAGE_KEY));
   const cached = await storage.get(key);
   if (cached) {
-    return new Client(env, cached);
+    return new Client(env, cached, STORAGE_KEY);
   }
 
   // Otherwise try to launch
