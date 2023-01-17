@@ -122,6 +122,7 @@ export default class Client {
      * will be `undefined`.
      */
     api: Record<string, any> | undefined;
+    private STORAGE_KEY;
     /**
      * Refers to the refresh task while it is being performed.
      * @see [[refresh]]
@@ -131,7 +132,7 @@ export default class Client {
      * Validates the parameters, creates an instance and tries to connect it to
      * FhirJS, if one is available globally.
      */
-    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string);
+    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string, STORAGE_KEY?: string);
     /**
      * This method is used to make the "link" between the `fhirclient` and the
      * `fhir.js`, if one is available.

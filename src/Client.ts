@@ -344,6 +344,8 @@ export default class Client
      */
     api: Record<string, any> | undefined;
 
+    private STORAGE_KEY: string;
+
     /**
      * Refers to the refresh task while it is being performed.
      * @see [[refresh]]
@@ -354,7 +356,7 @@ export default class Client
      * Validates the parameters, creates an instance and tries to connect it to
      * FhirJS, if one is available globally.
      */
-    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string)
+    constructor(environment: fhirclient.Adapter, state: fhirclient.ClientState | string, STORAGE_KEY: string = SMART_KEY)
     {
         const _state = typeof state == "string" ? { serverUrl: state } : state;
 
@@ -363,7 +365,8 @@ export default class Client
             _state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/),
             "A \"serverUrl\" option is required and must begin with \"http(s)\""
         );
-
+      
+        this.STORAGE_KEY = STORAGE_KEY;
         this.state = _state;
         this.environment = environment;
         this._refreshTask = null;
@@ -637,11 +640,11 @@ export default class Client
      */
     private async _clearState() {
         const storage = this.environment.getStorage();
-        const key = await storage.get(SMART_KEY);
+        const key = await storage.get(this.STORAGE_KEY);
         if (key) {
             await storage.unset(key);
         }
-        await storage.unset(SMART_KEY);
+        await storage.unset(this.STORAGE_KEY);
         this.state.tokenResponse = {};
     }
 

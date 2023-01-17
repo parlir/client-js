@@ -173,7 +173,8 @@ export function getSecurityExtensions(env: fhirclient.Adapter, baseUrl = "/"): P
  */
 export async function authorize(
     env: fhirclient.Adapter,
-    params: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[] = {}
+    params: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[] = {},
+    STORAGE_KEY: string = SMART_KEY
 ): Promise<string|void>
 {
     const url = env.getUrl();
@@ -297,7 +298,7 @@ export async function authorize(
 
     // If `authorize` is called, make sure we clear any previous state (in case
     // this is a re-authorize)
-    const oldKey = await storage.get(SMART_KEY);
+    const oldKey = await storage.get(STORAGE_KEY);
     await storage.unset(oldKey);
 
     // create initial state
@@ -318,7 +319,7 @@ export async function authorize(
         true;
 
     if (fullSessionStorageSupport) {
-        await storage.set(SMART_KEY, stateKey);
+        await storage.set(STORAGE_KEY, stateKey);
     }
 
     // fakeTokenResponse to override stuff (useful in development)
@@ -467,7 +468,7 @@ export function onMessage(e: MessageEvent) {
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
+export async function completeAuth(env: fhirclient.Adapter, STORAGE_KEY: string = SMART_KEY): Promise<Client>
 {
     const url = env.getUrl();
     const Storage = env.getStorage();
@@ -479,7 +480,7 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     const authErrorDescription = params.get("error_description");
 
     if (!key) {
-        key = await Storage.get(SMART_KEY);
+        key = await Storage.get(STORAGE_KEY);
     }
 
     // Start by checking the url for `error` and `error_description` parameters.
@@ -615,11 +616,11 @@ export async function completeAuth(env: fhirclient.Adapter): Promise<Client>
     }
 
     if (fullSessionStorageSupport) {
-        await Storage.set(SMART_KEY, key);
+        await Storage.set(STORAGE_KEY, key);
     }
 
-    const client = new Client(env, state);
-    debug("Created client instance: %O", client);
+  const client = new Client(env, state, STORAGE_KEY);
+  debug("Created client instance: %O", client);
     return client;
 }
 
@@ -667,7 +668,7 @@ export function buildTokenRequest(env: fhirclient.Adapter, code: string, state: 
  * @param [onSuccess]
  * @param [onError]
  */
-export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>
+export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any, STORAGE_KEY: string = SMART_KEY): Promise<Client>
 {
     let task = completeAuth(env);
     if (onSuccess) {
@@ -709,7 +710,7 @@ export async function ready(env: fhirclient.Adapter, onSuccess?: (client: Client
  * @param env The adapter
  * @param options The authorize options
  */
-export async function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client|never>
+export async function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams, STORAGE_KEY: string = SMART_KEY): Promise<Client|never>
 {
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
@@ -717,21 +718,21 @@ export async function init(env: fhirclient.Adapter, options: fhirclient.Authoriz
 
     // if `code` and `state` params are present we need to complete the auth flow
     if (code && state) {
-        return completeAuth(env);
+        return completeAuth(env, STORAGE_KEY);
     }
 
     // Check for existing client state. If state is found, it means a client
     // instance have already been created in this session and we should try to
     // "revive" it.
     const storage = env.getStorage();
-    const key     = state || await storage.get(SMART_KEY);
+    const key     = state || await storage.get(STORAGE_KEY);
     const cached  = await storage.get(key);
     if (cached) {
-        return new Client(env, cached);
+        return new Client(env, cached, STORAGE_KEY);
     }
 
     // Otherwise try to launch
-    return authorize(env, options).then(() => {
+    return authorize(env, options, STORAGE_KEY).then(() => {
         // `init` promises a Client but that cannot happen in this case. The
         // browser will be redirected (unload the page and be redirected back
         // to it later and the same init function will be called again). On

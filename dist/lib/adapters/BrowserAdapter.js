@@ -149,8 +149,8 @@ class BrowserAdapter {
   getSmartApi() {
     return {
       ready: (...args) => smart_1.ready(this, ...args),
-      authorize: options => smart_1.authorize(this, options),
-      init: options => smart_1.init(this, options),
+      authorize: (options, STORAGE_KEY) => smart_1.authorize(this, options, STORAGE_KEY),
+      init: (options, STORAGE_KEY) => smart_1.init(this, options, STORAGE_KEY),
       client: state => new Client_1.default(this, state),
       options: this.options
     };

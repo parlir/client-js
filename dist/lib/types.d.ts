@@ -20,7 +20,7 @@ declare namespace fhirclient {
          * to query the fhir server.
          */
         ready(): Promise<Client>;
-        ready(onSuccess: (client: Client) => any, onError?: (error: Error) => any): Promise<any>;
+        ready(onSuccess: (client: Client) => any, onError?: (error: Error) => any, STORAGE_KEY?: string): Promise<any>;
 
         /**
          * Starts the [SMART Launch Sequence](http://hl7.org/fhir/smart-app-launch/#smart-launch-sequence).
@@ -36,7 +36,7 @@ declare namespace fhirclient {
          * the `iss` option.
          * @param options
          */
-        authorize(options: AuthorizeParams): Promise<string|void>;
+        authorize(options: AuthorizeParams, STORAGE_KEY?: string): Promise<string|void>;
 
         /**
          * This function can be used when you want to handle everything in one
@@ -57,7 +57,7 @@ declare namespace fhirclient {
          *      writing to localStorage).
          * @param options
          */
-        init(options: AuthorizeParams): Promise<never|Client>;
+        init(options: AuthorizeParams, STORAGE_KEY?: string): Promise<never|Client>;
 
         /**
          * Creates and returns a Client instance that can be used to query the

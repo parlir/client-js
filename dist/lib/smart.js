@@ -168,7 +168,7 @@ exports.getSecurityExtensions = getSecurityExtensions;
  * @param [params]
  */
 
-async function authorize(env, params = {}) {
+async function authorize(env, params = {}, STORAGE_KEY = settings_1.SMART_KEY) {
   const url = env.getUrl(); // Multiple config for EHR launches ---------------------------------------
 
   if (Array.isArray(params)) {
@@ -276,7 +276,7 @@ async function authorize(env, params = {}) {
   // this is a re-authorize)
 
 
-  const oldKey = await storage.get(settings_1.SMART_KEY);
+  const oldKey = await storage.get(STORAGE_KEY);
   await storage.unset(oldKey); // create initial state
 
   const stateKey = lib_1.randomString(16);
@@ -293,7 +293,7 @@ async function authorize(env, params = {}) {
   const fullSessionStorageSupport = isBrowser() ? lib_1.getPath(env, "options.fullSessionStorageSupport") : true;
 
   if (fullSessionStorageSupport) {
-    await storage.set(settings_1.SMART_KEY, stateKey);
+    await storage.set(STORAGE_KEY, stateKey);
   } // fakeTokenResponse to override stuff (useful in development)
 
 
@@ -442,7 +442,7 @@ exports.onMessage = onMessage;
  * authorization server..
  */
 
-async function completeAuth(env) {
+async function completeAuth(env, STORAGE_KEY = settings_1.SMART_KEY) {
   var _a, _b;
 
   const url = env.getUrl();
@@ -454,7 +454,7 @@ async function completeAuth(env) {
   const authErrorDescription = params.get("error_description");
 
   if (!key) {
-    key = await Storage.get(settings_1.SMART_KEY);
+    key = await Storage.get(STORAGE_KEY);
   } // Start by checking the url for `error` and `error_description` parameters.
   // This happens when the auth server rejects our authorization attempt. In
   // this case it has no other way to tell us what the error was, other than
@@ -580,10 +580,10 @@ async function completeAuth(env) {
   }
 
   if (fullSessionStorageSupport) {
-    await Storage.set(settings_1.SMART_KEY, key);
+    await Storage.set(STORAGE_KEY, key);
   }
 
-  const client = new Client_1.default(env, state);
+  const client = new Client_1.default(env, state, STORAGE_KEY);
   debug("Created client instance: %O", client);
   return client;
 }
@@ -636,7 +636,7 @@ exports.buildTokenRequest = buildTokenRequest;
  * @param [onError]
  */
 
-async function ready(env, onSuccess, onError) {
+async function ready(env, onSuccess, onError, STORAGE_KEY = settings_1.SMART_KEY) {
   let task = completeAuth(env);
 
   if (onSuccess) {
@@ -682,28 +682,28 @@ exports.ready = ready;
  * @param options The authorize options
  */
 
-async function init(env, options) {
+async function init(env, options, STORAGE_KEY = settings_1.SMART_KEY) {
   const url = env.getUrl();
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state"); // if `code` and `state` params are present we need to complete the auth flow
 
   if (code && state) {
-    return completeAuth(env);
+    return completeAuth(env, STORAGE_KEY);
   } // Check for existing client state. If state is found, it means a client
   // instance have already been created in this session and we should try to
   // "revive" it.
 
 
   const storage = env.getStorage();
-  const key = state || (await storage.get(settings_1.SMART_KEY));
+  const key = state || (await storage.get(STORAGE_KEY));
   const cached = await storage.get(key);
 
   if (cached) {
-    return new Client_1.default(env, cached);
+    return new Client_1.default(env, cached, STORAGE_KEY);
   } // Otherwise try to launch
 
 
-  return authorize(env, options).then(() => {
+  return authorize(env, options, STORAGE_KEY).then(() => {
     // `init` promises a Client but that cannot happen in this case. The
     // browser will be redirected (unload the page and be redirected back
     // to it later and the same init function will be called again). On

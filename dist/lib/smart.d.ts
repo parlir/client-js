@@ -28,7 +28,7 @@ export declare function getSecurityExtensions(env: fhirclient.Adapter, baseUrl?:
  * @param env
  * @param [params]
  */
-export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[]): Promise<string | void>;
+export declare function authorize(env: fhirclient.Adapter, params?: fhirclient.AuthorizeParams | fhirclient.AuthorizeParams[], STORAGE_KEY?: string): Promise<string | void>;
 /**
  * Checks if called within a frame. Only works in browsers!
  * If the current window has a `parent` or `top` properties that refer to
@@ -55,7 +55,7 @@ export declare function onMessage(e: MessageEvent): void;
  * the redirectUri. We typically land there after a redirect from the
  * authorization server..
  */
-export declare function completeAuth(env: fhirclient.Adapter): Promise<Client>;
+export declare function completeAuth(env: fhirclient.Adapter, STORAGE_KEY?: string): Promise<Client>;
 /**
  * Builds the token request options. Does not make the request, just
  * creates it's configuration and returns it in a Promise.
@@ -66,7 +66,7 @@ export declare function buildTokenRequest(env: fhirclient.Adapter, code: string,
  * @param [onSuccess]
  * @param [onError]
  */
-export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any): Promise<Client>;
+export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Client) => any, onError?: (error: Error) => any, STORAGE_KEY?: string): Promise<Client>;
 /**
  * This function can be used when you want to handle everything in one page
  * (no launch endpoint needed). You can think of it as if it does:
@@ -97,4 +97,4 @@ export declare function ready(env: fhirclient.Adapter, onSuccess?: (client: Clie
  * @param env The adapter
  * @param options The authorize options
  */
-export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams): Promise<Client | never>;
+export declare function init(env: fhirclient.Adapter, options: fhirclient.AuthorizeParams, STORAGE_KEY?: string): Promise<Client | never>;

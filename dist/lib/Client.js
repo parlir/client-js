@@ -194,7 +194,7 @@ class Client {
    * Validates the parameters, creates an instance and tries to connect it to
    * FhirJS, if one is available globally.
    */
-  constructor(environment, state) {
+  constructor(environment, state, STORAGE_KEY = settings_1.SMART_KEY) {
     /**
      * @category Utility
      */
@@ -206,6 +206,7 @@ class Client {
 
 
     lib_1.assert(_state.serverUrl && _state.serverUrl.match(/https?:\/\/.+/), "A \"serverUrl\" option is required and must begin with \"http(s)\"");
+    this.STORAGE_KEY = STORAGE_KEY;
     this.state = _state;
     this.environment = environment;
     this._refreshTask = null;
@@ -512,13 +513,13 @@ class Client {
 
   async _clearState() {
     const storage = this.environment.getStorage();
-    const key = await storage.get(settings_1.SMART_KEY);
+    const key = await storage.get(this.STORAGE_KEY);
 
     if (key) {
       await storage.unset(key);
     }
 
-    await storage.unset(settings_1.SMART_KEY);
+    await storage.unset(this.STORAGE_KEY);
     this.state.tokenResponse = {};
   }
   /**

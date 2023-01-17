@@ -13,8 +13,8 @@
     "Client"
   ],
   "license": "Apache-2.0",
-  "main": "src/index.js",
-  "browser": "src/browser.js",
+  "main": "dist/lib/entry/node.js",
+  "browser": "dist/lib/entry/browser.js",
   "dependencies": {
     "@types/hapi": "^18.0.3",
     "abortcontroller-polyfill": "^1.5.0",
@@ -23,6 +23,7 @@
     "debug": "^4.1.1"
   },
   "scripts": {
+    "prepare": "npm run build",
     "test": "lab test/*.test.ts",
     "pack": "webpack",
     "build": "npm run build:module && npm run pack",
