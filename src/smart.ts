@@ -715,8 +715,9 @@ export async function init(env: fhirclient.Adapter, options: fhirclient.Authoriz
     const url   = env.getUrl();
     const code  = url.searchParams.get("code");
     const state = url.searchParams.get("state");
+    const error = url.searchParams.get("error");
 
-    // if `code` and `state` params are present we need to complete the auth flow
+    // if error or (`code` and `state`) params are present we need to complete the auth flow
     if (error || code && state) {
         return completeAuth(env, STORAGE_KEY);
     }
